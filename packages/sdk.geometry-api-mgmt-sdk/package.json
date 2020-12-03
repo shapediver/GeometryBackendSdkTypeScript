@@ -1,6 +1,6 @@
 {
   "name": "@shapediver/sdk.geometry-api-mgmt-sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "SDK to communicate with the Geometry Management API",
   "keywords": [
     "shapediver",
@@ -40,7 +40,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "setupFilesAfterEnv": ["./test.config.js"]
+    "setupFilesAfterEnv": [
+      "./test.config.js"
+    ]
   },
   "devDependencies": {
     "jest": "^26.6.3",
