@@ -1,7 +1,5 @@
 import { ShapeDiverSdkConfig } from "../config/ShapeDiverSdkConfig"
 
-// const fetch = require("node-fetch") // TODO only for local testing
-
 enum Method {
     GET = "GET",
     POST = "POST",
@@ -12,20 +10,20 @@ enum Method {
 interface IResponseError {
     readonly error: string;
 
-    readonly error_description: string;
+    readonly desc: string;
 
-    readonly error_uri: string;
+    readonly message: string;
 }
 
 export class ShapeDiverResponseError implements IResponseError {
     public readonly error: string
-    public readonly error_description: string
-    public readonly error_uri: string
+    public readonly desc: string
+    public readonly message: string
 
     constructor (data: IResponseError) {
         this.error = data.error
-        this.error_description = data.error_description
-        this.error_uri = data.error_uri
+        this.desc = data.desc
+        this.message = data.message
     }
 }
 
@@ -65,8 +63,7 @@ export class ShapeDiverSdkApi {
         if (response.ok) {
             return Promise.resolve(await response.json())
         } else {
-            console.error(response) // TODO delete
-            throw new ShapeDiverResponseError(await response.json())    // TODO add actual error mapping
+            throw new ShapeDiverResponseError(await response.json())
         }
     }
 
@@ -77,8 +74,7 @@ export class ShapeDiverSdkApi {
         if (response.ok) {
             return Promise.resolve(await response.json())
         } else {
-            console.error(response) // TODO delete
-            throw new ShapeDiverResponseError(await response.json())    // TODO add actual error mapping
+            throw new ShapeDiverResponseError(await response.json())
         }
     }
 
@@ -89,8 +85,7 @@ export class ShapeDiverSdkApi {
         if (response.ok) {
             return Promise.resolve(await response.json())
         } else {
-            console.error(response) // TODO delete
-            throw new ShapeDiverResponseError(await response.json())    // TODO add actual error mapping
+            throw new ShapeDiverResponseError(await response.json())
         }
     }
 
@@ -101,8 +96,7 @@ export class ShapeDiverSdkApi {
         if (response.ok) {
             return Promise.resolve(await response.json())
         } else {
-            console.error(response) // TODO delete
-            throw new ShapeDiverResponseError(await response.json())    // TODO add actual error mapping
+            throw new ShapeDiverResponseError(await response.json())
         }
     }
 }
