@@ -14,7 +14,6 @@ let sdk: ShapeDiverSdk | undefined
 
 beforeEach(() => {
     sdk = create(
-        "test",
         // @ts-ignore
         global.sdJwt,
         "http://localhost:8081",

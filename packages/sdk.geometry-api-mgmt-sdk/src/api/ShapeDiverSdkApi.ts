@@ -47,9 +47,6 @@ export class ShapeDiverSdkApi {
         if (this.config.jwt) {
             (request.headers as { [id: string]: string })["Authorization"] = `Bearer ${ this.config.jwt }`
         }
-        if (this.config.clientId) {
-            (request.headers as { [id: string]: string })["X-ShapeDiver-Client"] = this.config.clientId
-        }
         if (data) {
             request.body = JSON.stringify(data)
         }

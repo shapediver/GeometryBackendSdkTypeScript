@@ -4,8 +4,8 @@ import { ShapeDiverConfigApi } from "./resources/ShapeDiverConfigApi"
 import { ShapeDiverModelApi } from "./resources/ShapeDiverModelApi"
 import { ShapeDiverTicketApi } from "./resources/ShapeDiverTicketApi"
 
-export function create(clientId?: string, jwt?: string, baseUrl?: string): ShapeDiverSdk {
-    return new ShapeDiverSdk(clientId, jwt, baseUrl)
+export function create(jwt?: string, baseUrl?: string): ShapeDiverSdk {
+    return new ShapeDiverSdk(jwt, baseUrl)
 }
 
 export class ShapeDiverSdk {
@@ -19,12 +19,11 @@ export class ShapeDiverSdk {
     /**
      * ShapeDiverSDK constructor
      *
-     * @param clientId - the client id
      * @param jwt - the client's jwt
      * @param baseUrl - the URL of the target system (just for testing)
      */
-    constructor (clientId?: string, jwt?: string, baseUrl?: string) {
-        this.config = new ShapeDiverSdkConfig(clientId, jwt, baseUrl)
+    constructor (jwt?: string, baseUrl?: string) {
+        this.config = new ShapeDiverSdkConfig(jwt, baseUrl)
 
         const sdkApi = new ShapeDiverSdkApi(this.config)
 
