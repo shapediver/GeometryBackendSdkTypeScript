@@ -7,6 +7,7 @@ enum Method {
     DELETE = "DELETE"
 }
 
+/** The error object returned by the backend **/
 interface IResponseError {
     readonly error: string;
 
@@ -15,6 +16,7 @@ interface IResponseError {
     readonly message: string;
 }
 
+/** The error object used and exposed by the SDK **/
 export class ShapeDiverResponseError implements IResponseError {
     public readonly error: string
     public readonly desc: string
@@ -32,7 +34,7 @@ export class ShapeDiverSdkApi {
     constructor (private config: ShapeDiverSdkConfig) {
     }
 
-    private resolveRequest (method: Method, data?: any): RequestInit {
+    private buildRequest (method: Method, data?: any): RequestInit {
         const request: RequestInit = {
             method: method,
             mode: "cors",
@@ -44,8 +46,9 @@ export class ShapeDiverSdkApi {
             body: undefined,
         }
 
+        // Add jwt if provided
         if (this.config.jwt) {
-            (request.headers as { [id: string]: string })["Authorization"] = `Bearer ${ this.config.jwt }`
+            (request.headers as { [key: string]: string })["Authorization"] = "Bearer " + this.config.jwt
         }
         if (data) {
             request.body = JSON.stringify(data)
@@ -55,7 +58,7 @@ export class ShapeDiverSdkApi {
     }
 
     async get<T> (url?: string): Promise<T> {
-        const response = await fetch(`${ this.config.baseUrl }/${ url }`, this.resolveRequest(Method.GET))
+        const response = await fetch(`${ this.config.baseUrl }/${ url }`, this.buildRequest(Method.GET))
 
         if (response.ok) {
             return Promise.resolve(await response.json())
@@ -65,7 +68,7 @@ export class ShapeDiverSdkApi {
     }
 
     async post<T> (url: string, data: any): Promise<T> {
-        const request = this.resolveRequest(Method.POST, data)
+        const request = this.buildRequest(Method.POST, data)
         const response = await fetch(`${ this.config.baseUrl }/${ url }`, request)
 
         if (response.ok) {
@@ -76,7 +79,7 @@ export class ShapeDiverSdkApi {
     }
 
     async put<T> (url: string, data: any): Promise<T> {
-        const request = this.resolveRequest(Method.PUT, data)
+        const request = this.buildRequest(Method.PUT, data)
         const response = await fetch(`${ this.config.baseUrl }/${ url }`, request)
 
         if (response.ok) {
@@ -87,7 +90,7 @@ export class ShapeDiverSdkApi {
     }
 
     async delete<T> (url: string): Promise<T> {
-        const request = this.resolveRequest(Method.DELETE)
+        const request = this.buildRequest(Method.DELETE)
         const response = await fetch(`${ this.config.baseUrl }/${ url }`, request)
 
         if (response.ok) {

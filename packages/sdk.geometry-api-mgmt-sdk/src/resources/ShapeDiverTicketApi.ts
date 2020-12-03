@@ -4,11 +4,17 @@ import { ShapeDiverModelResponse } from "./dto/ResponseDtos"
 
 export class ShapeDiverTicketApi extends BaseResourceApi {
 
-    buildUri (id: string): string {
-        return this.commonPath + id + "/ticket";
+    buildUri (modelId: string): string {
+        return this.commonPath + modelId + "/ticket";
     }
 
-    async create (id: string, body: ShapeDiverTicketRequest): Promise<ShapeDiverModelResponse> {
-        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(id), body)
+    /**
+     * Create a ticket for a ShapeDiver Model.
+     *
+     * @param modelId
+     * @param body
+     */
+    async create (modelId: string, body: ShapeDiverTicketRequest): Promise<ShapeDiverModelResponse> {
+        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(modelId), body)
     }
 }

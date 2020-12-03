@@ -4,23 +4,45 @@ import { ShapeDiverModelResponse } from "./dto/ResponseDtos"
 
 export class ShapeDiverModelApi extends BaseResourceApi {
 
-    buildUri (id: string): string {
-        return this.commonPath + id;
+    buildUri (modelId: string): string {
+        return this.commonPath + modelId;
     }
 
-    async get (id: string): Promise<ShapeDiverModelResponse> {
-        return await this.api.get<ShapeDiverModelResponse>(this.buildUri(id))
+    /**
+     * Get information about a ShapeDiver Model.
+     *
+     * @param modelId
+     */
+    async get (modelId: string): Promise<ShapeDiverModelResponse> {
+        return await this.api.get<ShapeDiverModelResponse>(this.buildUri(modelId))
     }
 
-    async create (id: string, body: ShapeDiverModelRequest): Promise<ShapeDiverModelResponse> {
-        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(id), body)
+    /**
+     * Create a new ShapeDiver Model.
+     *
+     * @param modelId
+     * @param body
+     */
+    async create (modelId: string, body: ShapeDiverModelRequest): Promise<ShapeDiverModelResponse> {
+        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(modelId), body)
     }
 
-    async update (id: string, body: ShapeDiverModelRequest): Promise<ShapeDiverModelResponse> {
-        return await this.api.put<ShapeDiverModelResponse>(this.buildUri(id), body)
+    /**
+     * Update properties of a ShapeDiver Model.
+     *
+     * @param modelId
+     * @param body
+     */
+    async update (modelId: string, body: ShapeDiverModelRequest): Promise<ShapeDiverModelResponse> {
+        return await this.api.put<ShapeDiverModelResponse>(this.buildUri(modelId), body)
     }
 
-    async delete (id: string): Promise<ShapeDiverModelResponse> {
-        return await this.api.delete<ShapeDiverModelResponse>(this.buildUri(id))
+    /**
+     * Delete a ShapeDiver Model.
+     *
+     * @param modelId
+     */
+    async delete (modelId: string): Promise<ShapeDiverModelResponse> {
+        return await this.api.delete<ShapeDiverModelResponse>(this.buildUri(modelId))
     }
 }

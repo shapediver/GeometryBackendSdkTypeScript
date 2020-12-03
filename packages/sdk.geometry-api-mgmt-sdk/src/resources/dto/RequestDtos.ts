@@ -1,3 +1,5 @@
+// NOTE this should be replaces with a shared repository
+
 /** supported file types for models */
 export enum ShapeDiverModelFiletype {
     UNKNOWN = "unknown",

@@ -9,6 +9,11 @@ export abstract class BaseResourceApi {
     constructor (protected readonly api: ShapeDiverSdkApi) {
     }
 
-    abstract buildUri(id: string): string
+    /**
+     * Create the controller specific URI.
+     *
+     * @param modelId
+     */
+    abstract buildUri(modelId: string): string
 
 }

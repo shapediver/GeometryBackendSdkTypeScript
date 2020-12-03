@@ -3,15 +3,26 @@ import { ShapeDiverConfigResponse, ShapeDiverModelResponse } from "./dto/Respons
 
 export class ShapeDiverConfigApi extends BaseResourceApi {
 
-    buildUri (id: string): string {
-        return this.commonPath + id + '/config';
+    buildUri (modelId: string): string {
+        return this.commonPath + modelId + '/config';
     }
 
-    async get (id: string): Promise<ShapeDiverConfigResponse> {
-        return await this.api.get<ShapeDiverConfigResponse>(this.buildUri(id))
+    /**
+     * Get the viewer config object of a ShapeDiver Model.
+     *
+     * @param modelId
+     */
+    async get (modelId: string): Promise<ShapeDiverConfigResponse> {
+        return await this.api.get<ShapeDiverConfigResponse>(this.buildUri(modelId))
     }
 
-    async create (id: string, body: any): Promise<ShapeDiverModelResponse> {
-        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(id), body)
+    /**
+     * Set the viewer config object of a ShapeDiver Model.
+     *
+     * @param modelId
+     * @param body
+     */
+    async create (modelId: string, body: any): Promise<ShapeDiverModelResponse> {
+        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(modelId), body)
     }
 }

@@ -1,3 +1,5 @@
+// NOTE this should be replaces with a shared repository
+
 /**
  * ShapeDiver Model Mgmt API response
  */
