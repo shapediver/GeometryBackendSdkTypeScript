@@ -1,6 +1,6 @@
 {
   "name": "@shapediver/sdk.geometry-api-mgmt-sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "SDK to communicate with the Geometry Management API",
   "keywords": [
     "shapediver",
