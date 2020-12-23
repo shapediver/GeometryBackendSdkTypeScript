@@ -7,5 +7,5 @@ global["fetch"] = require("node-fetch")
 global["sdJwt"] = ""
 
 if (!global.sdJwt) {
-    throw new Error("No JWT is set globally! Set on in 'test.config.js'.")
+    throw new Error("No JWT is set globally! Set one in 'test.config.js'.")
 }

@@ -1,5 +1,6 @@
 import { beforeEach, describe } from "@jest/globals"
 import { strict as assert } from "assert"
+// @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 
 const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
@@ -9,7 +10,7 @@ let sdk: ShapeDiverSdk | undefined
 beforeEach(() => {
     sdk = create(
         // @ts-ignore
-        global.sdJwt,
+        "<the jwt goes here>",
         "http://localhost:8081",
     )
 })

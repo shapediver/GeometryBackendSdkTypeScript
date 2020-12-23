@@ -1,6 +1,7 @@
 import { beforeEach, describe } from "@jest/globals"
 import { strict as assert } from "assert"
-import { create, ShapeDiverSdk, ShapeDiverTicketRequest, ShapeDiverTicketType } from "../src"
+// @ts-ignore
+import { create, ShapeDiverMgmtRequestTicket, ShapeDiverMgmtRequestTicketType, ShapeDiverSdk } from "../src"
 
 const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
 
@@ -18,10 +19,10 @@ describe("tickets", () => {
 
     it("create", async () => {
         assert(sdk)
-        const body: ShapeDiverTicketRequest = {
+        const body: ShapeDiverMgmtRequestTicket = {
             "pub": true,
             "author": true,
-            "type": ShapeDiverTicketType.NONE,
+            "type": ShapeDiverMgmtRequestTicketType.NONE,
             "until": "29991231235959",
         }
         const res = await sdk.tickets.create(modelId, body)

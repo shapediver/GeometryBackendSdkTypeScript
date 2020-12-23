@@ -2,10 +2,11 @@ import { beforeEach, describe } from "@jest/globals"
 import { strict as assert } from "assert"
 import {
     create,
-    ShapeDiverModelFiletype,
-    ShapeDiverModelRequest,
-    ShapeDiverModelTrustlevel,
+    ShapeDiverMgmtRequestModelFiletype,
+    ShapeDiverMgmtRequestModel,
+    ShapeDiverMgmtRequestModelTrustlevel,
     ShapeDiverSdk,
+    // @ts-ignore
 } from "../src"
 
 const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
@@ -41,14 +42,14 @@ describe("models", () => {
 
     it("update", async () => {
         assert(sdk)
-        const body: ShapeDiverModelRequest = {
+        const body: ShapeDiverMgmtRequestModel = {
             "pub": false,
-            "ftype": ShapeDiverModelFiletype.GRASSHOPPER_XML,
+            "ftype": ShapeDiverMgmtRequestModelFiletype.GRASSHOPPER_XML,
             "name": "Local test via sdk",
             "max_comp_time": 9999,
             "max_output_size": 52428800,
             "max_export_size": 52428800,
-            "trust": ShapeDiverModelTrustlevel.FULL,
+            "trust": ShapeDiverMgmtRequestModelTrustlevel.FULL,
             "num_loaded_min": 0,
         }
         const res = await sdk.models.update(modelId, body)

@@ -1,23 +1,20 @@
+import {
+    ShapeDiverMgmtRequestModel,
+    ShapeDiverMgmtRequestModelFiletype,
+    ShapeDiverMgmtRequestModelTrustlevel,
+    ShapeDiverMgmtRequestTicket,
+    ShapeDiverMgmtRequestTicketType,
+    ShapeDiverMgmtResponseCollection,
+    ShapeDiverMgmtResponseCollectionError,
+    ShapeDiverMgmtResponseCollectionItem,
+    ShapeDiverMgmtResponseCollectionItemData,
+    ShapeDiverMgmtResponseCollectionItemDataName,
+    ShapeDiverMgmtResponseCollectionItemLink,
+    ShapeDiverMgmtResponseCollectionItemLinkRel,
+    ShapeDiverMgmtResponseCollectionTemplate,
+    ShapeDiverMgmtResponseDto,
+} from "@shapediver/api.geometry-api-mgmt-dto"
 import { ShapeDiverResponseError } from "./api/ShapeDiverSdkApi"
-import {
-    ShapeDiverModelFiletype,
-    ShapeDiverModelRequest,
-    ShapeDiverModelTrustlevel,
-    ShapeDiverTicketRequest,
-    ShapeDiverTicketType,
-} from "./resources/dto/RequestDtos"
-import {
-    ShapeDiverConfigResponse,
-    ShapeDiverModelResponse,
-    ShapeDiverModelResponseCollection,
-    ShapeDiverModelResponseCollectionError,
-    ShapeDiverModelResponseCollectionItem,
-    ShapeDiverModelResponseCollectionItemData,
-    ShapeDiverModelResponseCollectionItemDataName,
-    ShapeDiverModelResponseCollectionItemLink,
-    ShapeDiverModelResponseCollectionTemplate,
-    ShapeDiverResponseCollectionItemLinkRel,
-} from "./resources/dto/ResponseDtos"
 import { create, ShapeDiverSdk } from "./ShapeDiverSdk"
 
 
@@ -26,20 +23,19 @@ export {
     ShapeDiverSdk,
     ShapeDiverResponseError,
     // Request DTOs
-    ShapeDiverModelFiletype,
-    ShapeDiverModelTrustlevel,
-    ShapeDiverModelRequest,
-    ShapeDiverTicketType,
-    ShapeDiverTicketRequest,
+    ShapeDiverMgmtRequestModelFiletype,
+    ShapeDiverMgmtRequestModelTrustlevel,
+    ShapeDiverMgmtRequestModel,
+    ShapeDiverMgmtRequestTicketType,
+    ShapeDiverMgmtRequestTicket,
     // Response DTOs
-    ShapeDiverModelResponse,
-    ShapeDiverModelResponseCollection,
-    ShapeDiverModelResponseCollectionError,
-    ShapeDiverModelResponseCollectionItem,
-    ShapeDiverModelResponseCollectionTemplate,
-    ShapeDiverModelResponseCollectionItemDataName,
-    ShapeDiverModelResponseCollectionItemData,
-    ShapeDiverResponseCollectionItemLinkRel,
-    ShapeDiverModelResponseCollectionItemLink,
-    ShapeDiverConfigResponse,
+    ShapeDiverMgmtResponseDto,
+    ShapeDiverMgmtResponseCollection,
+    ShapeDiverMgmtResponseCollectionError,
+    ShapeDiverMgmtResponseCollectionItem,
+    ShapeDiverMgmtResponseCollectionTemplate,
+    ShapeDiverMgmtResponseCollectionItemDataName,
+    ShapeDiverMgmtResponseCollectionItemData,
+    ShapeDiverMgmtResponseCollectionItemLinkRel,
+    ShapeDiverMgmtResponseCollectionItemLink,
 }

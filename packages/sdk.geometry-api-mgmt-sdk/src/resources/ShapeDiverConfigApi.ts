@@ -1,5 +1,5 @@
 import { BaseResourceApi } from "./BaseResourceApi"
-import { ShapeDiverConfigResponse, ShapeDiverModelResponse } from "./dto/ResponseDtos"
+import { ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-mgmt-dto"
 
 export class ShapeDiverConfigApi extends BaseResourceApi {
 
@@ -12,8 +12,8 @@ export class ShapeDiverConfigApi extends BaseResourceApi {
      *
      * @param modelId
      */
-    async get (modelId: string): Promise<ShapeDiverConfigResponse> {
-        return await this.api.get<ShapeDiverConfigResponse>(this.buildUri(modelId))
+    async get (modelId: string): Promise<ShapeDiverMgmtResponseDto> {
+        return await this.api.get<ShapeDiverMgmtResponseDto>(this.buildUri(modelId))
     }
 
     /**
@@ -22,7 +22,7 @@ export class ShapeDiverConfigApi extends BaseResourceApi {
      * @param modelId
      * @param body
      */
-    async create (modelId: string, body: any): Promise<ShapeDiverModelResponse> {
-        return await this.api.post<ShapeDiverModelResponse>(this.buildUri(modelId), body)
+    async create (modelId: string, body: any): Promise<ShapeDiverMgmtResponseDto> {
+        return await this.api.post<ShapeDiverMgmtResponseDto>(this.buildUri(modelId), body)
     }
 }
