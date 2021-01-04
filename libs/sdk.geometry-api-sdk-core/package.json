@@ -1,0 +1,35 @@
+{
+  "name": "@shapediver/sdk.geometry-api-sdk-core",
+  "version": "0.0.3",
+  "description": "Core-library for SDK-packages to communicate with the Geometry API",
+  "keywords": [],
+  "author": "Matthias Reisacher <matt@shapediver.com>",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "directories": {},
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/shapediver"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shapediver/GeometryBackendSdkTypeScript.git"
+  },
+  "scripts": {
+    "test": "bash ../../scripts/test.sh",
+    "check": "tsc --noEmit",
+    "build": "bash ../../scripts/build.sh",
+    "build-dep": "bash ../../scripts/build-dep.sh"
+  },
+  "bugs": {
+    "url": "https://github.com/shapediver/GeometryBackendSdkTypeScript/issues"
+  },
+  "homepage": "https://github.com/shapediver/GeometryBackendSdkTypeScript#readme",
+  "typings": "dist/index.d.ts",
+  "devDependencies": {
+    "lerna": "^3.22.1",
+    "typescript": "^4.1.2"
+  }
+}

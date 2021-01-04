@@ -14,18 +14,15 @@ const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
 let sdk: ShapeDiverSdk | undefined
 
 beforeEach(() => {
-    sdk = create(
-        // @ts-ignore
-        global.sdJwt,
-        "http://localhost:8081",
-    )
+    // @ts-ignore
+    sdk = create(global.sdJwt, global.sdUrl)
 })
 
 describe("models", () => {
 
     it("get", async () => {
         assert(sdk)
-        const res = await sdk.models.get(modelId)
+        const res = await sdk.model.get(modelId)
         expect(res.collection).toBeDefined()
     })
 
@@ -52,7 +49,7 @@ describe("models", () => {
             "trust": ShapeDiverMgmtRequestModelTrustlevel.FULL,
             "num_loaded_min": 0,
         }
-        const res = await sdk.models.update(modelId, body)
+        const res = await sdk.model.update(modelId, body)
         expect(res.collection).toBeDefined()
     })
 

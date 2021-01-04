@@ -54,6 +54,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "@shapediver/sdk.geometry-api-sdk-core": "^0.0.3",
     "@shapediver/api.geometry-api-dto-mgmt": "^1.0.0"
   }
 }

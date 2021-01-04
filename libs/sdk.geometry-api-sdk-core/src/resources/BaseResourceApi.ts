@@ -1,4 +1,4 @@
-import { ShapeDiverSdkApi } from "../api/ShapeDiverSdkApi"
+import { ShapeDiverSdkApi } from ".."
 
 export abstract class BaseResourceApi {
 
@@ -6,6 +6,7 @@ export abstract class BaseResourceApi {
     // protected readonly commonPath: string = "api/v1/"
     protected readonly commonPath: string = ""
 
+    // Intentionally not set to 'protected'
     constructor (protected readonly api: ShapeDiverSdkApi) {
     }
 
@@ -14,6 +15,6 @@ export abstract class BaseResourceApi {
      *
      * @param modelId
      */
-    abstract buildUri(modelId: string): string
+    abstract buildUri (modelId: string): string
 
 }

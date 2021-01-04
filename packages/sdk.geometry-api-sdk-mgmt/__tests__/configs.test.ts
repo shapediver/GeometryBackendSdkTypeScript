@@ -8,18 +8,15 @@ const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
 let sdk: ShapeDiverSdk | undefined
 
 beforeEach(() => {
-    sdk = create(
-        // @ts-ignore
-        "<the jwt goes here>",
-        "http://localhost:8081",
-    )
+    // @ts-ignore
+    sdk = create(global.sdJwt, global.sdUrl)
 })
 
 describe("configs", () => {
 
     it("get", async () => {
         assert(sdk)
-        const res = await sdk.configs.get(modelId)
+        const res = await sdk.config.get(modelId)
         expect(res.config).toBeDefined()
     })
 
