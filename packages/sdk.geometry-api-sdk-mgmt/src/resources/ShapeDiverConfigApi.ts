@@ -1,5 +1,5 @@
 import { BaseResourceApi } from "./BaseResourceApi"
-import { ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-mgmt-dto"
+import { ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-dto-mgmt"
 
 export class ShapeDiverConfigApi extends BaseResourceApi {
 

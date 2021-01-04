@@ -1,4 +1,4 @@
-import { ShapeDiverMgmtRequestModel, ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-mgmt-dto"
+import { ShapeDiverMgmtRequestModel, ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-dto-mgmt"
 import { BaseResourceApi } from "./BaseResourceApi"
 
 export class ShapeDiverModelApi extends BaseResourceApi {

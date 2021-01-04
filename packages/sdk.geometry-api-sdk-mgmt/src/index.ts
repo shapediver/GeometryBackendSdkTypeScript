@@ -13,7 +13,7 @@ import {
     ShapeDiverMgmtResponseCollectionItemLinkRel,
     ShapeDiverMgmtResponseCollectionTemplate,
     ShapeDiverMgmtResponseDto,
-} from "@shapediver/api.geometry-api-mgmt-dto"
+} from "@shapediver/api.geometry-api-dto-mgmt"
 import { ShapeDiverResponseError } from "./api/ShapeDiverSdkApi"
 import { create, ShapeDiverSdk } from "./ShapeDiverSdk"
 
@@ -21,7 +21,6 @@ import { create, ShapeDiverSdk } from "./ShapeDiverSdk"
 export {
     create,
     ShapeDiverSdk,
-    ShapeDiverResponseError,
     // Request DTOs
     ShapeDiverMgmtRequestModelFiletype,
     ShapeDiverMgmtRequestModelTrustlevel,
