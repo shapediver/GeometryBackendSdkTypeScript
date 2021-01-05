@@ -4,7 +4,7 @@ import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
 export class ShapeDiverModelApi extends BaseResourceApi {
 
     buildUri (modelId: string): string {
-        return this.commonPath + modelId
+        return `${ this.commonPath }/${ modelId }`
     }
 
     /**

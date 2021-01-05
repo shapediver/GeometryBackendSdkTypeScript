@@ -4,8 +4,8 @@
  */
 
 global["fetch"] = require("node-fetch")
+global["sdUrl"] = "https://sddev2.eu-central-1.shapediver.com:1914"
 global["sdJwt"] = ""
-global["sdUrl"] = "http://localhost:9091"
 
 if (!global.sdJwt) {
     throw new Error("No JWT is set globally! Set one in 'test.config.js'.")

@@ -1,10 +1,10 @@
-import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
 import { ShapeDiverMgmtRequestTicket, ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-dto-mgmt"
+import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverTicketApi extends BaseResourceApi {
 
     buildUri (modelId: string): string {
-        return this.commonPath + modelId + "/ticket";
+        return `${ this.commonPath }/${ modelId }/ticket`
     }
 
     /**

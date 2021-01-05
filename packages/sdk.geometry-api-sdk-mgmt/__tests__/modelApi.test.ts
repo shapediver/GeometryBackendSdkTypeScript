@@ -18,7 +18,7 @@ beforeEach(() => {
     sdk = create(global.sdJwt, global.sdUrl)
 })
 
-describe("models", () => {
+describe("model Api", () => {
 
     it("get", async () => {
         assert(sdk)
@@ -26,21 +26,22 @@ describe("models", () => {
         expect(res.collection).toBeDefined()
     })
 
-    // it("create", async () => {
-    //     assert(sdk)
-    //     const body: ShapeDiverModelRequest = {
-    //         "pub": true,
-    //         "ftype": ShapeDiverModelFiletype.GRASSHOPPER_XML,
-    //         "max_comp_time": 10000,
-    //     }
-    //     const res = await sdk.models.create(modelId, body)
-    //     expect(res.collection).toBeDefined()
-    // })
+    // NOTE activate when hard delete functionality has been implemented on the server-side
+    it.skip("create", async () => {
+        assert(sdk)
+        const body: ShapeDiverMgmtRequestModel = {
+            "pub": true,
+            "ftype": ShapeDiverMgmtRequestModelFiletype.GRASSHOPPER_XML,
+            "max_comp_time": 10000,
+        }
+        const res = await sdk.model.create(modelId, body)
+        expect(res.collection).toBeDefined()
+    })
 
     it("update", async () => {
         assert(sdk)
         const body: ShapeDiverMgmtRequestModel = {
-            "pub": false,
+            "pub": true,
             "ftype": ShapeDiverMgmtRequestModelFiletype.GRASSHOPPER_XML,
             "name": "Local test via sdk",
             "max_comp_time": 9999,
@@ -53,10 +54,11 @@ describe("models", () => {
         expect(res.collection).toBeDefined()
     })
 
-    // it("delete", async () => {
-    //     assert(sdk)
-    //     const res = await sdk.models.delete(modelId)
-    //     expect(res).toBeDefined()
-    // })
+    // NOTE activate when hard delete functionality has been implemented on the server-side
+    it.skip("delete", async () => {
+        assert(sdk)
+        const res = await sdk.model.delete(modelId)
+        expect(res).toBeDefined()
+    })
 
 })

@@ -12,7 +12,7 @@ beforeEach(() => {
     sdk = create(global.sdJwt, global.sdUrl)
 })
 
-describe("tickets", () => {
+describe("ticket Api", () => {
 
     it("create", async () => {
         assert(sdk)

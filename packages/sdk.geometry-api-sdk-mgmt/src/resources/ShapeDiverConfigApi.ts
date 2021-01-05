@@ -4,7 +4,7 @@ import { ShapeDiverMgmtResponseDto } from "@shapediver/api.geometry-api-dto-mgmt
 export class ShapeDiverConfigApi extends BaseResourceApi {
 
     buildUri (modelId: string): string {
-        return this.commonPath + modelId + '/config';
+        return `${ this.commonPath }/${ modelId }/config`
     }
 
     /**
