@@ -2,9 +2,7 @@ import { ShapeDiverSdkApi } from ".."
 
 export abstract class BaseResourceApi {
 
-    // NOTE currently not used on sddev2!
-    // protected readonly commonPath: string = "api/v1/"
-    protected readonly commonPath: string = ""
+    protected readonly commonPath: string = "/api/v2"
 
     // Intentionally not set to 'protected'
     constructor (protected readonly api: ShapeDiverSdkApi) {

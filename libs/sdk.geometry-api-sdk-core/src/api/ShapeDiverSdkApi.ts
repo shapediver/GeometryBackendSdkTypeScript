@@ -1,10 +1,11 @@
 import { ShapeDiverSdkConfigInternal } from "../config/ShapeDiverSdkConfig"
 
 enum Method {
+    DELETE = "DELETE",
     GET = "GET",
+    PATCH = "PATCH",
     POST = "POST",
     PUT = "PUT",
-    DELETE = "DELETE"
 }
 
 /** The error object returned by the backend **/
@@ -109,6 +110,13 @@ export class ShapeDiverSdkApi {
 
     async put<T> (url: string, data: any, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
         const request = this.buildRequest(Method.PUT, data)
+        const response = await fetch(this.buildUrl(url), request)
+
+        return await this.extractBody(response, type)
+    }
+
+    async patch<T> (url: string, data: any, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
+        const request = this.buildRequest(Method.PATCH, data)
         const response = await fetch(this.buildUrl(url), request)
 
         return await this.extractBody(response, type)

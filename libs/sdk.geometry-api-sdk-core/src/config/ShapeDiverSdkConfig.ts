@@ -1,5 +1,3 @@
-import { DEFAULT_BASE_URL } from "../globals"
-
 export interface ShapeDiverSdkConfig {
     jwt: string,
 
@@ -8,15 +6,15 @@ export interface ShapeDiverSdkConfig {
 
 export class ShapeDiverSdkConfigInternal {
 
-    public readonly jwt: string
     public readonly baseUrl: string
+    public readonly jwt: string
 
     // The origin is needed during testing, but should not be exposed to the user!
     public readonly origin = undefined
 
-    constructor (jwt?: string, baseUrl?: string) {
+    constructor (baseUrl: string, jwt?: string) {
+        this.baseUrl = baseUrl
         this.jwt = (jwt) ? jwt : ""
-        this.baseUrl = (baseUrl) ? baseUrl : DEFAULT_BASE_URL
     }
 
     public toConfig (): ShapeDiverSdkConfig {

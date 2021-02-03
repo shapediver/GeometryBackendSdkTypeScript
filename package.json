@@ -1,6 +1,19 @@
 {
   "name": "root",
   "private": true,
+  "scripts": {
+    "bootstrap": "npm run check-npm-version && lerna bootstrap",
+    "check-npm-version": "bash ./scripts/check-npm-version.sh",
+    "create-lib": "npm run check-npm-version && bash ./scripts/create-lib.sh",
+    "create-package": "bash ./scripts/create-package.sh",
+    "add-dependency": "bash ./scripts/add-dependency.sh",
+    "add-devDependency": "bash ./scripts/add-devDependency.sh",
+    "publish": "lerna publish --force-publish --no-push --registry https://npm.pkg.github.com/",
+    "init": "bash ./scripts/init.sh",
+    "test": "lerna run test",
+    "build": "lerna run build",
+    "build-dep": "lerna run build-dep"
+  },
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.9",
@@ -14,18 +27,5 @@
     "webpack-cli": "^4.2.0",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.4.0"
-  },
-  "scripts": {
-    "bootstrap": "npm run check-npm-version && lerna bootstrap",
-    "check-npm-version": "bash ./scripts/check-npm-version.sh",
-    "create-lib": "npm run check-npm-version && bash ./scripts/create-lib.sh",
-    "create-package": "bash ./scripts/create-package.sh",
-    "add-dependency": "bash ./scripts/add-dependency.sh",
-    "add-devDependency": "bash ./scripts/add-devDependency.sh",
-    "publish": "lerna publish --force-publish --no-push --registry https://npm.pkg.github.com/",
-    "init": "bash ./scripts/init.sh",
-    "test": "lerna run test",
-    "build": "lerna run build",
-    "build-dep": "lerna run build-dep"
   }
 }

@@ -9,11 +9,11 @@ export abstract class BaseShapeDiverSdk {
     /**
      * ShapeDiverSDK constructor
      *
+     * @param baseUrl - the URL of the target system
      * @param jwt - the client's jwt
-     * @param baseUrl - the URL of the target system (just for testing)
      */
-    protected constructor (jwt?: string, baseUrl?: string) {
-        this.sdkConfig = new ShapeDiverSdkConfigInternal(jwt, baseUrl)
+    protected constructor (baseUrl: string, jwt?: string) {
+        this.sdkConfig = new ShapeDiverSdkConfigInternal(baseUrl, jwt)
 
         this.sdkApi = new ShapeDiverSdkApi(this.sdkConfig)
     }
