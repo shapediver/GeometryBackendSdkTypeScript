@@ -24,10 +24,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     /**
      * Create a new ShapeDiver Model.
      *
-     * @param modelId
      * @param body
      */
-    async create (modelId: string, body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
+    async create (body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
         return await this.api.post<ShapeDiverResponseDto>(this.buildUri(), body)
     }
 
