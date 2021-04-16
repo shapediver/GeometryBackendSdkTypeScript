@@ -33,7 +33,7 @@ describe("model Api", () => {
             "ftype": ShapeDiverRequestModelFiletype.GRASSHOPPER_XML,
             "max_comp_time": 10000,
         }
-        const res = await sdk.model.create(modelId, body)
+        const res = await sdk.model.create(body)
         expect(res).toBeDefined()
     })
 
