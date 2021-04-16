@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "bootstrap": "npm run check-npm-version && lerna bootstrap",
+    "clean": "lerna clean && lerna exec -- rm -rf ./dist",
+    "reset": "npm run clean && rm -r ./node_modules",
     "check-npm-version": "bash ./scripts/check-npm-version.sh",
     "create-lib": "npm run check-npm-version && bash ./scripts/create-lib.sh",
     "create-package": "bash ./scripts/create-package.sh",
@@ -12,21 +14,23 @@
     "init": "bash ./scripts/init.sh",
     "test": "lerna run test",
     "build": "lerna run build",
-    "build-dep": "lerna run build-dep"
+    "build-dep": "lerna run build-dep",
+    "check-for-updates": "bash ./scripts/check-updates.sh update",
+    "upgrade-dependencies": "bash ./scripts/check-updates.sh upgrade-all"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.15",
-    "@types/node": "^14.14.9",
+    "@types/jest": "^26.0.22",
+    "@types/node": "^14.14.41",
     "jest": "^26.6.3",
     "json": "^10.0.0",
     "lerna": "^3.22.1",
     "npm-check-updates": "^11.4.1",
-    "ts-jest": "^26.4.4",
-    "ts-loader": "^8.0.11",
-    "typescript": "^4.1.2",
-    "webpack": "^5.6.0",
-    "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.0",
-    "webpack-merge": "^5.4.0"
+    "ts-jest": "^26.5.5",
+    "ts-loader": "^8.1.0",
+    "typescript": "^4.2.4",
+    "webpack": "^5.33.2",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.7.3"
   }
 }
