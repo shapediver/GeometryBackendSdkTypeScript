@@ -1,9 +1,6 @@
 # `sdk.geometry-api-sdk-core`
+The **ShapeDiver SDK Core** package cannot be used directly.
+All available SDKs are listed at the [main page](https://github.com/shapediver/GeometryBackendSdkTypeScript/blob/master/packages/sdk.geometry-api-sdk-v2). 
 
-This SDK provides the base functionality to communicate with the *ShapeDiver Geometry Backend API*.
-
-## Usage
-
-```
-import { BaseShapeDiverSdk } from "@shapediver/sdk.geometry-api-sdk-core"
-```
+## Licensing
+This project is released under the [MIT License](https://github.com/shapediver/GeometryBackendSdkTypeScript/blob/master/LICENSE).
