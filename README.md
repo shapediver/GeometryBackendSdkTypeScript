@@ -11,7 +11,7 @@
 # ShapeDiver Geometry API SDKs
 [ShapeDiver](https://www.shapediver.com/) is a cloud platform that provides the right tools and scalable infrastructure needed to build online applications based on Grasshopper files.
 
-Using the **ShapeDiver Geometry API** allows accessing ShapeDiver models without using the [ShapeDiver Viewer](https://viewer.shapediver.com/v3/0.2.6/api/index.html).
+Using the **ShapeDiver Geometry API** allows accessing ShapeDiver models without using the [ShapeDiver Viewer](https://viewer.shapediver.com/v3/latest/api/index.html).
 The SDKs provide the functionality to communicate with a specific version of our Geometry Backend API, and they expose all TypeScript-types describing request and response objects.
 
 The authentication system for the Geometry API is based on **ticket objects** and **JWT tokens**, which are handled by the [ShapeDiver Platform](https://dev-app.shapediver.com/api/documentation).
