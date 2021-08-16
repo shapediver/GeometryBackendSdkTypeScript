@@ -3,8 +3,6 @@
 
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
-source "${__dir}/utils.sh"
-
 function ncu() {
   command "${__dir}/../node_modules/.bin/ncu" "$@"
 }
