@@ -1,10 +1,10 @@
 import { ShapeDiverRequestLogMessage, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverUtilsApi extends BaseResourceApi {
 
-    buildUri (sessionId: string): string {
-        return `${ this.commonPath }/session/${ sessionId }/log/message`
+    constructor (api: ShapeDiverSdkApi) {
+        super(api)
     }
 
     /**
@@ -14,7 +14,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param body
      */
     async log (sessionId: string, body: ShapeDiverRequestLogMessage): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildUri(sessionId), body)
+        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/log/message", body)
     }
 
 }

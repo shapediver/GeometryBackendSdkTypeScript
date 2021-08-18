@@ -7,24 +7,21 @@ import {
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+import { getTestJwtBackend, getTestModel1, getTestOrigin, getTestSession1, getTestTicket, getTestUrl } from "./utils"
 
-const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
-
-// @ts-ignore
-const ticketId = global.sdTicket
-// @ts-ignore
-const sessionId = global.sdSession1
-
-let sdk: ShapeDiverSdk | undefined
+let sdk: ShapeDiverSdk
 
 beforeEach(() => {
+    sdk = create(getTestUrl())
     // @ts-ignore
-    sdk = create(global.sdUrl)
-    // @ts-ignore
-    sdk.sdkConfig.origin = global.sdOrigin
+    sdk.sdkConfig.origin = getTestOrigin()
 })
 
 describe("session Api", () => {
+
+    const modelId = getTestModel1()
+    const ticketId = getTestTicket()
+    const sessionId = getTestSession1()
 
     function extractSessionId (dto: ShapeDiverResponseDto): string {
         if (!dto.actions) return ""
@@ -35,7 +32,7 @@ describe("session Api", () => {
 
     it("ticket", async () => {
         // @ts-ignore
-        sdk.sdkConfig.jwt = global.sdJwtBackend
+        sdk.sdkConfig.jwt = getTestJwtBackend()
 
         assert(sdk)
         const body: ShapeDiverRequestTicket = {

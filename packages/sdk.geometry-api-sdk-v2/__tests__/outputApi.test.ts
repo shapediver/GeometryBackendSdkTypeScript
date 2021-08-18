@@ -2,18 +2,18 @@ import { beforeEach, describe } from "@jest/globals"
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+import { getTestJwt1, getTestModel1, getTestSession1, getTestUrl } from "./utils"
 
-// @ts-ignore
-const sessionId = global.sdSession1
-
-let sdk: ShapeDiverSdk | undefined
+let sdk: ShapeDiverSdk
 
 beforeEach(() => {
-    // @ts-ignore
-    sdk = create(global.sdUrl)
+    sdk = create(getTestUrl(), getTestJwt1())
 })
 
 describe("output Api", () => {
+
+    const sessionId = getTestSession1()
+    const modelId = getTestModel1()
 
     it("customize", async () => {
         assert(sdk)
@@ -27,6 +27,18 @@ describe("output Api", () => {
         assert(sdk)
         const res = await sdk.output.getCache(sessionId, {
             "d6823c7f67b6384f665400ea36eaa3e9": "43c544427745122aae228e0009e4c332",
+        })
+        expect(res).toBeDefined()
+    })
+
+    it("definitions", async () => {
+        assert(sdk)
+        const res = await sdk.output.updateDefinitions(modelId, {
+            "d6823c7f67b6384f665400ea36eaa3e9": {
+                displayname: "",
+                hidden: false,
+                order: 1,
+            },
         })
         expect(res).toBeDefined()
     })

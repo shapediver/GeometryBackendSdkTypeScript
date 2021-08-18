@@ -1,14 +1,15 @@
 import {
     ShapeDiverRequestCache,
     ShapeDiverRequestExport,
+    ShapeDiverRequestExportDefinition,
     ShapeDiverResponseDto,
 } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverExportApi extends BaseResourceApi {
 
-    buildUri (sessionId: string): string {
-        return `${ this.commonPath }/session/${ sessionId }`
+    constructor (api: ShapeDiverSdkApi) {
+        super(api)
     }
 
     /**
@@ -18,7 +19,7 @@ export class ShapeDiverExportApi extends BaseResourceApi {
      * @param body
      */
     async compute (sessionId: string, body: ShapeDiverRequestExport): Promise<ShapeDiverResponseDto> {
-        return await this.api.put<ShapeDiverResponseDto>(this.buildUri(sessionId) + "/export", body)
+        return await this.api.put<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/export", body)
     }
 
     /**
@@ -28,7 +29,17 @@ export class ShapeDiverExportApi extends BaseResourceApi {
      * @param body
      */
     async getCache (sessionId: string, body: ShapeDiverRequestCache): Promise<ShapeDiverResponseDto> {
-        return await this.api.put<ShapeDiverResponseDto>(this.buildUri(sessionId) + "/export/cache", body)
+        return await this.api.put<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/export/cache", body)
+    }
+
+    /**
+     * Updates the definitions of the given exports.
+     *
+     * @param modelId
+     * @param body
+     */
+    async updateDefinitions (modelId: string, body: ShapeDiverRequestExportDefinition): Promise<ShapeDiverResponseDto> {
+        return await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/export", body)
     }
 
 }

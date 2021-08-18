@@ -6,13 +6,19 @@
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,
-        "target": "es5",
+        "target": "es6",
         "strict": true,
         "rootDir": "src",
-        "outDir": "dist"
+        "outDir": "dist",
+        "lib": [
+            "dom",
+            "es6",
+            "scripthost",
+            "es2018.promise"
+        ]
     },
     "include": [
-        "./**/*.ts"
+        "./src/*.ts"
     ],
     "exclude": [
         "__tests__/**/*",

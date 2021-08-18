@@ -7,17 +7,17 @@ import {
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+import { getTestJwt1, getTestJwtBackend, getTestModel1, getTestUrl } from "./utils"
 
-const modelId = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
-
-let sdk: ShapeDiverSdk | undefined
+let sdk: ShapeDiverSdk
 
 beforeEach(() => {
-    // @ts-ignore
-    sdk = create(global.sdUrl, global.sdJwt1)
+    sdk = create(getTestUrl(), getTestJwt1())
 })
 
 describe("model Api", () => {
+
+    const modelId = getTestModel1()
 
     it("get", async () => {
         assert(sdk)
@@ -39,7 +39,7 @@ describe("model Api", () => {
 
     it("update", async () => {
         // @ts-ignore
-        sdk.sdkConfig.jwt = global.sdJwtBackend
+        sdk.sdkConfig.jwt = getTestJwtBackend()
 
         assert(sdk)
         const body: ShapeDiverRequestModel = {
@@ -72,6 +72,18 @@ describe("model Api", () => {
     it("get config", async () => {
         assert(sdk)
         const res = await sdk.model.getConfig(modelId)
+        expect(res).toBeDefined()
+    })
+
+    it("definitions", async () => {
+        assert(sdk)
+        const res = await sdk.model.updateParameterDefinitions(modelId, {
+            "e1d10474-4690-4e7d-a269-110919becc19": {
+                displayname: "",
+                hidden: false,
+                order: 1,
+            },
+        })
         expect(res).toBeDefined()
     })
 

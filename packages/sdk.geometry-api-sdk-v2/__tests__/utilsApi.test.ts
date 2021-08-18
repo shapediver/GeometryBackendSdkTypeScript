@@ -3,24 +3,23 @@ import { ShapeDiverRequestLogMessageLevel } from "@shapediver/api.geometry-api-d
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
-
-// @ts-ignore
-const sessionId = global.sdSession1
+import { getTestSession1, getTestUrl } from "./utils"
 
 let sdk: ShapeDiverSdk | undefined
 
 beforeEach(() => {
-    // @ts-ignore
-    sdk = create(global.sdUrl)
+    sdk = create(getTestUrl())
 })
 
 describe("utils Api", () => {
+
+    const sessionId = getTestSession1()
 
     it("log", async () => {
         assert(sdk)
         const res = await sdk.utils.log(sessionId, {
             level: ShapeDiverRequestLogMessageLevel.INFO,
-            message: "Integration test log message"
+            message: "Integration test log message",
         })
         expect(res).toBeDefined()
     })

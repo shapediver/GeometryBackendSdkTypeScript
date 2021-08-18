@@ -1,18 +1,10 @@
 import { ShapeDiverRequestTicket, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverSessionApi extends BaseResourceApi {
 
-    buildUri (sessionId: string): string {
-        return `${ this.commonPath }/session/${ sessionId }`
-    }
-
-    buildModelUri (modelId: string): string {
-        return `${ this.commonPath }/model/${ modelId }`
-    }
-
-    buildTicketUri (ticketId: string): string {
-        return `${ this.commonPath }/ticket/${ ticketId }`
+    constructor (api: ShapeDiverSdkApi) {
+        super(api)
     }
 
     /**
@@ -41,7 +33,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param sessionId
      */
     async default (sessionId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(this.buildUri(sessionId) + "/default")
+        return await this.api.get<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/default")
     }
 
     /**
@@ -50,7 +42,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param sessionId
      */
     async close (sessionId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildUri(sessionId) + "/close", {})
+        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/close", {})
     }
 
 }

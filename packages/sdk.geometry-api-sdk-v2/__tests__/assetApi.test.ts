@@ -2,18 +2,17 @@ import { beforeEach, describe } from "@jest/globals"
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+import { getTestSession2, getTestUrl } from "./utils"
 
-// @ts-ignore
-const sessionId = global.sdSession2
-
-let sdk: ShapeDiverSdk | undefined
+let sdk: ShapeDiverSdk
 
 beforeEach(() => {
-    // @ts-ignore
-    sdk = create(global.sdUrl)
+    sdk = create(getTestUrl())
 })
 
 describe("asset Api", () => {
+
+    const sessionId = getTestSession2()
 
     // NOTE activate when dedicated test model is in use
     it.skip("get export", async () => {
@@ -25,7 +24,6 @@ describe("asset Api", () => {
     it("get output", async () => {
         assert(sdk)
         const res = await sdk.asset.getOutput(sessionId, "6480ab6fc1dab95f064fd2783b12bc62cf51300c4e39986a5e2aa38c52d13d282afed62418f1c9e35bc243251f2a960a6bed5090c61cf78e3a32e334ea675c947ce915e761208a2ae983c20b8d98dda301a330f3aaa33a3437d6e4e52180a376d9625060c94ebdab82e76fef35b6-64313361616633322d346264352d3464")
-        console.log(res)
         expect(res).toBeDefined()
     })
 

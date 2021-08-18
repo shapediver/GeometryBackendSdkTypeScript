@@ -2,14 +2,15 @@ import {
     ShapeDiverRequestConfigure,
     ShapeDiverRequestCustomization,
     ShapeDiverRequestModel,
+    ShapeDiverRequestParameterDefinition,
     ShapeDiverResponseDto,
 } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverModelApi extends BaseResourceApi {
 
-    buildUri (): string {
-        return `${ this.commonPath }/model/`
+    constructor (api: ShapeDiverSdkApi) {
+        super(api)
     }
 
     /**
@@ -18,7 +19,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async get (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(this.buildUri() + modelId)
+        return await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId))
     }
 
     /**
@@ -27,7 +28,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async create (body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildUri(), body)
+        return await this.api.post<ShapeDiverResponseDto>(this.commonPath, body)
     }
 
     /**
@@ -37,7 +38,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async update (modelId: string, body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
-        return await this.api.put<ShapeDiverResponseDto>(this.buildUri() + modelId, body)
+        return await this.api.put<ShapeDiverResponseDto>(this.buildModelUri(modelId), body)
     }
 
     /**
@@ -46,7 +47,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async delete (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.delete<ShapeDiverResponseDto>(this.buildUri() + modelId)
+        return await this.api.delete<ShapeDiverResponseDto>(this.buildModelUri(modelId))
     }
 
     /**
@@ -55,7 +56,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async getConfig (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(this.buildUri() + modelId + "/config")
+        return await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config")
     }
 
     /**
@@ -65,7 +66,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async createConfig (modelId: string, body: ShapeDiverRequestConfigure): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildUri() + modelId + "/config", body)
+        return await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config", body)
     }
 
     /**
@@ -75,16 +76,16 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async updateConfig (modelId: string, body: ShapeDiverRequestConfigure): Promise<ShapeDiverResponseDto> {
-        return await this.api.patch<ShapeDiverResponseDto>(this.buildUri() + modelId + "/config", body)
+        return await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config", body)
     }
 
     /**
-     * Get configurations of the viewer.
+     * Download the Grasshopper file of the ShapeDiver Model.
      *
      * @param modelId
      */
     async getFile (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(this.buildUri() + modelId + "/file/download")
+        return await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/file/download")
     }
 
     /**
@@ -94,7 +95,17 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async setDefaultParams (modelId: string, body: ShapeDiverRequestCustomization): Promise<ShapeDiverResponseDto> {
-        return await this.api.patch<ShapeDiverResponseDto>(this.buildUri() + modelId + "/parameters/defval", body)
+        return await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter/defval", body)
+    }
+
+    /**
+     * Updates the definitions of the given parameters.
+     *
+     * @param modelId
+     * @param body
+     */
+    async updateParameterDefinitions (modelId: string, body: ShapeDiverRequestParameterDefinition): Promise<ShapeDiverResponseDto> {
+        return await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter", body)
     }
 
 }

@@ -1,10 +1,10 @@
 import { ShapeDiverRequestSdtfUpload, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverSdtfApi extends BaseResourceApi {
 
-    buildUri (sessionId: string): string {
-        return `${ this.commonPath }/session/${ sessionId }/sdtf/upload`
+    constructor (api: ShapeDiverSdkApi) {
+        super(api)
     }
 
     /**
@@ -14,7 +14,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
      * @param body
      */
     async upload (sessionId: string, body: ShapeDiverRequestSdtfUpload): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildUri(sessionId), body)
+        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/sdtf/upload", body)
     }
 
 }

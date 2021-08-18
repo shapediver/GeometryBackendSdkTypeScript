@@ -2,18 +2,17 @@ import { beforeEach, describe } from "@jest/globals"
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+import { getTestSession1, getTestUrl } from "./utils"
 
-// @ts-ignore
-const sessionId = global.sdSession1
-
-let sdk: ShapeDiverSdk | undefined
+let sdk: ShapeDiverSdk
 
 beforeEach(() => {
-    // @ts-ignore
-    sdk = create(global.sdUrl)
+    sdk = create(getTestUrl())
 })
 
 describe("file Api", () => {
+
+    const sessionId = getTestSession1()
 
     // NOTE activate when dedicated test model is in use
     it.skip("upload", async () => {
@@ -21,8 +20,8 @@ describe("file Api", () => {
         const res = await sdk.file.upload(sessionId, {
             "795ac629-a574-47dc-816f-6906f5a13376": {
                 "format": "image/gif",
-                "size": 123
-            }
+                "size": 123,
+            },
         })
         // TODO check response object
         expect(res).toBeDefined()

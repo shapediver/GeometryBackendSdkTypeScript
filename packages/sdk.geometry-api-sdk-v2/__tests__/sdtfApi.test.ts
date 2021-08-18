@@ -3,18 +3,17 @@ import { ShapeDiverRequestSdtfUploadPartType } from "@shapediver/api.geometry-ap
 import { strict as assert } from "assert"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+import { getTestSession1, getTestUrl } from "./utils"
 
-// @ts-ignore
-const sessionId = global.sdSession1
-
-let sdk: ShapeDiverSdk | undefined
+let sdk: ShapeDiverSdk
 
 beforeEach(() => {
-    // @ts-ignore
-    sdk = create(global.sdUrl)
+    sdk = create(getTestUrl())
 })
 
 describe("sdtf Api", () => {
+
+    const sessionId = getTestSession1()
 
     // NOTE activate when dedicated test model is in use
     it.skip("upload", async () => {
@@ -23,7 +22,7 @@ describe("sdtf Api", () => {
             {
                 "content_length": 123,
                 "content_type": ShapeDiverRequestSdtfUploadPartType.MODEL_SDTF,
-                namespace: "foobar",
+                "namespace": "foobar",
             },
         ])
         expect(res).toBeDefined()
