@@ -24,7 +24,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param ticketId
      */
     async init (ticketId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticketId), {})
+        return await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticketId))
     }
 
     /**
@@ -42,7 +42,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param sessionId
      */
     async close (sessionId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/close", {})
+        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/close")
     }
 
 }

@@ -1,4 +1,9 @@
-import { ShapeDiverResponseError, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "./api/ShapeDiverSdkApi"
+import {
+    ShapeDiverResponseError,
+    ShapeDiverSdkApi,
+    ShapeDiverSdkApiRequestHeaders,
+    ShapeDiverSdkApiResponseType,
+} from "./api/ShapeDiverSdkApi"
 import { BaseShapeDiverSdk } from "./BaseShapeDiverSdk"
 import { ShapeDiverSdkConfig } from "./config/ShapeDiverSdkConfig"
 import { BaseResourceApi } from "./resources/BaseResourceApi"
@@ -8,6 +13,7 @@ export {
     BaseShapeDiverSdk,
     ShapeDiverResponseError,
     ShapeDiverSdkApi,
+    ShapeDiverSdkApiRequestHeaders,
     ShapeDiverSdkApiResponseType,
     ShapeDiverSdkConfig,
 }

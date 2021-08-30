@@ -13,7 +13,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getExport (sessionId: string, assetData: string): Promise<Blob> {
-        return await this.api.get<Blob>(`${ this.buildSessionUri(sessionId) }/export/${ assetData }`, ShapeDiverSdkApiResponseType.BLOB)
+        return await this.api.get<Blob>(
+            `${ this.buildSessionUri(sessionId) }/export/${ assetData }`,
+            undefined,
+            ShapeDiverSdkApiResponseType.BLOB,
+        )
     }
 
     /**
@@ -23,7 +27,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getOutput (sessionId: string, assetData: string): Promise<Blob> {
-        return await this.api.get<Blob>(`${ this.buildSessionUri(sessionId) }/output/${ assetData }`, ShapeDiverSdkApiResponseType.BLOB)
+        return await this.api.get<Blob>(
+            `${ this.buildSessionUri(sessionId) }/output/${ assetData }`,
+            undefined,
+            ShapeDiverSdkApiResponseType.BLOB,
+        )
     }
 
     /**
@@ -33,7 +41,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getTexture (sessionId: string, assetData: string): Promise<Blob> {
-        return await this.api.get<Blob>(`${ this.buildSessionUri(sessionId) }/texture/${ assetData }`, ShapeDiverSdkApiResponseType.BLOB)
+        return await this.api.get<Blob>(
+            `${ this.buildSessionUri(sessionId) }/texture/${ assetData }`,
+            undefined,
+            ShapeDiverSdkApiResponseType.BLOB,
+        )
     }
 
 }

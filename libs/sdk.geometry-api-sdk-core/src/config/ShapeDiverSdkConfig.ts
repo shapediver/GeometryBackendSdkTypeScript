@@ -10,7 +10,7 @@ export class ShapeDiverSdkConfigInternal {
     public readonly jwt: string
 
     // The origin is needed during testing, but should not be exposed to the user!
-    public readonly origin = undefined
+    public readonly origin: string | undefined = undefined
 
     constructor (baseUrl: string, jwt?: string) {
         this.baseUrl = baseUrl

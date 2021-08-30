@@ -2,6 +2,7 @@ import { BaseShapeDiverSdk } from "@shapediver/sdk.geometry-api-sdk-core"
 import { ShapeDiverAssetApi } from "./resources/ShapeDiverAssetApi"
 import { ShapeDiverExportApi } from "./resources/ShapeDiverExportApi"
 import { ShapeDiverFileApi } from "./resources/ShapeDiverFileApi"
+import { ShapeDiverGltfApi } from "./resources/ShapeDiverGltfApi"
 import { ShapeDiverModelApi } from "./resources/ShapeDiverModelApi"
 import { ShapeDiverOutputApi } from "./resources/ShapeDiverOutputApi"
 import { ShapeDiverSdtfApi } from "./resources/ShapeDiverSdtfApi"
@@ -17,6 +18,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
     private readonly _asset: ShapeDiverAssetApi
     private readonly _export: ShapeDiverExportApi
     private readonly _file: ShapeDiverFileApi
+    private readonly _gltf: ShapeDiverGltfApi
     private readonly _model: ShapeDiverModelApi
     private readonly _output: ShapeDiverOutputApi
     private readonly _sdtf: ShapeDiverSdtfApi
@@ -35,6 +37,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
         this._asset = new ShapeDiverAssetApi(this.sdkApi)
         this._export = new ShapeDiverExportApi(this.sdkApi)
         this._file = new ShapeDiverFileApi(this.sdkApi)
+        this._gltf = new ShapeDiverGltfApi(this.sdkApi)
         this._model = new ShapeDiverModelApi(this.sdkApi)
         this._output = new ShapeDiverOutputApi(this.sdkApi)
         this._sdtf = new ShapeDiverSdtfApi(this.sdkApi)
@@ -52,6 +55,10 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
     get file (): ShapeDiverFileApi {
         return this._file
+    }
+
+    get gltf (): ShapeDiverGltfApi {
+        return this._gltf
     }
 
     get model (): ShapeDiverModelApi {

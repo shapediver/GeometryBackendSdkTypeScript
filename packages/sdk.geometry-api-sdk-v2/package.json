@@ -49,6 +49,7 @@
     ]
   },
   "devDependencies": {
+    "blob-polyfill": "^5.0.20210201",
     "jest": "^27.0.6",
     "lerna": "^3.22.1",
     "node-fetch": "^2.6.1",

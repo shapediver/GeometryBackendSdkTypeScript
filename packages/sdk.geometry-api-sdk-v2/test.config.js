@@ -4,6 +4,9 @@
  */
 
 global["fetch"] = require("node-fetch")
+global["ReadableStream"] = require("stream").Readable
+global["Blob"] = require("blob-polyfill").Blob
+
 global["sdUrl"] = "https://sddev2.eu-central-1.shapediver.com"
 global["sdOrigin"] = "http://localhost:8080"
 global["sdTicket"] = ""

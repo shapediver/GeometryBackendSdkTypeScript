@@ -30,6 +30,10 @@ export class ShapeDiverResponseError implements IResponseError {
     }
 }
 
+export interface ShapeDiverSdkApiRequestHeaders {
+    contentType: string
+}
+
 export enum ShapeDiverSdkApiResponseType {
     JSON,
     BLOB,
@@ -40,13 +44,13 @@ export class ShapeDiverSdkApi {
     constructor (private config: ShapeDiverSdkConfigInternal) {
     }
 
-    private buildRequest (method: Method, data?: any): RequestInit {
+    private buildRequest (method: Method, headers: ShapeDiverSdkApiRequestHeaders, data: any): RequestInit {
         const request: RequestInit = {
             method: method,
             mode: "cors",
             credentials: "include",
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": headers.contentType,
                 "Authorization": "",
             },
             body: undefined,
@@ -56,16 +60,19 @@ export class ShapeDiverSdkApi {
         // The browser adds the Origin automatically to each request.
         // However, during testing this needs to be set manually.
         if (this.config.origin) {
-            // @ts-ignore
-            request.headers["Origin"] = this.config.origin
+            (request.headers as { [key: string]: string })["Origin"] = this.config.origin
         }
 
         // Add jwt if provided
         if (this.config.jwt) {
             (request.headers as { [key: string]: string })["Authorization"] = "Bearer " + this.config.jwt
         }
-        if (data) {
+
+        // Set data and convert depending on content-type
+        if (headers.contentType === "application/json") {
             request.body = JSON.stringify(data)
+        } else {
+            request.body = data
         }
 
         return request
@@ -94,38 +101,61 @@ export class ShapeDiverSdkApi {
         }
     }
 
-    async get<T> (url: string, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
-        const request = this.buildRequest(Method.GET)
+    async get<T> (
+        url: string,
+        requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
+        responseType = ShapeDiverSdkApiResponseType.JSON,
+    ): Promise<T> {
+        const request = this.buildRequest(Method.GET, requestHeaders, {})
         const response = await fetch(this.buildUrl(url), request)
 
-        return await this.extractBody(response, type)
+        return await this.extractBody(response, responseType)
     }
 
-    async post<T> (url: string, data: any, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
-        const request = this.buildRequest(Method.POST, data)
+    async post<T> (
+        url: string,
+        data: any = {},
+        requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
+        responseType = ShapeDiverSdkApiResponseType.JSON,
+    ): Promise<T> {
+        const request = this.buildRequest(Method.POST, requestHeaders, data)
         const response = await fetch(this.buildUrl(url), request)
 
-        return await this.extractBody(response, type)
+        return await this.extractBody(response, responseType)
     }
 
-    async put<T> (url: string, data: any, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
-        const request = this.buildRequest(Method.PUT, data)
+    async put<T> (
+        url: string,
+        data: any = {},
+        requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
+        responseType = ShapeDiverSdkApiResponseType.JSON,
+    ): Promise<T> {
+        const request = this.buildRequest(Method.PUT, requestHeaders, data)
         const response = await fetch(this.buildUrl(url), request)
 
-        return await this.extractBody(response, type)
+        return await this.extractBody(response, responseType)
     }
 
-    async patch<T> (url: string, data: any, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
-        const request = this.buildRequest(Method.PATCH, data)
+    async patch<T> (
+        url: string,
+        data: any = {},
+        requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
+        responseType = ShapeDiverSdkApiResponseType.JSON,
+    ): Promise<T> {
+        const request = this.buildRequest(Method.PATCH, requestHeaders, data)
         const response = await fetch(this.buildUrl(url), request)
 
-        return await this.extractBody(response, type)
+        return await this.extractBody(response, responseType)
     }
 
-    async delete<T> (url: string, type = ShapeDiverSdkApiResponseType.JSON): Promise<T> {
-        const request = this.buildRequest(Method.DELETE)
+    async delete<T> (
+        url: string,
+        requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
+        responseType = ShapeDiverSdkApiResponseType.JSON,
+    ): Promise<T> {
+        const request = this.buildRequest(Method.DELETE, requestHeaders, {})
         const response = await fetch(this.buildUrl(url), request)
 
-        return await this.extractBody(response, type)
+        return await this.extractBody(response, responseType)
     }
 }
