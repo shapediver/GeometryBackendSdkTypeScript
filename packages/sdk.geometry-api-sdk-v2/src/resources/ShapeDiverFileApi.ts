@@ -14,7 +14,7 @@ export class ShapeDiverFileApi extends BaseResourceApi {
      * @param body
      */
     async upload (sessionId: string, body: ShapeDiverRequestFileUpload): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/upload", body)
+        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/file/upload", body)
     }
 
 }
