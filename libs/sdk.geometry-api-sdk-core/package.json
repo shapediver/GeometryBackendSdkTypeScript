@@ -30,6 +30,6 @@
   "typings": "dist/index.d.ts",
   "devDependencies": {
     "lerna": "^3.22.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.4.3"
   }
 }
