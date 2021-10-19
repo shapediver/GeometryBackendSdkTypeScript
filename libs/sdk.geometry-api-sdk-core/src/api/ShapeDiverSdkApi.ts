@@ -1,4 +1,6 @@
+import axios, { AxiosRequestConfig } from "axios"
 import { ShapeDiverSdkConfigInternal } from "../config/ShapeDiverSdkConfig"
+import { ShapeDiverError, ShapeDiverRequestError, ShapeDiverResponseError } from "../ShapeDiverErrors"
 
 enum Method {
     DELETE = "DELETE",
@@ -8,35 +10,14 @@ enum Method {
     PUT = "PUT",
 }
 
-/** The error object returned by the backend **/
-interface IResponseError {
-    readonly error: string;
-
-    readonly desc: string;
-
-    readonly message: string;
-}
-
-/** The error object used and exposed by the SDK **/
-export class ShapeDiverResponseError implements IResponseError {
-    public readonly error: string
-    public readonly desc: string
-    public readonly message: string
-
-    constructor (data: IResponseError) {
-        this.error = data.error
-        this.desc = data.desc
-        this.message = data.message
-    }
-}
-
 export interface ShapeDiverSdkApiRequestHeaders {
     contentType: string
+    authorization?: "disabled"
 }
 
 export enum ShapeDiverSdkApiResponseType {
-    JSON,
-    BLOB,
+    JSON = "json",
+    DATA = "arraybuffer",
 }
 
 export class ShapeDiverSdkApi {
@@ -44,61 +25,110 @@ export class ShapeDiverSdkApi {
     constructor (private config: ShapeDiverSdkConfigInternal) {
     }
 
-    private buildRequest (method: Method, headers: ShapeDiverSdkApiRequestHeaders, data: any): RequestInit {
-        const request: RequestInit = {
+    private buildRequestConfig (
+        method: Method,
+        headers: ShapeDiverSdkApiRequestHeaders,
+        data: any,
+        responseType: ShapeDiverSdkApiResponseType,
+    ): AxiosRequestConfig {
+        const request: AxiosRequestConfig = {
             method: method,
-            mode: "cors",
-            credentials: "include",
             headers: {
                 "Content-Type": headers.contentType,
-                "Authorization": "",
             },
-            body: undefined,
+            responseType: responseType,
+            data: undefined,
         }
 
         // Add origin if specified.
         // The browser adds the Origin automatically to each request.
         // However, during testing this needs to be set manually.
         if (this.config.origin) {
-            (request.headers as { [key: string]: string })["Origin"] = this.config.origin
+            request.headers!["Origin"] = this.config.origin
         }
 
         // Add jwt if provided
-        if (this.config.jwt) {
-            (request.headers as { [key: string]: string })["Authorization"] = "Bearer " + this.config.jwt
+        if (this.config.jwt && !headers.authorization) {
+            request.headers!["Authorization"] = "Bearer " + this.config.jwt
         }
 
         // Set data and convert depending on content-type
         if (headers.contentType === "application/json") {
-            request.body = JSON.stringify(data)
+            request.data = JSON.stringify(data)
         } else {
-            request.body = data
+            request.data = data
         }
 
         return request
     }
 
     private buildUrl (uri: string): string {
-        if (uri.startsWith("/")) {
+        if (uri.startsWith("http")) {
+            return uri
+        } else if (uri.startsWith("/")) {
             return `${ this.config.baseUrl }/${ uri.substring(1) }`
         } else {
             return `${ this.config.baseUrl }/${ uri }`
         }
     }
 
-    private async extractBody (response: Response, type: ShapeDiverSdkApiResponseType): Promise<any> {
-        if (response.ok) {
-            switch (type) {
-                case ShapeDiverSdkApiResponseType.JSON:
-                    return Promise.resolve(await response.json())
-                case ShapeDiverSdkApiResponseType.BLOB:
-                    return Promise.resolve(await response.blob())
-                default:
-                    return Promise.reject("Invalid response type")
+    /**
+     * Processes the given Axios error, maps it content and throws the
+     * respective ShapeDiver error.
+     *
+     * @param error
+     * @param responseType
+     * @throws
+     * @private
+     */
+    private static async processError (error: any, responseType: ShapeDiverSdkApiResponseType): Promise<any> {
+        if (error.response) {
+            // Request was made and server responded with 4xx or 5xx
+
+            let data
+            if (responseType === ShapeDiverSdkApiResponseType.DATA) {
+                data = this.convertErrorResponseData(error.response.data)
+            } else {
+                data = error.response.data
             }
+
+            throw new ShapeDiverResponseError(
+                error.response.status,
+                data.error,
+                data.desc,
+                data.message,
+            )
+        } else if (error.request) {
+            // The request was made but no response was received
+            throw new ShapeDiverRequestError("The request was made but no response was received", error.request)
         } else {
-            throw new ShapeDiverResponseError(await response.json())
+            // Something happened in setting up the request that triggered an Error
+            throw new ShapeDiverError(error.message)
         }
+    }
+
+    /**
+     * Axios returns errors in the same type that we where using to specify the
+     * data response type of the happy-path. Thus, we have to convert them
+     * manually.
+     *
+     * @param data
+     * @private
+     */
+    private static convertErrorResponseData (data: any): { [key: string]: string } {
+        let stringData
+
+        if (typeof window === 'undefined') {
+            // NodeJs
+            stringData = Buffer.from(data).toString()
+        } else if (window.TextDecoder) {
+            // Browser + TextDecoder support
+            stringData = new TextDecoder("utf-8").decode(new Uint8Array(data))
+        } else {
+            return {}
+        }
+
+        return JSON.parse(stringData)
     }
 
     async get<T> (
@@ -106,10 +136,13 @@ export class ShapeDiverSdkApi {
         requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
         responseType = ShapeDiverSdkApiResponseType.JSON,
     ): Promise<T> {
-        const request = this.buildRequest(Method.GET, requestHeaders, {})
-        const response = await fetch(this.buildUrl(url), request)
-
-        return await this.extractBody(response, responseType)
+        const config = this.buildRequestConfig(Method.GET, requestHeaders, {}, responseType)
+        try {
+            const response = await axios(this.buildUrl(url), config)
+            return response.data as T
+        } catch (e: any) {
+            return await ShapeDiverSdkApi.processError(e, responseType)
+        }
     }
 
     async post<T> (
@@ -118,10 +151,13 @@ export class ShapeDiverSdkApi {
         requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
         responseType = ShapeDiverSdkApiResponseType.JSON,
     ): Promise<T> {
-        const request = this.buildRequest(Method.POST, requestHeaders, data)
-        const response = await fetch(this.buildUrl(url), request)
-
-        return await this.extractBody(response, responseType)
+        const config = this.buildRequestConfig(Method.POST, requestHeaders, data, responseType)
+        try {
+            const response = await axios(this.buildUrl(url), config)
+            return response.data as T
+        } catch (e: any) {
+            return await ShapeDiverSdkApi.processError(e, responseType)
+        }
     }
 
     async put<T> (
@@ -130,10 +166,13 @@ export class ShapeDiverSdkApi {
         requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
         responseType = ShapeDiverSdkApiResponseType.JSON,
     ): Promise<T> {
-        const request = this.buildRequest(Method.PUT, requestHeaders, data)
-        const response = await fetch(this.buildUrl(url), request)
-
-        return await this.extractBody(response, responseType)
+        const config = this.buildRequestConfig(Method.PUT, requestHeaders, data, responseType)
+        try {
+            const response = await axios(this.buildUrl(url), config)
+            return response.data as T
+        } catch (e: any) {
+            return await ShapeDiverSdkApi.processError(e, responseType)
+        }
     }
 
     async patch<T> (
@@ -142,10 +181,13 @@ export class ShapeDiverSdkApi {
         requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
         responseType = ShapeDiverSdkApiResponseType.JSON,
     ): Promise<T> {
-        const request = this.buildRequest(Method.PATCH, requestHeaders, data)
-        const response = await fetch(this.buildUrl(url), request)
-
-        return await this.extractBody(response, responseType)
+        const config = this.buildRequestConfig(Method.PATCH, requestHeaders, data, responseType)
+        try {
+            const response = await axios(this.buildUrl(url), config)
+            return response.data as T
+        } catch (e: any) {
+            return await ShapeDiverSdkApi.processError(e, responseType)
+        }
     }
 
     async delete<T> (
@@ -153,9 +195,12 @@ export class ShapeDiverSdkApi {
         requestHeaders: ShapeDiverSdkApiRequestHeaders = { contentType: "application/json" },
         responseType = ShapeDiverSdkApiResponseType.JSON,
     ): Promise<T> {
-        const request = this.buildRequest(Method.DELETE, requestHeaders, {})
-        const response = await fetch(this.buildUrl(url), request)
-
-        return await this.extractBody(response, responseType)
+        const config = this.buildRequestConfig(Method.DELETE, requestHeaders, {}, responseType)
+        try {
+            const response = await axios(this.buildUrl(url), config)
+            return response.data as T
+        } catch (e: any) {
+            return await ShapeDiverSdkApi.processError(e, responseType)
+        }
     }
 }

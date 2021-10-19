@@ -8,19 +8,23 @@ export class ShapeDiverGltfApi extends BaseResourceApi {
     }
 
     /**
-     * Request an Upload-URL for a file.
-     *
-     * The request's content-type is extracted from the blob-type.
+     * Upload a glTF file.
      *
      * @param sessionId
      * @param body
+     * @param type
      * @param queryConvert
      */
-    async upload (sessionId: string, body: Blob, queryConvert: ShapeDiverRequestGltfUploadQueryConversion): Promise<ShapeDiverResponseDto> {
+    async upload (
+        sessionId: string,
+        body: ArrayBuffer,
+        type: string,
+        queryConvert: ShapeDiverRequestGltfUploadQueryConversion = ShapeDiverRequestGltfUploadQueryConversion.NONE,
+    ): Promise<ShapeDiverResponseDto> {
         return await this.api.post<ShapeDiverResponseDto>(
             `${ this.buildSessionUri(sessionId) }/gltf?conversion=${ queryConvert }`,
-            await body.arrayBuffer(),
-            { contentType: body.type },
+            body,
+            { contentType: type },
         )
     }
 

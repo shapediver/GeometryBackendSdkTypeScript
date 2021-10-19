@@ -5,7 +5,7 @@ import {
     ShapeDiverRequestParameterDefinition,
     ShapeDiverResponseDto,
 } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverModelApi extends BaseResourceApi {
 
@@ -60,7 +60,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
-     * Create configurations of the viewer.
+     * Create viewer configurations.
      *
      * @param modelId
      * @param body
@@ -70,7 +70,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
-     * Update the configurations of the viewer.
+     * Update viewer configurations.
      *
      * @param modelId
      * @param body
@@ -84,8 +84,12 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      *
      * @param modelId
      */
-    async getFile (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/file/download")
+    async getFile (modelId: string): Promise<ArrayBuffer> {
+        return await this.api.get<ArrayBuffer>(
+            this.buildModelUri(modelId) + "/file/download",
+            undefined,
+            ShapeDiverSdkApiResponseType.DATA,
+        )
     }
 
     /**

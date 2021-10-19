@@ -10,6 +10,24 @@ export abstract class BaseResourceApi {
     }
 
     /**
+     * Create the URI for analytics-based controller endpoints.
+     *
+     * @protected
+     */
+    protected buildAnalyticsUri (): string {
+        return `${ this.commonPath }/analytics`
+    }
+
+    /**
+     * Create the URI for auth_group-based controller endpoints.
+     *
+     * @protected
+     */
+    protected buildAuthGroupUri (): string {
+        return `${ this.commonPath }/auth_group`
+    }
+
+    /**
      * Create the URI for ticket-based controller endpoints.
      *
      * @param ticketId
@@ -37,6 +55,15 @@ export abstract class BaseResourceApi {
      */
     protected buildModelUri (modelId: string): string {
         return `${ this.commonPath }/model/${ modelId }`
+    }
+
+    /**
+     * Create the URI for system-based controller endpoints.
+     *
+     * @protected
+     */
+    protected buildSystemUri (): string {
+        return `${ this.commonPath }/system`
     }
 
 }

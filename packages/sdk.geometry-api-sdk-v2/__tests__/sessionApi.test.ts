@@ -4,9 +4,10 @@ import {
     ShapeDiverRequestTicketType,
     ShapeDiverResponseDto,
 } from "@shapediver/api.geometry-api-dto-v2"
-import { strict as assert } from "assert"
+
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
+// @ts-ignore
 import { getTestJwtBackend, getTestModel1, getTestOrigin, getTestSession1, getTestTicket, getTestUrl } from "./utils"
 
 let sdk: ShapeDiverSdk
@@ -34,7 +35,6 @@ describe("session Api", () => {
         // @ts-ignore
         sdk.sdkConfig.jwt = getTestJwtBackend()
 
-        assert(sdk)
         const body: ShapeDiverRequestTicket = {
             "pub": true,
             "author": true,
@@ -46,7 +46,6 @@ describe("session Api", () => {
     })
 
     it("init and close", async () => {
-        assert(sdk)
         const res = await sdk.session.init(ticketId)
         expect(res).toBeDefined()
 
@@ -55,7 +54,6 @@ describe("session Api", () => {
     })
 
     it("default", async () => {
-        assert(sdk)
         const res = await sdk.session.default(sessionId)
         expect(res).toBeDefined()
     })

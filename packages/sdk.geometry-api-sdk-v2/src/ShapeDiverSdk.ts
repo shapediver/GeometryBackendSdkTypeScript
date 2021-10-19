@@ -1,4 +1,5 @@
 import { BaseShapeDiverSdk } from "@shapediver/sdk.geometry-api-sdk-core"
+import { ShapeDiverAnalyticsApi } from "./resources/ShapeDiverAnalyticsApi"
 import { ShapeDiverAssetApi } from "./resources/ShapeDiverAssetApi"
 import { ShapeDiverExportApi } from "./resources/ShapeDiverExportApi"
 import { ShapeDiverFileApi } from "./resources/ShapeDiverFileApi"
@@ -7,6 +8,7 @@ import { ShapeDiverModelApi } from "./resources/ShapeDiverModelApi"
 import { ShapeDiverOutputApi } from "./resources/ShapeDiverOutputApi"
 import { ShapeDiverSdtfApi } from "./resources/ShapeDiverSdtfApi"
 import { ShapeDiverSessionApi } from "./resources/ShapeDiverSessionApi"
+import { ShapeDiverSystemApi } from "./resources/ShapeDiverSystemApi"
 import { ShapeDiverUtilsApi } from "./resources/ShapeDiverUtilsApi"
 
 export function create (baseUrl: string, jwt?: string): ShapeDiverSdk {
@@ -15,6 +17,7 @@ export function create (baseUrl: string, jwt?: string): ShapeDiverSdk {
 
 export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
+    private readonly _analytics: ShapeDiverAnalyticsApi
     private readonly _asset: ShapeDiverAssetApi
     private readonly _export: ShapeDiverExportApi
     private readonly _file: ShapeDiverFileApi
@@ -23,6 +26,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
     private readonly _output: ShapeDiverOutputApi
     private readonly _sdtf: ShapeDiverSdtfApi
     private readonly _session: ShapeDiverSessionApi
+    private readonly _system: ShapeDiverSystemApi
     private readonly _utils: ShapeDiverUtilsApi
 
     /**
@@ -34,6 +38,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
     constructor (baseUrl: string, jwt?: string) {
         super(baseUrl, jwt)
 
+        this._analytics = new ShapeDiverAnalyticsApi(this.sdkApi)
         this._asset = new ShapeDiverAssetApi(this.sdkApi)
         this._export = new ShapeDiverExportApi(this.sdkApi)
         this._file = new ShapeDiverFileApi(this.sdkApi)
@@ -42,7 +47,12 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
         this._output = new ShapeDiverOutputApi(this.sdkApi)
         this._sdtf = new ShapeDiverSdtfApi(this.sdkApi)
         this._session = new ShapeDiverSessionApi(this.sdkApi)
+        this._system = new ShapeDiverSystemApi(this.sdkApi)
         this._utils = new ShapeDiverUtilsApi(this.sdkApi)
+    }
+
+    get analytics (): ShapeDiverAnalyticsApi {
+        return this._analytics
     }
 
     get asset (): ShapeDiverAssetApi {
@@ -75,6 +85,10 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
     get session (): ShapeDiverSessionApi {
         return this._session
+    }
+
+    get system (): ShapeDiverSystemApi {
+        return this._system
     }
 
     get utils (): ShapeDiverUtilsApi {

@@ -1,5 +1,5 @@
 import { ShapeDiverRequestSdtfUpload, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseResourceApi, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverSdtfApi extends BaseResourceApi {
 
@@ -8,12 +8,46 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
     }
 
     /**
-     * Request an Upload-URL for a sdtf-file.
+     * List all sdTF-assets of the given namespace.
+     *
+     * @param sessionId
+     * @param namespace
+     */
+    async list (sessionId: string, namespace: string): Promise<ShapeDiverResponseDto> {
+        return await this.api.get<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/sdtf/${ namespace }/list`)
+    }
+
+    /**
+     * Download a sdTF-asset.
+     *
+     * @param sessionId
+     * @param sdtfId - Format: "<namespace>/<sdTF id>"
+     */
+    async get (sessionId: string, sdtfId: string): Promise<ArrayBuffer> {
+        return await this.api.get<ArrayBuffer>(
+            `${ this.buildSessionUri(sessionId) }/sdtf/${ sdtfId }`,
+            undefined,
+            ShapeDiverSdkApiResponseType.DATA,
+        )
+    }
+
+    /**
+     * Delete a sdTF-asset.
+     *
+     * @param sessionId
+     * @param sdtfId
+     */
+    async delete (sessionId: string, sdtfId: string): Promise<ShapeDiverResponseDto> {
+        return await this.api.delete<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/sdtf/${ sdtfId }`)
+    }
+
+    /**
+     * Request an Upload-URL for a sdTF-asset.
      *
      * @param sessionId
      * @param body
      */
-    async upload (sessionId: string, body: ShapeDiverRequestSdtfUpload): Promise<ShapeDiverResponseDto> {
+    async requestUpload (sessionId: string, body: ShapeDiverRequestSdtfUpload): Promise<ShapeDiverResponseDto> {
         return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/sdtf/upload", body)
     }
 

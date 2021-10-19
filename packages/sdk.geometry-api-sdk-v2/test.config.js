@@ -3,18 +3,14 @@
  * been started.
  */
 
-global["fetch"] = require("node-fetch")
-global["ReadableStream"] = require("stream").Readable
-global["Blob"] = require("blob-polyfill").Blob
-
 global["sdUrl"] = "https://sddev2.eu-central-1.shapediver.com"
 global["sdOrigin"] = "http://localhost:8080"
 global["sdTicket"] = ""
 global["sdJwtBackend"] = ""
-global["sdJwt1"] = "" // Model: cc5d4dee-1ee2-4907-97cf-c3802858cf5b
-global["sdJwt2"] = "" // Model: eb449d6d-37a0-4c12-bd2c-f4e1972293bc
+global["sdJwt1"] = "" // Model 1
+global["sdJwt2"] = "" // Model 2
 // NOTE merge into single session when dedicated test model is in use
-global["sdModel1"] = "cc5d4dee-1ee2-4907-97cf-c3802858cf5b"
-global["sdModel2"] = "eb449d6d-37a0-4c12-bd2c-f4e1972293bc"
+global["sdModel1"] = "0f563296-4e61-4c53-91e1-0526d78723b9"
+global["sdModel2"] = "13e899fa-75d0-45d8-9335-d22d8288437c"
 global["sdSession1"] = "" // Session of model 1
 global["sdSession2"] = "" // Session of model 2

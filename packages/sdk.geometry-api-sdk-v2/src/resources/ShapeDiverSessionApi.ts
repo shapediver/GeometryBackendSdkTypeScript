@@ -21,10 +21,10 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
     /**
      * Create a new session for a ShapeDiver Model.
      *
-     * @param ticketId
+     * @param ticket
      */
-    async init (ticketId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticketId))
+    async init (ticket: string): Promise<ShapeDiverResponseDto> {
+        return await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket))
     }
 
     /**
