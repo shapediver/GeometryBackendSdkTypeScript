@@ -2,6 +2,9 @@ import {
     ShapeDiverRequestConfigure,
     ShapeDiverRequestCustomization,
     ShapeDiverRequestModel,
+    ShapeDiverRequestModelComputationQueryOrder,
+    ShapeDiverRequestModelComputationQueryStatus,
+    ShapeDiverRequestModelComputationQueryType,
     ShapeDiverRequestParameterDefinition,
     ShapeDiverResponseDto,
 } from "@shapediver/api.geometry-api-dto-v2"
@@ -110,6 +113,44 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      */
     async updateParameterDefinitions (modelId: string, body: ShapeDiverRequestParameterDefinition): Promise<ShapeDiverResponseDto> {
         return await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter", body)
+    }
+
+    /**
+     * Query model computation statistics.
+     *
+     * @param modelId
+     * @param timestampFrom - Timestamp to query from
+     * @param timestampTo - Timestamp to query to.
+     * @param limit - How many items to return at most.
+     * @param strictLimit - Whether the limit shall be attained (if there are enough items).
+     * @param order - Order in which to query computation stats items.
+     * @param status - Filter computations by the result status.
+     * @param type - Filter computations by type.
+     * @param offset - Continuation token for pagination.
+     */
+    async queryComputations (
+        modelId: string,
+        timestampFrom?: string,
+        timestampTo?: string,
+        limit?: number,
+        strictLimit?: boolean,
+        order?: ShapeDiverRequestModelComputationQueryOrder,
+        status?: ShapeDiverRequestModelComputationQueryStatus,
+        type?: ShapeDiverRequestModelComputationQueryType,
+        offset?: string,
+    ): Promise<ShapeDiverResponseDto> {
+        // Build queries
+        const queries = []
+        if (timestampFrom !== undefined) queries.push("timestamp_from=" + timestampFrom)
+        if (timestampTo !== undefined) queries.push("timestamp_to=" + timestampTo)
+        if (limit !== undefined) queries.push("limit=" + limit)
+        if (strictLimit !== undefined) queries.push("strict_limit=" + strictLimit)
+        if (order !== undefined) queries.push("order=" + order)
+        if (status !== undefined) queries.push("status=" + status)
+        if (type !== undefined) queries.push("type=" + type)
+        if (offset !== undefined) queries.push("offset=" + offset)
+
+        return await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/computations?" + queries.join("&"))
     }
 
 }
