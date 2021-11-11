@@ -1,6 +1,9 @@
 import { beforeEach, describe } from "@jest/globals"
 import {
     ShapeDiverRequestModel,
+    ShapeDiverRequestModelComputationQueryOrder,
+    ShapeDiverRequestModelComputationQueryStatus,
+    ShapeDiverRequestModelComputationQueryType,
     ShapeDiverRequestModelFiletype,
     ShapeDiverRequestModelTrustlevel,
 } from "@shapediver/api.geometry-api-dto-v2"
@@ -98,5 +101,26 @@ describe("model Api", () => {
     })
 
     // TODO add update & set config when DTO-definitions have been specified
+
+    it("query computations", async () => {
+        const res = await sdk.model.queryComputations(
+            modelId,
+            "20000101000000000",
+            new Date().toISOString().replace(/[-:TZ.]/g, ""),   // now
+            1,
+            false,
+            ShapeDiverRequestModelComputationQueryOrder.ASC,
+            ShapeDiverRequestModelComputationQueryStatus.ALL,
+            ShapeDiverRequestModelComputationQueryType.ALL,
+            undefined
+        )
+
+        expect(res.computations).toBeDefined()
+        expect(res.computations!.length).toBe(1)
+
+        expect(res.pagination).toBeDefined()
+        expect(res.pagination!.limit).toBe(1)
+        expect(typeof res.pagination!.next_offset).toBe("string")
+    })
 
 })
