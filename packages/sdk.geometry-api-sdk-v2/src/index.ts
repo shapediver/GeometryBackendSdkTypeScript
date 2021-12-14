@@ -3,5 +3,7 @@ export {
     ShapeDiverError,
     ShapeDiverRequestError,
     ShapeDiverResponseError,
+    ShapeDiverSdkConfig,
+    ShapeDiverSdkConfigType,
 } from "@shapediver/sdk.geometry-api-sdk-core"
 export { create, ShapeDiverSdk } from "./ShapeDiverSdk"

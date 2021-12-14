@@ -4,6 +4,7 @@ import {
     ShapeDiverRequestTicketType,
     ShapeDiverResponseDto,
 } from "@shapediver/api.geometry-api-dto-v2"
+import { ShapeDiverSdkConfigType } from "@shapediver/sdk.geometry-api-sdk-core"
 
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
@@ -14,8 +15,7 @@ let sdk: ShapeDiverSdk
 
 beforeEach(() => {
     sdk = create(getTestUrl())
-    // @ts-ignore
-    sdk.sdkConfig.origin = getTestOrigin()
+    sdk.setConfigurationValue(ShapeDiverSdkConfigType.REQUEST_HEADERS, { origin: getTestOrigin() })
 })
 
 describe("session Api", () => {

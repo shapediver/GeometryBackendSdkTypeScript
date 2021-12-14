@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios"
-import { ShapeDiverSdkConfigInternal } from "../config/ShapeDiverSdkConfig"
+import { SdkConfigInternal } from "../config/ShapeDiverSdkConfig"
 import { ShapeDiverError, ShapeDiverRequestError, ShapeDiverResponseError } from "../ShapeDiverErrors"
 
 enum Method {
@@ -12,6 +12,7 @@ enum Method {
 
 export interface ShapeDiverSdkApiRequestHeaders {
     contentType: string
+
     authorization?: "disabled"
 }
 
@@ -22,7 +23,7 @@ export enum ShapeDiverSdkApiResponseType {
 
 export class ShapeDiverSdkApi {
 
-    constructor (private config: ShapeDiverSdkConfigInternal) {
+    constructor (private config: SdkConfigInternal) {
     }
 
     private buildRequestConfig (
@@ -34,21 +35,15 @@ export class ShapeDiverSdkApi {
         const request: AxiosRequestConfig = {
             method: method,
             headers: {
+                ...this.config.headers,
                 "Content-Type": headers.contentType,
             },
             responseType: responseType,
             data: undefined,
         }
 
-        // Add origin if specified.
-        // The browser adds the Origin automatically to each request.
-        // However, during testing this needs to be set manually.
-        if (this.config.origin) {
-            request.headers!["Origin"] = this.config.origin
-        }
-
         // Add jwt if provided
-        if (this.config.jwt && !headers.authorization) {
+        if (this.config.jwt) {
             request.headers!["Authorization"] = "Bearer " + this.config.jwt
         }
 
@@ -118,7 +113,7 @@ export class ShapeDiverSdkApi {
     private static convertErrorResponseData (data: any): { [key: string]: string } {
         let stringData
 
-        if (typeof window === 'undefined') {
+        if (typeof window === "undefined") {
             // NodeJs
             stringData = Buffer.from(data).toString()
         } else if (window.TextDecoder) {

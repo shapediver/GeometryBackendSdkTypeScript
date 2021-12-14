@@ -6,7 +6,9 @@
   "author": "Matthias Reisacher <matt@shapediver.com>",
   "license": "ISC",
   "main": "dist/index.js",
-  "directories": {},
+  "directories": {
+    "test": "__tests__"
+  },
   "files": [
     "dist"
   ],
@@ -28,10 +30,18 @@
   },
   "homepage": "https://github.com/shapediver/GeometryBackendSdkTypeScript#readme",
   "typings": "dist/index.d.ts",
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.ts"
+    ]
+  },
   "dependencies": {
     "axios": "^0.24.0"
   },
   "devDependencies": {
+    "jest": "^27.4.3",
     "lerna": "^3.22.1",
     "typescript": "^4.5.2"
   }

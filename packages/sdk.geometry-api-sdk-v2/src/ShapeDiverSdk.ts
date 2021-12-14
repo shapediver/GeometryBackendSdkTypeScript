@@ -1,4 +1,4 @@
-import { BaseShapeDiverSdk } from "@shapediver/sdk.geometry-api-sdk-core"
+import { BaseShapeDiverSdk, ShapeDiverSdkConfigType } from "@shapediver/sdk.geometry-api-sdk-core"
 import { ShapeDiverAnalyticsApi } from "./resources/ShapeDiverAnalyticsApi"
 import { ShapeDiverAssetApi } from "./resources/ShapeDiverAssetApi"
 import { ShapeDiverExportApi } from "./resources/ShapeDiverExportApi"
@@ -36,7 +36,8 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
      * @param jwt - the client's jwt
      */
     constructor (baseUrl: string, jwt?: string) {
-        super(baseUrl, jwt)
+        super(baseUrl)
+        if (jwt) this.setConfigurationValue(ShapeDiverSdkConfigType.JWT_TOKEN, jwt)
 
         this._analytics = new ShapeDiverAnalyticsApi(this.sdkApi)
         this._asset = new ShapeDiverAssetApi(this.sdkApi)
