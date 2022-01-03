@@ -1,4 +1,9 @@
-import { ShapeDiverRequestTicket, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
+import {
+    ShapeDiverRequestCustomization,
+    ShapeDiverRequestExport,
+    ShapeDiverRequestTicket,
+    ShapeDiverResponseDto,
+} from "@shapediver/api.geometry-api-dto-v2"
 import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 
 export class ShapeDiverSessionApi extends BaseResourceApi {
@@ -22,9 +27,10 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * Create a new session for a ShapeDiver Model.
      *
      * @param ticket
+     * @param request - Optional customization or export request.
      */
-    async init (ticket: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket))
+    async init (ticket: string, request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport): Promise<ShapeDiverResponseDto> {
+        return await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket), request)
     }
 
     /**
