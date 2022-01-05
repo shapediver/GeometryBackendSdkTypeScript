@@ -1,5 +1,6 @@
 import { ShapeDiverRequestGltfUploadQueryConversion, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
 import { BaseResourceApi, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import { sendRequest } from "../utils/utils"
 
 export class ShapeDiverGltfApi extends BaseResourceApi {
 
@@ -21,11 +22,11 @@ export class ShapeDiverGltfApi extends BaseResourceApi {
         type: string,
         queryConvert: ShapeDiverRequestGltfUploadQueryConversion = ShapeDiverRequestGltfUploadQueryConversion.NONE,
     ): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(
+        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(
             `${ this.buildSessionUri(sessionId) }/gltf?conversion=${ queryConvert }`,
             body,
             { contentType: type },
-        )
+        ))
     }
 
 }

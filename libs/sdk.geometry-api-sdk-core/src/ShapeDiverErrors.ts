@@ -1,8 +1,7 @@
-export class ShapeDiverError {
+export class ShapeDiverError extends Error {
 
-    constructor (
-        public readonly message: string,
-    ) {
+    constructor (message: string) {
+        super(message)
     }
 
 }
@@ -25,6 +24,7 @@ export class ShapeDiverResponseError extends ShapeDiverError {
         public readonly error: string,
         public readonly desc: string,
         message: string,
+        public readonly headers: { [key: string]: any },
     ) {
         super(message)
     }

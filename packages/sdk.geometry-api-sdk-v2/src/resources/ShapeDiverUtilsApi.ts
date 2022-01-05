@@ -8,7 +8,7 @@ import {
 } from "@shapediver/api.geometry-api-dto-v2"
 import { BaseResourceApi, ShapeDiverError, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
 import { ShapeDiverSdk } from "../ShapeDiverSdk"
-import { sleep } from "../utils/utils"
+import { sendRequest, sleep } from "../utils/utils"
 
 export class ShapeDiverUtilsApi extends BaseResourceApi {
 
@@ -24,7 +24,10 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param type
      */
     async upload (href: string, data: ArrayBuffer, type: string): Promise<any> {
-        return await this.api.put<any>(href, data, { contentType: type, authorization: "disabled" })
+        return await sendRequest(async () => this.api.put<any>(href, data, {
+            contentType: type,
+            authorization: "disabled",
+        }))
     }
 
     /**
@@ -43,7 +46,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
         maxWaitMsec = -1,
     ): Promise<ShapeDiverResponseDto> {
         const startMsec = Date.now()
-        const dto = await sdk.output.customize(sessionId, body)
+        const dto = await sendRequest(async () => sdk.output.customize(sessionId, body))
         const waitMsec = Date.now() - startMsec
 
         // Reduce the total max waiting time by the amount the customization-request took
@@ -68,7 +71,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
         maxWaitMsec = -1,
     ): Promise<ShapeDiverResponseDto> {
         const startMsec = Date.now()
-        const dto = await sdk.export.compute(sessionId, body)
+        const dto = await sendRequest(async () => sdk.export.compute(sessionId, body))
         const waitMsec = Date.now() - startMsec
 
         // Reduce the total max waiting time by the amount the compute-request took
@@ -118,7 +121,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
             await sleep(delay)
 
             // Send cache request
-            dto = await sdk.output.getCache(sessionId, outputVersions)
+            dto = await sendRequest(async () => sdk.output.getCache(sessionId, outputVersions))
             delay = ShapeDiverUtilsApi.getMaxOutputDelay(dto)
         }
 
@@ -166,7 +169,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
             await sleep(delay)
 
             // Send cache request
-            dto = await sdk.export.getCache(sessionId, exportVersion)
+            dto = await sendRequest(async () => sdk.export.getCache(sessionId, exportVersion))
             delay = ShapeDiverUtilsApi.getExportDelay(dto, exportId)
         }
 

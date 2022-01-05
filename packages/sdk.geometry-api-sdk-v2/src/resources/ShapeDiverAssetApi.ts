@@ -1,4 +1,5 @@
 import { BaseResourceApi, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "@shapediver/sdk.geometry-api-sdk-core"
+import { sendRequest } from "../utils/utils"
 
 export class ShapeDiverAssetApi extends BaseResourceApi {
 
@@ -13,11 +14,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getExport (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await this.api.get<ArrayBuffer>(
+        return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/export/${ assetData }`,
             undefined,
             ShapeDiverSdkApiResponseType.DATA,
-        )
+        ))
     }
 
     /**
@@ -27,11 +28,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getOutput (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await this.api.get<ArrayBuffer>(
+        return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/output/${ assetData }`,
             undefined,
             ShapeDiverSdkApiResponseType.DATA,
-        )
+        ))
     }
 
     /**
@@ -41,11 +42,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getTexture (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await this.api.get<ArrayBuffer>(
+        return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/texture/${ assetData }`,
             undefined,
             ShapeDiverSdkApiResponseType.DATA,
-        )
+        ))
     }
 
     /**
@@ -55,11 +56,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getGltf (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await this.api.get<ArrayBuffer>(
+        return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/gltf/${ assetData }`,
             undefined,
             ShapeDiverSdkApiResponseType.DATA,
-        )
+        ))
     }
 
     /**
@@ -69,11 +70,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param assetData
      */
     async getUsdz (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await this.api.get<ArrayBuffer>(
+        return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/usdz/${ assetData }`,
             undefined,
             ShapeDiverSdkApiResponseType.DATA,
-        )
+        ))
     }
 
 }

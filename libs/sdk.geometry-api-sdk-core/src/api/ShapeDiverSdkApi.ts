@@ -89,9 +89,10 @@ export class ShapeDiverSdkApi {
 
             throw new ShapeDiverResponseError(
                 error.response.status,
-                data.error,
-                data.desc,
-                data.message,
+                data.error ?? "",
+                data.desc ?? "",
+                data.message || (data.desc ?? ""),
+                error.response.headers,
             )
         } else if (error.request) {
             // The request was made but no response was received
@@ -120,7 +121,7 @@ export class ShapeDiverSdkApi {
             // Browser + TextDecoder support
             stringData = new TextDecoder("utf-8").decode(new Uint8Array(data))
         } else {
-            return {}
+            throw new ShapeDiverError("Received an unknown error object")
         }
 
         return JSON.parse(stringData)

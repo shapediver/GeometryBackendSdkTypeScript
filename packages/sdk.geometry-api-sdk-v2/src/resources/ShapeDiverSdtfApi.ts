@@ -1,5 +1,6 @@
 import { ShapeDiverRequestSdtfUpload, ShapeDiverResponseDto } from "@shapediver/api.geometry-api-dto-v2"
 import { BaseResourceApi, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "@shapediver/sdk.geometry-api-sdk-core"
+import { sendRequest } from "../utils/utils"
 
 export class ShapeDiverSdtfApi extends BaseResourceApi {
 
@@ -14,7 +15,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
      * @param namespace
      */
     async list (sessionId: string, namespace: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/sdtf/${ namespace }/list`)
+        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/sdtf/${ namespace }/list`))
     }
 
     /**
@@ -24,11 +25,11 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
      * @param sdtfId - Format: "<namespace>/<sdTF id>"
      */
     async get (sessionId: string, sdtfId: string): Promise<ArrayBuffer> {
-        return await this.api.get<ArrayBuffer>(
+        return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/sdtf/${ sdtfId }`,
             undefined,
             ShapeDiverSdkApiResponseType.DATA,
-        )
+        ))
     }
 
     /**
@@ -38,7 +39,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
      * @param sdtfId
      */
     async delete (sessionId: string, sdtfId: string): Promise<ShapeDiverResponseDto> {
-        return await this.api.delete<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/sdtf/${ sdtfId }`)
+        return await sendRequest(async () => this.api.delete<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/sdtf/${ sdtfId }`))
     }
 
     /**
@@ -48,7 +49,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
      * @param body
      */
     async requestUpload (sessionId: string, body: ShapeDiverRequestSdtfUpload): Promise<ShapeDiverResponseDto> {
-        return await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/sdtf/upload", body)
+        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/sdtf/upload", body))
     }
 
 }
