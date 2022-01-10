@@ -14,8 +14,7 @@ beforeEach(() => {
 
 describe("utils Api", () => {
 
-    // const sessionId = getTestSession1()
-    const sessionId = "da0fa328-57c3-46f6-8220-51fcf2cd70cf"
+    const sessionId = getTestSession1()
 
     // We skip this because this function is used in other tests as well
     test.skip("upload", async () => {

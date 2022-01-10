@@ -13,7 +13,7 @@ enum Method {
 export interface ShapeDiverSdkApiRequestHeaders {
     contentType: string
 
-    authorization?: "disabled"
+    authorization?: "disabled"  // Disable Authorization
 }
 
 export enum ShapeDiverSdkApiResponseType {
@@ -42,8 +42,12 @@ export class ShapeDiverSdkApi {
             data: undefined,
         }
 
-        // Add jwt if provided
-        if (this.config.jwt) {
+        // Process HTTP authorization
+        if (headers.authorization === "disabled") {
+            delete request.headers!["Authorization"]
+            delete request.headers!["authorization"]    // config.headers might use lower case
+        } else if (this.config.jwt) {
+            // Add jwt if provided
             request.headers!["Authorization"] = "Bearer " + this.config.jwt
         }
 
