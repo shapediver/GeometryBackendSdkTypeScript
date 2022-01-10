@@ -16,8 +16,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     async getExport (sessionId: string, assetData: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/export/${ assetData }`,
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 
@@ -30,8 +29,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     async getOutput (sessionId: string, assetData: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/output/${ assetData }`,
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 
@@ -44,8 +42,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     async getTexture (sessionId: string, assetData: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/texture/${ assetData }`,
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 
@@ -58,8 +55,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     async getGltf (sessionId: string, assetData: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/gltf/${ assetData }`,
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 
@@ -72,8 +68,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     async getUsdz (sessionId: string, assetData: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/usdz/${ assetData }`,
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 

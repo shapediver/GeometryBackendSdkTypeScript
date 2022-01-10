@@ -16,7 +16,7 @@ export enum ShapeDiverSdkConfigType {
     REQUEST_HEADERS = "REQUEST_HEADERS",
 }
 
-export type RequestHeader = { [key: string]: string | number | Array<string | number> }
+export type RequestHeader = Record<string, string>
 
 /** Private interface of the ShapeDiver configuration object */
 export class SdkConfigInternal {
@@ -60,22 +60,22 @@ export class SdkConfigInternal {
                 this._jwt = SdkConfigInternal.validateValue(type, value, "string") as string
                 break
             case ShapeDiverSdkConfigType.REQUEST_HEADERS:
-                this._headers = SdkConfigInternal.validateValue(type, value, "string_keyed_object") as RequestHeader
+                this._headers = SdkConfigInternal.validateValue(type, value, "string_map") as RequestHeader
                 break
             default:
                 throw new ShapeDiverError(`Invalid config-type ${ type }`)
         }
     }
 
-    public static validateValue (type: ShapeDiverSdkConfigType, value: any, dataType: "string" | "string_keyed_object"): any {
+    public static validateValue (type: ShapeDiverSdkConfigType, value: any, dataType: "string" | "string_map"): any {
         switch (dataType) {
             case "string":
                 if (typeof value !== "string")
                     throw new ShapeDiverError(`Invalid value for config-type '${ type }': Value must be a string`)
                 break
-            case "string_keyed_object":
-                if (typeof value !== "object" || !Object.values(value).every(v => typeof v === "string" || typeof v === "number" || typeof v === "boolean" || Array.isArray(v)))
-                    throw new ShapeDiverError(`Invalid value for config-type '${ type }': Value must be a string-keyed-object`)
+            case "string_map":
+                if (typeof value !== "object" || !Object.values(value).every(v => typeof v === "string"))
+                    throw new ShapeDiverError(`Invalid value for config-type '${ type }': Value must be a string-map`)
                 break
         }
 

@@ -27,8 +27,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
     async get (sessionId: string, sdtfId: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/sdtf/${ sdtfId }`,
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 

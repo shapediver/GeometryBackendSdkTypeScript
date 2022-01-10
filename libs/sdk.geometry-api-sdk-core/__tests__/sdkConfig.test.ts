@@ -36,19 +36,19 @@ describe("validateValue", function () {
         expect(() => SdkConfigInternal.validateValue(ShapeDiverSdkConfigType.BASE_URL, {}, "string")).toThrowError()
     })
 
-    test("string keyed object - valid", () => {
+    test("string map - valid", () => {
         SdkConfigInternal.validateValue(ShapeDiverSdkConfigType.REQUEST_HEADERS, {
             a: "foo",
-            b: 666,
-            c: false,
-            d: [ "bar", 123 ],
-        }, "string_keyed_object")
+            b: "666",
+            c: "false",
+        }, "string_map")
     })
 
     test("string keyed object - invalid", () => {
         expect(() => SdkConfigInternal.validateValue(ShapeDiverSdkConfigType.BASE_URL, {
             a: () => "",
-        }, "string_keyed_object")).toThrowError()
+            b: [ "foo", "bar" ],
+        }, "string_map")).toThrowError()
     })
 
 })

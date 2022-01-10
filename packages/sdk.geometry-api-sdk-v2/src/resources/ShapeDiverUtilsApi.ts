@@ -6,7 +6,12 @@ import {
     ShapeDiverResponseExport,
     ShapeDiverResponseOutput,
 } from "@shapediver/api.geometry-api-dto-v2"
-import { BaseResourceApi, ShapeDiverError, ShapeDiverSdkApi } from "@shapediver/sdk.geometry-api-sdk-core"
+import {
+    BaseResourceApi,
+    ShapeDiverError,
+    ShapeDiverSdkApi,
+    ShapeDiverSdkApiResponseType,
+} from "@shapediver/sdk.geometry-api-sdk-core"
 import { ShapeDiverSdk } from "../ShapeDiverSdk"
 import { sendRequest, sleep } from "../utils/utils"
 
@@ -26,7 +31,9 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     async upload (href: string, data: ArrayBuffer, type: string): Promise<any> {
         return await sendRequest(async () => this.api.put<any>(href, data, {
             contentType: type,
-            authorization: "disabled",
+            responseType: ShapeDiverSdkApiResponseType.JSON,
+            disableAuthorization: true,
+            disableCustomHeaders: true,
         }))
     }
 

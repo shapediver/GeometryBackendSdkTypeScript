@@ -91,8 +91,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     async getFile (modelId: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             this.buildModelUri(modelId) + "/file/download",
-            undefined,
-            ShapeDiverSdkApiResponseType.DATA,
+            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 
