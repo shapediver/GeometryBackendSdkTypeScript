@@ -39,4 +39,11 @@ describe("system Api", () => {
         expect(res.auth_group).toBeDefined()
     })
 
+    it("minion info", async () => {
+        const res = await sdk.system.getMinionInfo()
+        expect(res).toBeDefined()
+        expect(res.system).toBeDefined()
+        expect(res.system!.minions).toBeDefined()
+    })
+
 })

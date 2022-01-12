@@ -51,4 +51,11 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
         return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildAuthGroupUri(), body))
     }
 
+    /**
+     * Returns system information about the Geometry Minions.
+     */
+    async getMinionInfo (): Promise<ShapeDiverResponseDto> {
+        return await this.api.get<ShapeDiverResponseDto>(`${ this.buildSystemUri() }/minions/info`)
+    }
+
 }
