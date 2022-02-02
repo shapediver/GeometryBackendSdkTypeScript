@@ -11,7 +11,7 @@ import {
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestJwt1, getTestJwtBackend, getTestModel1, getTestUrl } from "./utils"
+import { getTestJwt1, getTestJwtBackend, getTestModel1, getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 

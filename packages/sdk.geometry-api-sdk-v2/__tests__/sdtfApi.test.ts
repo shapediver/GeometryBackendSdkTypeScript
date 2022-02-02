@@ -5,7 +5,7 @@ import fs from "fs"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestJwt1, getTestSession1, getTestUrl } from "./utils"
+import { getTestJwt1, getTestSession1, getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 

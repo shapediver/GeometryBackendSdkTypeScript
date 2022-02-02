@@ -75,3 +75,12 @@ export function getTestSession2 (): string {
     if (!session) throw new Error("Missing test config value: 'sdSession2'. Set this in 'test.config.js'.")
     return session
 }
+
+/** General helper functions for tests */
+export async function extractException (fnUnderTest: Function): Promise<string | undefined> {
+    try {
+        await fnUnderTest()
+    } catch (e: unknown) {
+        return (<Error>e).message
+    }
+}

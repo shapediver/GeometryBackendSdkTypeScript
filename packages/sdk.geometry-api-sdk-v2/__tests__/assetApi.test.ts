@@ -3,7 +3,7 @@ import { beforeEach, describe } from "@jest/globals"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestSession1, getTestUrl } from "./utils"
+import { getTestSession1, getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 

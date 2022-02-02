@@ -4,7 +4,7 @@ import { ShapeDiverRequestLogMessageLevel } from "@shapediver/api.geometry-api-d
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestJwtBackend, getTestModel1, getTestModel2, getTestSession1, getTestTicket, getTestUrl } from "./utils"
+import { getTestJwtBackend, getTestModel1, getTestModel2, getTestSession1, getTestTicket, getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 

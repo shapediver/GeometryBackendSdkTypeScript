@@ -9,7 +9,7 @@ import { ShapeDiverSdkConfigType } from "@shapediver/sdk.geometry-api-sdk-core"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestJwtBackend, getTestModel1, getTestOrigin, getTestSession1, getTestTicket, getTestUrl } from "./utils"
+import { getTestJwtBackend, getTestModel1, getTestOrigin, getTestSession1, getTestTicket, getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 
