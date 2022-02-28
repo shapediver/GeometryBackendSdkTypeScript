@@ -153,4 +153,24 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/computations?" + queries.join("&")))
     }
 
+    /**
+     * Delete old output, export and texture components.
+     *
+     * @param modelId
+     * @param untilLastSeen - Delete all components that have been used last
+     * before this timestamp.
+     */
+    async enqueueCleanup (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup?untilLastSeen=" + untilLastSeen))
+    }
+
+    /**
+     * Get the status of all running model cleanup processes.
+     *
+     * @param modelId
+     */
+    async getCleanupStatus (modelId: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/status"))
+    }
+
 }

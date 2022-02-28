@@ -123,4 +123,13 @@ describe("model Api", () => {
         expect(typeof res.pagination!.next_offset).toBe("string")
     })
 
+    it.only("cleanup", async () => {
+        await sdk.model.enqueueCleanup(modelId, "2020")
+    })
+
+    it.only("cleanup status", async () => {
+        const res = await sdk.model.getCleanupStatus(modelId)
+        expect(Array.isArray(res.cleanup)).toBeTruthy()
+    })
+
 })
