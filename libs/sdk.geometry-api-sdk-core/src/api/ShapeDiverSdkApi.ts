@@ -23,6 +23,7 @@ export interface ShapeDiverSdkApiRequestOptions {
 export enum ShapeDiverSdkApiResponseType {
     JSON = "json",
     DATA = "arraybuffer",
+    TEXT = "text",
 }
 
 export class ShapeDiverSdkApi {
@@ -55,7 +56,7 @@ export class ShapeDiverSdkApi {
         }
 
         // Set data and convert depending on content-type
-        if (options.contentType === "application/json") {
+        if (options.contentType === "application/json" && data) {
             request.data = JSON.stringify(data)
         } else {
             request.data = data
@@ -65,7 +66,9 @@ export class ShapeDiverSdkApi {
     }
 
     private buildUrl (uri: string): string {
-        if (uri.startsWith("http")) {
+        if (typeof uri !== "string") {
+            throw new ShapeDiverError("No URL or URI was specified")
+        } else if (uri.startsWith("http")) {
             return uri
         } else if (uri.startsWith("/")) {
             return `${ this.config.baseUrl }/${ uri.substring(1) }`
@@ -131,7 +134,13 @@ export class ShapeDiverSdkApi {
             throw new ShapeDiverError("Received an unknown error object")
         }
 
-        return JSON.parse(stringData)
+        try {
+            // This should work for the ShapeDiver backend
+            return JSON.parse(stringData)
+        } catch (_) {
+            // This might be an XML when calling another system (e.g. S3)
+            return { message: stringData }
+        }
     }
 
     async get<T> (
@@ -141,7 +150,7 @@ export class ShapeDiverSdkApi {
             responseType: ShapeDiverSdkApiResponseType.JSON,
         },
     ): Promise<T> {
-        const config = this.buildRequestConfig(Method.GET, options, {})
+        const config = this.buildRequestConfig(Method.GET, options, undefined)
         try {
             const response = await axios(this.buildUrl(url), config)
             return response.data as T

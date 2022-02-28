@@ -24,14 +24,29 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     /**
      * Upload the given file to the specified URL.
      *
-     * @param href
+     * @param url
      * @param data
-     * @param type
+     * @param contentType
      */
-    async upload (href: string, data: ArrayBuffer, type: string): Promise<any> {
-        return await sendRequest(async () => this.api.put<any>(href, data, {
-            contentType: type,
+    async upload (url: string, data: ArrayBuffer, contentType: string): Promise<any> {
+        return await sendRequest(async () => this.api.put<any>(url, data, {
+            contentType: contentType,
             responseType: ShapeDiverSdkApiResponseType.JSON,
+            disableAuthorization: true,
+            disableCustomHeaders: true,
+        }))
+    }
+
+    /**
+     * Download from the given URL.
+     *
+     * @param url
+     * @param responseType
+     */
+    async download (url: string, responseType: ShapeDiverSdkApiResponseType): Promise<any> {
+        return await sendRequest(async () => this.api.get<any>(url, {
+            contentType: "application/json",
+            responseType: responseType,
             disableAuthorization: true,
             disableCustomHeaders: true,
         }))
