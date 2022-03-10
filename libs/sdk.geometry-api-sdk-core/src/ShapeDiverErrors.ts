@@ -20,10 +20,10 @@ export class ShapeDiverRequestError extends ShapeDiverError {
 export class ShapeDiverResponseError extends ShapeDiverError {
 
     constructor (
+        message: string,
         public readonly status: number,
         public readonly error: string,
         public readonly desc: string,
-        message: string,
         public readonly headers: { [key: string]: any },
     ) {
         super(message)

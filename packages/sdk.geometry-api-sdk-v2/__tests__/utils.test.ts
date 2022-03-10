@@ -30,14 +30,14 @@ describe("utils - sendRequest", () => {
     })
 
     test("managed error - 429; should throw", async () => {
-        await expect(async () => await sendRequest(call.bind(null, new ShapeDiverResponseError(429, "", "", "", { "retry-after": 1 }))))
+        await expect(async () => await sendRequest(call.bind(null, new ShapeDiverResponseError("", 429, "", "", { "retry-after": 1 }))))
             .rejects
             .toThrow()
         expect(spyCall).toBe(5)
     })
 
     test("managed error - 502; should throw", async () => {
-        await expect(async () => await sendRequest(call.bind(null, new ShapeDiverResponseError(502, "", "", "", { "retry-after": 1 }))))
+        await expect(async () => await sendRequest(call.bind(null, new ShapeDiverResponseError("", 502, "", "", { "retry-after": 1 }))))
             .rejects
             .toThrow()
         expect(spyCall).toBe(5)

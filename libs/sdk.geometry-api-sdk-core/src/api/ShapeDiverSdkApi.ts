@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios"
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
 import { SdkConfigInternal } from "../config/ShapeDiverSdkConfig"
 import { ShapeDiverError, ShapeDiverRequestError, ShapeDiverResponseError } from "../ShapeDiverErrors"
 
@@ -89,24 +89,25 @@ export class ShapeDiverSdkApi {
     private static async processError (error: any, responseType: ShapeDiverSdkApiResponseType): Promise<any> {
         if (error.response) {
             // Request was made and server responded with 4xx or 5xx
+            const resp = error.response as AxiosResponse
 
             let data
             if (responseType === ShapeDiverSdkApiResponseType.DATA) {
-                data = this.convertErrorResponseData(error.response.data)
+                data = this.convertErrorResponseData(resp.data)
             } else {
-                data = error.response.data
+                data = resp.data
             }
 
             throw new ShapeDiverResponseError(
-                error.response.status,
+                data.message || (data.desc ?? ""),
+                resp.status,
                 data.error ?? "",
                 data.desc ?? "",
-                data.message || (data.desc ?? ""),
-                error.response.headers,
+                resp.headers,
             )
         } else if (error.request) {
             // The request was made but no response was received
-            throw new ShapeDiverRequestError("The request was made but no response was received", error.request)
+            throw new ShapeDiverRequestError("Could not send request.", "The request was made but no response was received")
         } else {
             // Something happened in setting up the request that triggered an Error
             throw new ShapeDiverError(error.message)
