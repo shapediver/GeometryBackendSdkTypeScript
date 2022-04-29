@@ -1,10 +1,6 @@
-<p style="text-align: center">
+<p align="center">
   <a href="https://www.shapediver.com/">
-    <img
-      alt="ShapeDiver"
-      src="https://sduse1-assets.shapediver.com/production/assets/img/navbar_logo.png"
-      width="392"
-    />
+    <img src="https://sduse1-assets.shapediver.com/production/assets/img/navbar_logo.png" alt="ShapeDiver" width="392" />
   </a>
 </p>
 
