@@ -11,8 +11,8 @@ Using the **ShapeDiver Geometry Backend API** allows accessing ShapeDiver models
 The SDKs provide the functionality to communicate with a specific version of our Geometry Backend API, and they expose all TypeScript-types describing request and response objects.
 
 ## Authentication
-
-The authentication system for the Geometry Backend API is based on **ticket objects** and **JWT tokens**, which are handled by the [ShapeDiver Platform](https://www.shapediver.com/app/). You can obtain **tickets** and **JWT tokens** 
+The authentication system for the Geometry Backend API is based on **ticket objects** and **JWT tokens**, which are handled by the [ShapeDiver Platform](https://www.shapediver.com/app/).
+You can obtain **tickets** and **JWT tokens** 
  
 * using your account on the [ShapeDiver Platform](https://www.shapediver.com/app/) (tickets only)
 * or programmatically using the [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) (both tickets and JWT tokens).

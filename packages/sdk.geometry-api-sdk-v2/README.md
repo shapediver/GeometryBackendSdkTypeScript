@@ -10,11 +10,12 @@
 Using the **ShapeDiver Geometry Backend API** allows accessing ShapeDiver models without using the **ShapeDiver Viewer**.
 The SDKs provide the functionality to communicate with a specific version of our Geometry Backend API, and they expose all TypeScript-types describing request and response objects.
 
-This SDK provides functionality to communicate with the **ShapeDiver Geometry Backend API v2** and exposes all TypeScript-types describing request and response objects. See the [API documentation](https://sdeuc1.eu-central-1.shapediver.com/api/v2/docs/) for more details.
+This SDK provides functionality to communicate with the **ShapeDiver Geometry Backend API v2** and exposes all TypeScript-types describing request and response objects.
+See the [API documentation](https://sdeuc1.eu-central-1.shapediver.com/api/v2/docs/) for more details.
 
 ## Authentication
-
-The authentication system for the Geometry Backend API is based on **ticket objects** and **JWT tokens**, which are handled by the [ShapeDiver Platform](https://www.shapediver.com/app/). You can obtain **tickets** and **JWT tokens** by
+The authentication system for the Geometry Backend API is based on **ticket objects** and **JWT tokens**, which are handled by the [ShapeDiver Platform](https://www.shapediver.com/app/).
+You can obtain **tickets** and **JWT tokens** by
  
 * using your account on the [ShapeDiver Platform](https://www.shapediver.com/app/) (tickets only), or
 * you can obtain them programmatically using the [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) (both tickets and JWT tokens).
@@ -27,8 +28,8 @@ When obtaining a ticket for your model from the ShapeDiver Platform, please be a
 * _ticket for backend access_ in case you are accessing the Geometry Backend API from an arbitrary client application that is not a web browser.
 
 ## Base URL
-
-The base URL to use depends on which ShapeDiver Geometry Backend System your model was uploaded to. You can find the base URL in your model's dashboard on the ShapeDiver Platform, it is also called the _model view url_.
+The base URL to use depends on which ShapeDiver Geometry Backend System your model was uploaded to.
+You can find the base URL in your model's dashboard on the ShapeDiver Platform, it is also called the _model view url_.
 
 ## Usage - Ticket only
 
@@ -49,8 +50,8 @@ import { create } from "@shapediver/sdk.geometry-api-sdk-v2"
 ```
 
 ## Usage - Ticket and JWT
-
-It is possible to configure your ShapeDiver models such that JWT tokens are required to communicate with them, which provides a strong authorisation mechanism. In this case you will need to use the [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) to obtain a JWT token for your model on demand.
+It is possible to configure your ShapeDiver models such that JWT tokens are required to communicate with them, which provides a strong authorisation mechanism.
+In this case you will need to use the [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) to obtain a JWT token for your model on demand.
 
 ```
 import { create } from "@shapediver/sdk.geometry-api-sdk-v2"
@@ -70,10 +71,10 @@ import { create } from "@shapediver/sdk.geometry-api-sdk-v2"
 ```
 
 ## Examples
-
 Some practical use cases, we will regularly extend the list: 
 
-* [A Twitter Bot calling a ShapeDiver Model](https://github.com/shapediver/ServerlessExample-TwitterBot): This example shows how to run computations using a ShapeDiver Model which has image and data inputs and outputs. 
+* [A Twitter Bot calling a ShapeDiver Model](https://github.com/shapediver/ServerlessExample-TwitterBot):
+  This example shows how to run computations using a ShapeDiver Model which has image and data inputs and outputs.
 
 ## Support
 If you have questions, please use the [ShapeDiver Help Center](https://help.shapediver.com/).
