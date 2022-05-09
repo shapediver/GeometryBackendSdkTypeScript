@@ -123,11 +123,22 @@ describe("model Api", () => {
         expect(typeof res.pagination!.next_offset).toBe("string")
     })
 
-    it.only("cleanup", async () => {
-        await sdk.model.enqueueCleanup(modelId, "2020")
+    it("cleanup exports", async () => {
+        const res = await sdk.model.enqueueCleanupExports(modelId, "2025")
+        expect(res).toBeDefined()
     })
 
-    it.only("cleanup status", async () => {
+    it("cleanup outputs", async () => {
+        const res = await sdk.model.enqueueCleanupOutputs(modelId, "2025")
+        expect(res).toBeDefined()
+    })
+
+    it("cleanup textures", async () => {
+        const res = await sdk.model.enqueueCleanupTextures(modelId, "2025")
+        expect(res).toBeDefined()
+    })
+
+    it("cleanup status", async () => {
         const res = await sdk.model.getCleanupStatus(modelId)
         expect(Array.isArray(res.cleanup)).toBeTruthy()
     })

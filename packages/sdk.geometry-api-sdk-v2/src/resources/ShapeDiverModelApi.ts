@@ -154,14 +154,33 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
-     * Delete old output, export and texture components.
+     * Delete old export components.
      *
      * @param modelId
-     * @param untilLastSeen - Delete all components that have been used last
-     * before this timestamp.
+     * @param untilLastSeen - Delete all components that have been used last before this timestamp.
      */
-    async enqueueCleanup (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup?untilLastSeen=" + untilLastSeen))
+    async enqueueCleanupExports (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/export?untilLastSeen=" + untilLastSeen))
+    }
+
+    /**
+     * Delete old output components.
+     *
+     * @param modelId
+     * @param untilLastSeen - Delete all components that have been used last before this timestamp.
+     */
+    async enqueueCleanupOutputs (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/output?untilLastSeen=" + untilLastSeen))
+    }
+
+    /**
+     * Delete old texture components.
+     *
+     * @param modelId
+     * @param untilLastSeen - Delete all components that have been used last before this timestamp.
+     */
+    async enqueueCleanupTextures (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/texture?untilLastSeen=" + untilLastSeen))
     }
 
     /**
