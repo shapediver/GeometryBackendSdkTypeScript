@@ -117,7 +117,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
         dto: ShapeDiverResponseDto,
         maxWaitMsec = -1,
     ): Promise<ShapeDiverResponseDto> {
-        if (!dto.outputs) throw new ShapeDiverError("The given DTO does not contain any outputs")
+        if (!dto.outputs) return dto;
 
         // Build new cache request
         const outputVersions: ShapeDiverRequestCache = {}
