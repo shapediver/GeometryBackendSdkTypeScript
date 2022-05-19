@@ -11,7 +11,7 @@ enum Method {
 }
 
 export interface ShapeDiverSdkApiRequestOptions {
-    contentType: string
+    contentType?: string
 
     responseType: ShapeDiverSdkApiResponseType
 
@@ -45,7 +45,6 @@ export class ShapeDiverSdkApi {
 
         // Process HTTP headers
         if (!options.disableCustomHeaders) request.headers = { ...this.config.headers }
-        request.headers!["Content-Type"] = options.contentType
 
         // Process HTTP authorization header
         if (options.disableAuthorization) {
@@ -56,10 +55,14 @@ export class ShapeDiverSdkApi {
         }
 
         // Set data and convert depending on content-type
-        if (options.contentType === "application/json" && data) {
-            request.data = JSON.stringify(data)
-        } else {
-            request.data = data
+        if (options.contentType) {
+            request.headers!["Content-Type"] = options.contentType
+
+            if (options.contentType === "application/json") {
+                request.data = JSON.stringify(data ?? {})
+            } else {
+                request.data = data
+            }
         }
 
         return request

@@ -28,7 +28,7 @@ export class ShapeDiverFileApi extends BaseResourceApi {
     async get (sessionId: string, paramId: string, fileId: string): Promise<ArrayBuffer> {
         return await sendRequest(async () => this.api.get<ArrayBuffer>(
             `${ this.buildSessionUri(sessionId) }/file/${ paramId }/${ fileId }`,
-            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
+            { responseType: ShapeDiverSdkApiResponseType.DATA },
         ))
     }
 
