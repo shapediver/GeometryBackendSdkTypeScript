@@ -21,7 +21,9 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param body
      */
     async ticket (modelId: string, body: ShapeDiverRequestTicket): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/ticket", body))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/ticket", body))[1],
+        )
     }
 
     /**
@@ -31,7 +33,9 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param request - Optional customization or export request.
      */
     async init (ticket: string, request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket), request))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket), request))[1],
+        )
     }
 
     /**
@@ -40,7 +44,9 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param sessionId
      */
     async default (sessionId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/default"))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/default"))[1],
+        )
     }
 
     /**
@@ -49,7 +55,9 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param sessionId
      */
     async close (sessionId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/close"))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/close"))[1],
+        )
     }
 
 }

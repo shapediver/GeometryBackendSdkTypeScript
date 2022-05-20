@@ -20,7 +20,9 @@ export class ShapeDiverOutputApi extends BaseResourceApi {
      * @param body
      */
     async customize (sessionId: string, body: ShapeDiverRequestCustomization): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.put<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/output", body))
+        return await sendRequest(async () =>
+            (await this.api.put<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/output", body))[1],
+        )
     }
 
     /**
@@ -30,7 +32,9 @@ export class ShapeDiverOutputApi extends BaseResourceApi {
      * @param body
      */
     async getCache (sessionId: string, body: ShapeDiverRequestCache): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.put<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/output/cache", body))
+        return await sendRequest(async () =>
+            (await this.api.put<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/output/cache", body))[1],
+        )
     }
 
     /**
@@ -40,7 +44,9 @@ export class ShapeDiverOutputApi extends BaseResourceApi {
      * @param body
      */
     async updateDefinitions (modelId: string, body: ShapeDiverRequestOutputDefinition): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/output", body))
+        return await sendRequest(async () =>
+            (await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/output", body))[1],
+        )
     }
 
 }

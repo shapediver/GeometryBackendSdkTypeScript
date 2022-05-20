@@ -14,7 +14,9 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
      * @param body
      */
     async modelSessionStatistics (body: ShapeDiverRequestAnalyticsModel): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.put<ShapeDiverResponseDto>(this.buildAnalyticsUri() + "/session/model", body))
+        return await sendRequest(async () =>
+            (await this.api.put<ShapeDiverResponseDto>(this.buildAnalyticsUri() + "/session/model", body))[1],
+        )
     }
 
 }

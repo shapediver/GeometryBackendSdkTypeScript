@@ -153,11 +153,11 @@ export class ShapeDiverSdkApi {
             contentType: "application/json",
             responseType: ShapeDiverSdkApiResponseType.JSON,
         },
-    ): Promise<T> {
+    ): Promise<[ Record<string, any>, T ]> {
         const config = this.buildRequestConfig(Method.GET, options, undefined)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return response.data as T
+            return [ response.headers, response.data as T ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -170,11 +170,11 @@ export class ShapeDiverSdkApi {
             contentType: "application/json",
             responseType: ShapeDiverSdkApiResponseType.JSON,
         },
-    ): Promise<T> {
+    ): Promise<[ Record<string, any>, T ]> {
         const config = this.buildRequestConfig(Method.POST, options, data)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return response.data as T
+            return [ response.headers, response.data as T ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -187,11 +187,11 @@ export class ShapeDiverSdkApi {
             contentType: "application/json",
             responseType: ShapeDiverSdkApiResponseType.JSON,
         },
-    ): Promise<T> {
+    ): Promise<[ Record<string, any>, T ]> {
         const config = this.buildRequestConfig(Method.PUT, options, data)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return response.data as T
+            return [ response.headers, response.data as T ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -204,11 +204,11 @@ export class ShapeDiverSdkApi {
             contentType: "application/json",
             responseType: ShapeDiverSdkApiResponseType.JSON,
         },
-    ): Promise<T> {
+    ): Promise<[ Record<string, any>, T ]> {
         const config = this.buildRequestConfig(Method.PATCH, options, data)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return response.data as T
+            return [ response.headers, response.data as T ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -220,11 +220,11 @@ export class ShapeDiverSdkApi {
             contentType: "application/json",
             responseType: ShapeDiverSdkApiResponseType.JSON,
         },
-    ): Promise<T> {
+    ): Promise<[ Record<string, any>, T ]> {
         const config = this.buildRequestConfig(Method.DELETE, options, {})
         try {
             const response = await axios(this.buildUrl(url), config)
-            return response.data as T
+            return [ response.headers, response.data as T ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }

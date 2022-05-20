@@ -23,7 +23,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async get (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId)))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId)))[1],
+        )
     }
 
     /**
@@ -32,7 +34,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async create (body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.commonPath, body))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.commonPath, body))[1],
+        )
     }
 
     /**
@@ -42,7 +46,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async update (modelId: string, body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.put<ShapeDiverResponseDto>(this.buildModelUri(modelId), body))
+        return await sendRequest(async () =>
+            (await this.api.put<ShapeDiverResponseDto>(this.buildModelUri(modelId), body))[1],
+        )
     }
 
     /**
@@ -51,7 +57,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async delete (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.delete<ShapeDiverResponseDto>(this.buildModelUri(modelId)))
+        return await sendRequest(async () =>
+            (await this.api.delete<ShapeDiverResponseDto>(this.buildModelUri(modelId)))[1],
+        )
     }
 
     /**
@@ -60,7 +68,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async getConfig (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config"))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config"))[1],
+        )
     }
 
     /**
@@ -70,7 +80,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async createConfig (modelId: string, body: ShapeDiverRequestConfigure): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config", body))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config", body))[1],
+        )
     }
 
     /**
@@ -80,7 +92,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async updateConfig (modelId: string, body: ShapeDiverRequestConfigure): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config", body))
+        return await sendRequest(async () =>
+            (await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/config", body))[1],
+        )
     }
 
     /**
@@ -89,10 +103,12 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async getFile (modelId: string): Promise<ArrayBuffer> {
-        return await sendRequest(async () => this.api.get<ArrayBuffer>(
-            this.buildModelUri(modelId) + "/file/download",
-            { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
-        ))
+        return await sendRequest(async () =>
+            (await this.api.get<ArrayBuffer>(
+                this.buildModelUri(modelId) + "/file/download",
+                { contentType: "application/json", responseType: ShapeDiverSdkApiResponseType.DATA },
+            ))[1],
+        )
     }
 
     /**
@@ -102,7 +118,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async setDefaultParams (modelId: string, body: ShapeDiverRequestCustomization): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter/defval", body))
+        return await sendRequest(async () =>
+            (await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter/defval", body))[1],
+        )
     }
 
     /**
@@ -112,7 +130,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param body
      */
     async updateParameterDefinitions (modelId: string, body: ShapeDiverRequestParameterDefinition): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter", body))
+        return await sendRequest(async () =>
+            (await this.api.patch<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/parameter", body))[1],
+        )
     }
 
     /**
@@ -150,7 +170,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         if (type !== undefined) queries.push("type=" + type)
         if (offset !== undefined) queries.push("offset=" + offset)
 
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/computations?" + queries.join("&")))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/computations?" + queries.join("&")))[1],
+        )
     }
 
     /**
@@ -160,7 +182,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param untilLastSeen - Delete all components that have been used last before this timestamp.
      */
     async enqueueCleanupExports (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/export?untilLastSeen=" + untilLastSeen))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/export?untilLastSeen=" + untilLastSeen))[1],
+        )
     }
 
     /**
@@ -170,7 +194,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param untilLastSeen - Delete all components that have been used last before this timestamp.
      */
     async enqueueCleanupOutputs (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/output?untilLastSeen=" + untilLastSeen))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/output?untilLastSeen=" + untilLastSeen))[1],
+        )
     }
 
     /**
@@ -180,7 +206,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param untilLastSeen - Delete all components that have been used last before this timestamp.
      */
     async enqueueCleanupTextures (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/texture?untilLastSeen=" + untilLastSeen))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/texture?untilLastSeen=" + untilLastSeen))[1],
+        )
     }
 
     /**
@@ -189,7 +217,9 @@ export class ShapeDiverModelApi extends BaseResourceApi {
      * @param modelId
      */
     async getCleanupStatus (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/status"))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/cleanup/status"))[1],
+        )
     }
 
 }

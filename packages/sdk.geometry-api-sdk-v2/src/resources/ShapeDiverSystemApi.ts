@@ -19,7 +19,9 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
      * @param body
      */
     async log (sessionId: string, body: ShapeDiverRequestLogMessage): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/log/message", body))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/log/message", body))[1],
+        )
     }
 
     /**
@@ -30,7 +32,9 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
      * @param modelId
      */
     async pruneModel (modelId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.delete<ShapeDiverResponseDto>(`${ this.buildSystemUri() }/model/${ modelId }`))
+        return await sendRequest(async () =>
+            (await this.api.delete<ShapeDiverResponseDto>(`${ this.buildSystemUri() }/model/${ modelId }`))[1],
+        )
     }
 
     /**
@@ -39,7 +43,9 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
      * @param ticket
      */
     async decryptTicket (ticket: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(this.buildTicketUri(ticket)))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildTicketUri(ticket)))[1],
+        )
     }
 
     /**
@@ -48,14 +54,18 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
      * @param body
      */
     async authGroup (body: ShapeDiverRequestAuthorizationGroup): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildAuthGroupUri(), body))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildAuthGroupUri(), body))[1],
+        )
     }
 
     /**
      * Returns system information about the Geometry Minions.
      */
     async getMinionInfo (): Promise<ShapeDiverResponseDto> {
-        return await this.api.get<ShapeDiverResponseDto>(`${ this.buildSystemUri() }/minions/info`)
+        return sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(`${ this.buildSystemUri() }/minions/info`))[1],
+        )
     }
 
 }

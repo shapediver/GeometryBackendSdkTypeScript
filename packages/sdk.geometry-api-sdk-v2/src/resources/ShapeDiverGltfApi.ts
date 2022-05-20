@@ -22,11 +22,13 @@ export class ShapeDiverGltfApi extends BaseResourceApi {
         type: string,
         queryConvert: ShapeDiverRequestGltfUploadQueryConversion = ShapeDiverRequestGltfUploadQueryConversion.NONE,
     ): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(
-            `${ this.buildSessionUri(sessionId) }/gltf?conversion=${ queryConvert }`,
-            body,
-            { contentType: type, responseType: ShapeDiverSdkApiResponseType.JSON },
-        ))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(
+                `${ this.buildSessionUri(sessionId) }/gltf?conversion=${ queryConvert }`,
+                body,
+                { contentType: type, responseType: ShapeDiverSdkApiResponseType.JSON },
+            ))[1],
+        )
     }
 
 }

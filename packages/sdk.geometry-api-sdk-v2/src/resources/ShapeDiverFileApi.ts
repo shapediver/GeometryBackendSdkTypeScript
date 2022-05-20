@@ -15,7 +15,9 @@ export class ShapeDiverFileApi extends BaseResourceApi {
      * @param paramId
      */
     async list (sessionId: string, paramId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.get<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/file/${ paramId }/list`))
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/file/${ paramId }/list`))[1],
+        )
     }
 
     /**
@@ -26,10 +28,12 @@ export class ShapeDiverFileApi extends BaseResourceApi {
      * @param fileId
      */
     async get (sessionId: string, paramId: string, fileId: string): Promise<ArrayBuffer> {
-        return await sendRequest(async () => this.api.get<ArrayBuffer>(
-            `${ this.buildSessionUri(sessionId) }/file/${ paramId }/${ fileId }`,
-            { responseType: ShapeDiverSdkApiResponseType.DATA },
-        ))
+        return await sendRequest(async () =>
+            (await this.api.get<ArrayBuffer>(
+                `${ this.buildSessionUri(sessionId) }/file/${ paramId }/${ fileId }`,
+                { responseType: ShapeDiverSdkApiResponseType.DATA },
+            ))[1],
+        )
     }
 
     /**
@@ -40,7 +44,9 @@ export class ShapeDiverFileApi extends BaseResourceApi {
      * @param fileId
      */
     async delete (sessionId: string, paramId: string, fileId: string): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.delete<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/file/${ paramId }/${ fileId }`))
+        return await sendRequest(async () =>
+            (await this.api.delete<ShapeDiverResponseDto>(`${ this.buildSessionUri(sessionId) }/file/${ paramId }/${ fileId }`))[1],
+        )
     }
 
     /**
@@ -50,7 +56,9 @@ export class ShapeDiverFileApi extends BaseResourceApi {
      * @param body
      */
     async requestUpload (sessionId: string, body: ShapeDiverRequestFileUpload): Promise<ShapeDiverResponseDto> {
-        return await sendRequest(async () => this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/file/upload", body))
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/file/upload", body))[1],
+        )
     }
 
 }
