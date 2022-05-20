@@ -40,4 +40,10 @@ describe.skip("asset Api", () => {
         expect(res).toBeDefined()
     })
 
+    it("download image", async () => {
+        const [ data, content ] = await sdk.asset.downloadImage(sessionId, "https://sduse1-assets.shapediver.com/production/assets/img/navbar_logo.png")
+        expect(data).toBeDefined()
+        expect(content).toBeDefined()
+    })
+
 })

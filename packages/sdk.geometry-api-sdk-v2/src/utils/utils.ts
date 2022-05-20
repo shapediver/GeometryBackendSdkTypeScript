@@ -47,3 +47,12 @@ export async function sendRequest<T> (call: () => Promise<T>): Promise<T> {
 export function sleep (ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
+
+/** Encode the given string to base64 */
+export function encodeBase64 (str: string): string {
+    try {
+        return btoa(str)
+    } catch (err) {
+        return Buffer.from(str).toString("base64")
+    }
+}

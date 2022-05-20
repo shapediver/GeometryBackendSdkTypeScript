@@ -1,5 +1,5 @@
 import { BaseResourceApi, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "@shapediver/sdk.geometry-api-sdk-core"
-import { sendRequest } from "../utils/utils"
+import { encodeBase64, sendRequest } from "../utils/utils"
 
 export class ShapeDiverAssetApi extends BaseResourceApi {
 
@@ -80,6 +80,24 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
                 { responseType: ShapeDiverSdkApiResponseType.DATA },
             ))[1],
         )
+    }
+
+    /**
+     * Download an image.
+     *
+     * @param sessionId
+     * @param url - The URL of the image that should be downloaded.
+     * @returns [ <content data>, <content type> ]
+     */
+    async downloadImage (sessionId: string, url: string): Promise<[ ArrayBuffer, string ]> {
+        return await sendRequest(async () => {
+            const [ header, data ] = await this.api.get<ArrayBuffer>(
+                `${ this.buildSessionUri(sessionId) }/image?url=${ encodeBase64(url) }`,
+                { responseType: ShapeDiverSdkApiResponseType.DATA },
+            )
+            const contentType = header["Content-Type"] ?? header["content-type"]
+            return [ data, contentType ]
+        })
     }
 
 }
