@@ -102,7 +102,7 @@ export class ShapeDiverSdkApi {
             }
 
             throw new ShapeDiverResponseError(
-                data.message || (data.desc ?? ""),
+                data.message || (data.desc || (data.error ?? "")),
                 resp.status,
                 data.error ?? "",
                 data.desc ?? "",
