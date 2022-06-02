@@ -87,7 +87,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      *
      * @param sessionId
      * @param url - The URL of the image that should be downloaded.
-     * @returns [ <content data>, <content type> ]
+     * @returns Array of size 2: [0] = content data, [1] = content type.
      */
     async downloadImage (sessionId: string, url: string): Promise<[ ArrayBuffer, string ]> {
         return await sendRequest(async () => {
