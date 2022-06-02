@@ -28,7 +28,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param data
      * @param contentType
      */
-    async upload (url: string, data: ArrayBuffer, contentType: string): Promise<any> {
+    async upload (url: string, data: ArrayBuffer | Record<string, any> | string, contentType: string): Promise<any> {
         return await sendRequest(async () => this.api.put<any>(url, data, {
             contentType: contentType,
             responseType: ShapeDiverSdkApiResponseType.JSON,
@@ -117,7 +117,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
         dto: ShapeDiverResponseDto,
         maxWaitMsec = -1,
     ): Promise<ShapeDiverResponseDto> {
-        if (!dto.outputs) return dto;
+        if (!dto.outputs) return dto
 
         // Build new cache request
         const outputVersions: ShapeDiverRequestCache = {}
