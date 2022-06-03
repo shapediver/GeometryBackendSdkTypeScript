@@ -24,9 +24,9 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     /**
      * Upload the given file to the specified URL.
      *
-     * @param url
-     * @param data
-     * @param contentType
+     * @param url - The target URL of the upload request.
+     * @param data - The data that should be uploaded.
+     * @param contentType - Indicate the original media type of the resource.
      */
     async upload (url: string, data: ArrayBuffer | Record<string, any> | string, contentType: string): Promise<any> {
         return await sendRequest(async () => this.api.put<any>(url, data, {
@@ -40,8 +40,8 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     /**
      * Download from the given URL.
      *
-     * @param url
-     * @param responseType
+     * @param url - The target URL of the download request.
+     * @param responseType - Indicates the type of data that the server should respond with if possible.
      */
     async download (url: string, responseType: ShapeDiverSdkApiResponseType): Promise<any> {
         return await sendRequest(async () => this.api.get<any>(url, {
