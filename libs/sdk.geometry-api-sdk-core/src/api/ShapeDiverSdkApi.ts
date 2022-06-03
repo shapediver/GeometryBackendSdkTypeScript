@@ -57,12 +57,7 @@ export class ShapeDiverSdkApi {
         // Set data and convert depending on content-type
         if (options.contentType) {
             request.headers!["Content-Type"] = options.contentType
-
-            if (options.contentType === "application/json" && typeof data === "object" && !(data instanceof ArrayBuffer)) {
-                request.data = JSON.stringify(data)
-            } else {
-                request.data = data
-            }
+            request.data = data
         }
 
         return request
