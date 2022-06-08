@@ -25,6 +25,11 @@ describe.skip("asset Api", () => {
         expect(res).toBeDefined()
     })
 
+    it("get sdTF JSON content", async () => {
+        const res = await sdk.asset.getSdtfJsonContent(sessionId, "")
+        expect(res).toBeDefined()
+    })
+
     it("get texture", async () => {
         const res = await sdk.asset.getTexture(sessionId, "")
         expect(res).toBeDefined()

@@ -18,6 +18,8 @@ export interface ShapeDiverSdkApiRequestOptions {
     disableAuthorization?: boolean
 
     disableCustomHeaders?: boolean
+
+    accept?: string
 }
 
 export enum ShapeDiverSdkApiResponseType {
@@ -58,6 +60,11 @@ export class ShapeDiverSdkApi {
         if (options.contentType) {
             request.headers!["Content-Type"] = options.contentType
             request.data = data
+        }
+
+        // Set the HTTP Accept header if specified
+        if (options.accept) {
+            request.headers!["Accept"] = options.accept
         }
 
         return request

@@ -38,6 +38,24 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     }
 
     /**
+     * Downloads the JSON content part of a sdTF output.
+     *
+     * @param sessionId
+     * @param assetData
+     */
+    async getSdtfJsonContent (sessionId: string, assetData: string): Promise<Record<string, any>> {
+        return await sendRequest(async () =>
+            (await this.api.get<ArrayBuffer>(
+                `${ this.buildSessionUri(sessionId) }/output/${ assetData }`,
+                {
+                    responseType: ShapeDiverSdkApiResponseType.JSON,
+                    accept: "model/vnd.sdtf+json",
+                },
+            ))[1],
+        )
+    }
+
+    /**
      * Download a texture file.
      *
      * @param sessionId
