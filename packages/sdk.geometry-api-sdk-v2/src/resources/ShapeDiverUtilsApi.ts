@@ -43,12 +43,17 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param url - The target URL of the download request.
      * @param responseType - Indicates the type of data that the server should respond with if possible.
      */
-    async download (url: string, responseType: ShapeDiverSdkApiResponseType): Promise<any> {
+    async download (
+        url: string, 
+        responseType: ShapeDiverSdkApiResponseType,
+        disableAuthorization = true,
+        disableCustomHeaders = true
+    ): Promise<any> {
         return await sendRequest(async () => this.api.get<any>(url, {
             contentType: "application/json",
             responseType: responseType,
-            disableAuthorization: true,
-            disableCustomHeaders: true,
+            disableAuthorization: disableAuthorization,
+            disableCustomHeaders: disableCustomHeaders,
         }))
     }
 
