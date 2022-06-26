@@ -13,13 +13,15 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param sessionId
      * @param assetData
      */
-    async getExport (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await sendRequest(async () =>
-            (await this.api.get<ArrayBuffer>(
+    async getExport (sessionId: string, assetData: string): Promise<[ ArrayBuffer, string ]> {
+        return await sendRequest(async () => {
+            const [ header, data ] = await this.api.get<ArrayBuffer>(
                 `${ this.buildSessionUri(sessionId) }/export/${ assetData }`,
                 { responseType: ShapeDiverSdkApiResponseType.DATA },
-            ))[1],
-        )
+            )
+            const contentType = header["Content-Type"] ?? header["content-type"]
+            return [ data, contentType ]
+        })
     }
 
     /**
@@ -28,13 +30,15 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param sessionId
      * @param assetData
      */
-    async getOutput (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await sendRequest(async () =>
-            (await this.api.get<ArrayBuffer>(
+    async getOutput (sessionId: string, assetData: string): Promise<[ ArrayBuffer, string ]> {
+        return await sendRequest(async () => {
+            const [ header, data ] = await this.api.get<ArrayBuffer>(
                 `${ this.buildSessionUri(sessionId) }/output/${ assetData }`,
                 { responseType: ShapeDiverSdkApiResponseType.DATA },
-            ))[1],
-        )
+            )
+            const contentType = header["Content-Type"] ?? header["content-type"]
+            return [ data, contentType ]
+        })
     }
 
     /**
@@ -61,13 +65,15 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @param sessionId
      * @param assetData
      */
-    async getTexture (sessionId: string, assetData: string): Promise<ArrayBuffer> {
-        return await sendRequest(async () =>
-            (await this.api.get<ArrayBuffer>(
+    async getTexture (sessionId: string, assetData: string): Promise<[ ArrayBuffer, string ]> {
+        return await sendRequest(async () => {
+            const [ header, data ] = await this.api.get<ArrayBuffer>(
                 `${ this.buildSessionUri(sessionId) }/texture/${ assetData }`,
                 { responseType: ShapeDiverSdkApiResponseType.DATA },
-            ))[1],
-        )
+            )
+            const contentType = header["Content-Type"] ?? header["content-type"]
+            return [ data, contentType ]
+        })
     }
 
     /**
