@@ -1,5 +1,18 @@
-import { BaseResourceApi, ShapeDiverSdkApi, ShapeDiverSdkApiResponseType } from "@shapediver/sdk.geometry-api-sdk-core"
+import {
+    BaseResourceApi,
+    ShapeDiverError,
+    ShapeDiverSdkApi,
+    ShapeDiverSdkApiResponseType,
+} from "@shapediver/sdk.geometry-api-sdk-core"
 import { encodeBase64, sendRequest } from "../utils/utils"
+
+const apiAssetExportUri = /.+\/session\/.+\/export\/.+/
+const apiAssetOutputUri = /.+\/session\/.+\/output\/.+/
+const apiAssetTextureUri = /.+\/session\/.+\/texture\/.+/
+
+const cdnAssetExportUri = /.+\/cdn-asset-exports\/.+/
+const cdnAssetOutputUri = /.+\/cdn-asset-outputs\/.+/
+const cdnAssetTextureUri = /.+\/cdn-asset-textures\/.+/
 
 export class ShapeDiverAssetApi extends BaseResourceApi {
 
@@ -121,6 +134,38 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
             )
             const contentType = header["Content-Type"] ?? header["content-type"]
             return [ data, contentType ]
+        })
+    }
+
+    /**
+     * Fetches a ShapeDiver asset of the following types:
+     *  * Output
+     *  * Export
+     *  * Texture
+     *
+     * This function works similar to {@link getOutput}, {@link getExport} and {@link getTexture}, but does not require
+     * extracted _session ID_ and _asset data_ parameters.
+     *
+     * @param url - The URL of the asset that should be fetched.
+     * @returns Array of size 3: [0] = content data, [1] = content type, [2] = asset type.
+     * @throws {@link ShapeDiverError} when the given URL is not a valid ShapeDiver asset URL.
+     */
+    async getAsset (url: string): Promise<[ ArrayBuffer, string, "output" | "export" | "texture" ]> {
+        let type: "output" | "export" | "texture"
+
+        // Check if the given URL is a valid API or CDN asset URL
+        if (apiAssetExportUri.test(url) || cdnAssetExportUri.test(url)) type = "export"
+        else if (apiAssetOutputUri.test(url) || cdnAssetOutputUri.test(url)) type = "output"
+        else if (apiAssetTextureUri.test(url) || cdnAssetTextureUri.test(url)) type = "texture"
+        else throw new ShapeDiverError("Cannot fetch asset: Invalid URL (only ShapeDiver asset URLs are allowed).")
+
+        return await sendRequest(async () => {
+            const [ header, data ] = await this.api.get<ArrayBuffer>(
+                url,
+                { responseType: ShapeDiverSdkApiResponseType.DATA },
+            )
+            const contentType = header["Content-Type"] ?? header["content-type"]
+            return [ data, contentType, type ]
         })
     }
 

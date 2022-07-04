@@ -51,4 +51,8 @@ describe.skip("asset Api", () => {
         expect(content).toBeDefined()
     })
 
+    it.skip("getAsset", async () => {
+        await sdk.asset.getAsset("")    // TODO implement
+    })
+
 })
