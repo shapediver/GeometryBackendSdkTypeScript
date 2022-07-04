@@ -127,9 +127,19 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
      * @returns Array of size 2: [0] = content data, [1] = content type.
      */
     async downloadImage (sessionId: string, url: string): Promise<[ ArrayBuffer, string ]> {
+        let targetUrl: string
+
+        if (apiAssetTextureUri.test(url) || cdnAssetTextureUri.test(url)) {
+            // Call ShapeDiver texture-asset URLs directly
+            targetUrl = url
+        } else {
+            // All other source URLs are called via the download-image endpoint
+            targetUrl = `${ this.buildSessionUri(sessionId) }/image?url=${ encodeBase64(url) }`
+        }
+
         return await sendRequest(async () => {
             const [ header, data ] = await this.api.get<ArrayBuffer>(
-                `${ this.buildSessionUri(sessionId) }/image?url=${ encodeBase64(url) }`,
+                targetUrl,
                 { responseType: ShapeDiverSdkApiResponseType.DATA },
             )
             const contentType = header["Content-Type"] ?? header["content-type"]

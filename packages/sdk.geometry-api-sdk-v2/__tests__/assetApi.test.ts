@@ -46,6 +46,7 @@ describe.skip("asset Api", () => {
     })
 
     it("download image", async () => {
+        // TODO extend ShapeDiver texture-asset URL
         const [ data, content ] = await sdk.asset.downloadImage(sessionId, "https://sduse1-assets.shapediver.com/production/assets/img/navbar_logo.png")
         expect(data).toBeDefined()
         expect(content).toBeDefined()
