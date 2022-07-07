@@ -10,6 +10,7 @@ const apiAssetExportUri = /.+\/session\/.+\/export\/.+/
 const apiAssetOutputUri = /.+\/session\/.+\/output\/.+/
 const apiAssetTextureUri = /.+\/session\/.+\/texture\/.+/
 
+const cdnAssetUri = /.+\/cdn-asset-(exports|outputs|textures)\/.+/
 const cdnAssetExportUri = /.+\/cdn-asset-exports\/.+/
 const cdnAssetOutputUri = /.+\/cdn-asset-outputs\/.+/
 const cdnAssetTextureUri = /.+\/cdn-asset-textures\/.+/
@@ -140,7 +141,10 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
         return await sendRequest(async () => {
             const [ header, data ] = await this.api.get<ArrayBuffer>(
                 targetUrl,
-                { responseType: ShapeDiverSdkApiResponseType.DATA },
+                {
+                    responseType: ShapeDiverSdkApiResponseType.DATA,
+                    disableAuthorization: cdnAssetUri.test(url),    // disable for CDN URLs
+                },
             )
             const contentType = header["Content-Type"] ?? header["content-type"]
             return [ data, contentType ]
@@ -172,7 +176,10 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
         return await sendRequest(async () => {
             const [ header, data ] = await this.api.get<ArrayBuffer>(
                 url,
-                { responseType: ShapeDiverSdkApiResponseType.DATA },
+                {
+                    responseType: ShapeDiverSdkApiResponseType.DATA,
+                    disableAuthorization: cdnAssetUri.test(url),    // disable for CDN URLs
+                },
             )
             const contentType = header["Content-Type"] ?? header["content-type"]
             return [ data, contentType, type ]
