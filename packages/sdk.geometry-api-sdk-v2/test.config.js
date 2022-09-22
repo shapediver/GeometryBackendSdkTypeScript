@@ -14,3 +14,4 @@ global["sdModel1"] = "0f563296-4e61-4c53-91e1-0526d78723b9"
 global["sdModel2"] = "13e899fa-75d0-45d8-9335-d22d8288437c"
 global["sdSession1"] = "" // Session of model 1
 global["sdSession2"] = "" // Session of model 2
+global["sdArSceneId"] = ""

@@ -19,6 +19,15 @@ export abstract class BaseResourceApi {
     }
 
     /**
+     * Create the URI for AR-scene-based controller endpoints.
+     *
+     * @protected
+     */
+    protected buildArSceneUri (): string {
+        return `${ this.commonPath }/ar-scene`
+    }
+
+    /**
      * Create the URI for auth_group-based controller endpoints.
      *
      * @protected

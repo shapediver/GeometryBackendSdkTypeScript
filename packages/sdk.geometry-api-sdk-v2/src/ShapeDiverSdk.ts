@@ -1,5 +1,6 @@
 import { BaseShapeDiverSdk, ShapeDiverSdkConfigType } from "@shapediver/sdk.geometry-api-sdk-core"
 import { ShapeDiverAnalyticsApi } from "./resources/ShapeDiverAnalyticsApi"
+import { ShapeDiverArSceneApi } from "./resources/ShapeDiverArSceneApi"
 import { ShapeDiverAssetApi } from "./resources/ShapeDiverAssetApi"
 import { ShapeDiverExportApi } from "./resources/ShapeDiverExportApi"
 import { ShapeDiverFileApi } from "./resources/ShapeDiverFileApi"
@@ -18,6 +19,7 @@ export function create (baseUrl: string, jwt?: string): ShapeDiverSdk {
 export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
     private readonly _analytics: ShapeDiverAnalyticsApi
+    private readonly _arScene: ShapeDiverArSceneApi
     private readonly _asset: ShapeDiverAssetApi
     private readonly _export: ShapeDiverExportApi
     private readonly _file: ShapeDiverFileApi
@@ -40,6 +42,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
         if (jwt) this.setConfigurationValue(ShapeDiverSdkConfigType.JWT_TOKEN, jwt)
 
         this._analytics = new ShapeDiverAnalyticsApi(this.sdkApi)
+        this._arScene = new ShapeDiverArSceneApi(this.sdkApi)
         this._asset = new ShapeDiverAssetApi(this.sdkApi)
         this._export = new ShapeDiverExportApi(this.sdkApi)
         this._file = new ShapeDiverFileApi(this.sdkApi)
@@ -54,6 +57,10 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
     get analytics (): ShapeDiverAnalyticsApi {
         return this._analytics
+    }
+
+    get arScene (): ShapeDiverArSceneApi {
+        return this._arScene
     }
 
     get asset (): ShapeDiverAssetApi {

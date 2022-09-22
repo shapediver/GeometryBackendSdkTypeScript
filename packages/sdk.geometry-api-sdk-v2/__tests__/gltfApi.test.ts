@@ -31,4 +31,12 @@ describe("gltf Api", () => {
         expect(res?.gltf?.href).toBeDefined()
     })
 
+    it("upload and create AR scene", async () => {
+        const data = await fs.readFileSync("test_data/Box.glb")
+        const res = await sdk.gltf.upload(sessionId, data, "model/gltf-binary", ShapeDiverRequestGltfUploadQueryConversion.SCENE)
+        expect(res).toBeDefined()
+        expect(res?.gltf?.href).toBeDefined()
+        expect(res?.gltf?.sceneId).toBeDefined()
+    })
+
 })
