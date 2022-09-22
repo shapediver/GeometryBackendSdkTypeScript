@@ -59,7 +59,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param sessionId
      * @param body
      * @param maxWaitMsec - Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
-     *                      A ShapeDiverError will be thrown in case a maximum duration has been specified and is exceeded.
+     * @throws {@link ShapeDiverError} in case a maximum duration has been specified and is exceeded.
      * @returns
      */
     async submitAndWaitForCustomization (
@@ -85,7 +85,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param sessionId
      * @param body
      * @param maxWaitMsec - Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit. 
-     *                      A ShapeDiverError will be thrown in case a maximum duration has been specified and is exceeded.
+     * @throws {@link ShapeDiverError} in case a maximum duration has been specified and is exceeded.
      * @returns
      */
     async submitAndWaitForExport (
