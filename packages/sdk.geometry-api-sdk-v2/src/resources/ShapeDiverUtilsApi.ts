@@ -42,8 +42,9 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      *
      * @param url - The target URL of the download request.
      * @param responseType - Indicates the type of data that the server should respond with if possible.
+     * @returns Array of size 2: [0] = response headers, [1] = response data
      */
-    async download (url: string, responseType: ShapeDiverSdkApiResponseType): Promise<any> {
+    async download (url: string, responseType: ShapeDiverSdkApiResponseType): Promise<[ Record<string, any>, any ]> {
         return await sendRequest(async () => this.api.get<any>(url, {
             contentType: "application/json",
             responseType: responseType,
@@ -84,7 +85,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param sdk
      * @param sessionId
      * @param body
-     * @param maxWaitMsec - Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit. 
+     * @param maxWaitMsec - Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
      * @throws {@link ShapeDiverError} in case a maximum duration has been specified and is exceeded.
      * @returns
      */
