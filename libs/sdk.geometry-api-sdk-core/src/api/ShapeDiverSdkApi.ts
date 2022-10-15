@@ -5,6 +5,7 @@ import { ShapeDiverError, ShapeDiverRequestError, ShapeDiverResponseError } from
 enum Method {
     DELETE = "DELETE",
     GET = "GET",
+    HEAD = "HEAD",
     PATCH = "PATCH",
     POST = "POST",
     PUT = "PUT",
@@ -70,7 +71,7 @@ export class ShapeDiverSdkApi {
         return request
     }
 
-    private buildUrl (uri: string): string {
+    private buildUrl (uri: unknown): string {
         if (typeof uri !== "string") {
             throw new ShapeDiverError("No URL or URI was specified")
         } else if (uri.startsWith("http")) {
@@ -146,6 +147,23 @@ export class ShapeDiverSdkApi {
         } catch (_) {
             // This might be an XML when calling another system (e.g. S3)
             return { message: stringData }
+        }
+    }
+
+    async head (
+        url: string,
+        options: Omit<ShapeDiverSdkApiRequestOptions, "responseType"> = {}
+    ): Promise<[Record<string, any>, number]> {
+        const fullOptions: ShapeDiverSdkApiRequestOptions = {
+            ...options,
+            responseType: ShapeDiverSdkApiResponseType.JSON,    // To handle API error responses
+        }
+        const config = this.buildRequestConfig(Method.HEAD, fullOptions, undefined)
+        try {
+            const response = await axios(this.buildUrl(url), config)
+            return [ response.headers, response.status ]
+        } catch (e: any) {
+            return await ShapeDiverSdkApi.processError(e, fullOptions.responseType)
         }
     }
 

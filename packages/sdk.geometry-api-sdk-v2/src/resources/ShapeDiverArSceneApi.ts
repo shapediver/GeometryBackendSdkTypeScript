@@ -1,5 +1,6 @@
 import {
     BaseResourceApi,
+    ShapeDiverResponseError,
     ShapeDiverSdkApi,
     ShapeDiverSdkApiResponseType,
 } from "@shapediver/sdk.geometry-api-sdk-core"
@@ -9,6 +10,27 @@ export class ShapeDiverArSceneApi extends BaseResourceApi {
 
     constructor (api: ShapeDiverSdkApi) {
         super(api)
+    }
+
+    /**
+     * Checks the existence of the specific AR scene.
+     * @param sceneId
+     * @returns `true` when the AR scene exists, otherwise `false`.
+     */
+    async exists (sceneId: string): Promise<boolean> {
+        return await sendRequest(async () => {
+            try {
+                const [ _, status ] = await this.api.head(
+                    `${ this.buildArSceneUri() }/${ sceneId }`,
+                    { disableAuthorization: true },
+                )
+                return status === 200
+            } catch (e) {
+                // A 404 HTTP status is returned when the AR scene was not found.
+                if (e instanceof ShapeDiverResponseError && e.status === 404) return false
+                else throw e
+            }
+        })
     }
 
     /**
