@@ -176,10 +176,14 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
-     * Delete old export components.
+     * Delete all export components that have been last used at or before {@link untilLastSeen} timestamp.
      *
      * @param modelId
-     * @param untilLastSeen - Delete all components that have been used last before this timestamp.
+     * @param untilLastSeen - Timestamp, inclusive limit.
+     * Allowed Patterns: YYYY, YYYYMM, YYYYMMDD, YYYYMMDDhh, YYYYMMDDhhmm, YYYYMMDDhhmmss, YYYYMMDDhhmmssSSS
+     * @example
+     * untilLastSeen = "20221104112923123"
+     * represents the date-time "2022-11-04T11:29:23.123"
      */
     async enqueueCleanupExports (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
@@ -188,10 +192,14 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
-     * Delete old output components.
+     * Delete all output components that have been last used at or before {@link untilLastSeen} timestamp.
      *
      * @param modelId
-     * @param untilLastSeen - Delete all components that have been used last before this timestamp.
+     * @param untilLastSeen - Timestamp, inclusive limit.
+     * Allowed Patterns: YYYY, YYYYMM, YYYYMMDD, YYYYMMDDhh, YYYYMMDDhhmm, YYYYMMDDhhmmss, YYYYMMDDhhmmssSSS
+     * @example
+     * untilLastSeen = "20221104112923123"
+     * represents the date-time "2022-11-04T11:29:23.123"
      */
     async enqueueCleanupOutputs (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
@@ -200,10 +208,14 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
-     * Delete old texture components.
+     * Delete all texture components that have been last used at or before {@link untilLastSeen} timestamp.
      *
      * @param modelId
-     * @param untilLastSeen - Delete all components that have been used last before this timestamp.
+     * @param untilLastSeen - Timestamp, inclusive limit.
+     * Allowed Patterns: YYYY, YYYYMM, YYYYMMDD, YYYYMMDDhh, YYYYMMDDhhmm, YYYYMMDDhhmmss, YYYYMMDDhhmmssSSS
+     * @example
+     * untilLastSeen = "20221104112923123"
+     * represents the date-time "2022-11-04T11:29:23.123"
      */
     async enqueueCleanupTextures (modelId: string, untilLastSeen: string): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
