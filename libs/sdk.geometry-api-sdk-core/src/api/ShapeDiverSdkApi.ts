@@ -1,6 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
 import { SdkConfigInternal } from "../config/ShapeDiverSdkConfig"
-import { ShapeDiverError, ShapeDiverRequestError, ShapeDiverResponseError } from "../ShapeDiverErrors"
+import {
+    ShapeDiverError,
+    ShapeDiverRequestError,
+    ShapeDiverResponseError,
+} from "../ShapeDiverErrors"
+import { sdAssertUnreachable } from "../utils"
 
 enum Method {
     DELETE = "DELETE",
@@ -150,10 +155,25 @@ export class ShapeDiverSdkApi {
         }
     }
 
+    private static parseResponse (data: any, requestedType: ShapeDiverSdkApiResponseType): any {
+        switch (requestedType) {
+            case ShapeDiverSdkApiResponseType.TEXT:
+            case ShapeDiverSdkApiResponseType.JSON:
+                // For now, we do not validate or parse those responses
+                return data
+            case ShapeDiverSdkApiResponseType.DATA:
+                // This is required to support Node.js as well as Browsers
+                return (data instanceof ArrayBuffer) ? data : Uint8Array.from(data).buffer
+            default:
+                // Force the compiler to make the switch block exhaustive
+                sdAssertUnreachable(requestedType)
+        }
+    }
+
     async head (
         url: string,
-        options: Omit<ShapeDiverSdkApiRequestOptions, "responseType"> = {}
-    ): Promise<[Record<string, any>, number]> {
+        options: Omit<ShapeDiverSdkApiRequestOptions, "responseType"> = {},
+    ): Promise<[ Record<string, any>, number ]> {
         const fullOptions: ShapeDiverSdkApiRequestOptions = {
             ...options,
             responseType: ShapeDiverSdkApiResponseType.JSON,    // To handle API error responses
@@ -177,7 +197,10 @@ export class ShapeDiverSdkApi {
         const config = this.buildRequestConfig(Method.GET, options, undefined)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return [ response.headers, response.data as T ]
+            return [
+                response.headers,
+                ShapeDiverSdkApi.parseResponse(response.data, options.responseType) as T,
+            ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -194,7 +217,10 @@ export class ShapeDiverSdkApi {
         const config = this.buildRequestConfig(Method.POST, options, data)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return [ response.headers, response.data as T ]
+            return [
+                response.headers,
+                ShapeDiverSdkApi.parseResponse(response.data, options.responseType) as T,
+            ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -211,7 +237,10 @@ export class ShapeDiverSdkApi {
         const config = this.buildRequestConfig(Method.PUT, options, data)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return [ response.headers, response.data as T ]
+            return [
+                response.headers,
+                ShapeDiverSdkApi.parseResponse(response.data, options.responseType) as T,
+            ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -228,7 +257,10 @@ export class ShapeDiverSdkApi {
         const config = this.buildRequestConfig(Method.PATCH, options, data)
         try {
             const response = await axios(this.buildUrl(url), config)
-            return [ response.headers, response.data as T ]
+            return [
+                response.headers,
+                ShapeDiverSdkApi.parseResponse(response.data, options.responseType) as T,
+            ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
@@ -244,7 +276,10 @@ export class ShapeDiverSdkApi {
         const config = this.buildRequestConfig(Method.DELETE, options, {})
         try {
             const response = await axios(this.buildUrl(url), config)
-            return [ response.headers, response.data as T ]
+            return [
+                response.headers,
+                ShapeDiverSdkApi.parseResponse(response.data, options.responseType) as T,
+            ]
         } catch (e: any) {
             return await ShapeDiverSdkApi.processError(e, options.responseType)
         }
