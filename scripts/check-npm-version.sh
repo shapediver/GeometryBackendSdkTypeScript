@@ -1,6 +1,6 @@
 #!/bin/bash
 # We try to use the same Node.js (LTS) and NPM versions for all TypeScript ShapeDiver projects.
-target_node_version="v18"
+target_node_version="v16"
 target_npm_version="8"
 
 node_version=$(node -v | cut -d. -f1)
