@@ -15,6 +15,13 @@ import {
 import { ShapeDiverSdk } from "../ShapeDiverSdk"
 import { sendRequest, sleep } from "../utils/utils"
 
+// TypeScript wrapper for a response type that depend on an input type
+type ShapeDiverSdkUtilsDownloadType<T extends ShapeDiverSdkApiResponseType> =
+    T extends ShapeDiverSdkApiResponseType.TEXT ? string :
+        T extends ShapeDiverSdkApiResponseType.JSON ? Record<string, any> :
+            T extends ShapeDiverSdkApiResponseType.DATA ? ArrayBuffer :
+                never;
+
 export class ShapeDiverUtilsApi extends BaseResourceApi {
 
     constructor (api: ShapeDiverSdkApi) {
@@ -44,7 +51,10 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param responseType - Indicates the type of data that the server should respond with if possible.
      * @returns Array of size 2: [0] = response headers, [1] = response data
      */
-    async download (url: string, responseType: ShapeDiverSdkApiResponseType): Promise<[ Record<string, any>, any ]> {
+    async download<T extends ShapeDiverSdkApiResponseType> (url: string, responseType: T): Promise<[
+        Record<string, any>,
+        ShapeDiverSdkUtilsDownloadType<T>,
+    ]> {
         return await sendRequest(async () => this.api.get<any>(url, {
             contentType: "application/json",
             responseType: responseType,
