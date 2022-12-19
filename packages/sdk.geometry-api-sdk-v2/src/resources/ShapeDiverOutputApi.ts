@@ -49,4 +49,16 @@ export class ShapeDiverOutputApi extends BaseResourceApi {
         )
     }
 
+    /**
+     * List all cached versions of the specified output.
+     *
+     * @param sessionId
+     * @param outputId
+     */
+    async listVersions (sessionId: string, outputId: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/output/" + outputId + "/list"))[1],
+        )
+    }
+
 }

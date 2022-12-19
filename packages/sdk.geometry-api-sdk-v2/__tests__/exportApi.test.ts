@@ -45,4 +45,11 @@ describe("export Api", () => {
         expect(res).toBeDefined()
     })
 
+    it("listVersions", async () => {
+        const res = await sdk.export.listVersions(sessionId, "")
+        expect(res).toBeDefined()
+        expect(res.list?.export).toBeDefined()
+        expect(res.pagination).toBeDefined()
+    })
+
 })

@@ -42,4 +42,11 @@ describe("output Api", () => {
         expect(res).toBeDefined()
     })
 
+    it("listVersions", async () => {
+        const res = await sdk.output.listVersions(sessionId, "")
+        expect(res).toBeDefined()
+        expect(res.list?.output).toBeDefined()
+        expect(res.pagination).toBeDefined()
+    })
+
 })

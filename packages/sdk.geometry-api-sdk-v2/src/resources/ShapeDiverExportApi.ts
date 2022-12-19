@@ -49,4 +49,17 @@ export class ShapeDiverExportApi extends BaseResourceApi {
         )
     }
 
+
+    /**
+     * List all cached versions of the specified export.
+     *
+     * @param sessionId
+     * @param exportId
+     */
+    async listVersions (sessionId: string, exportId: string): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/export/" + exportId + "/list"))[1],
+        )
+    }
+
 }

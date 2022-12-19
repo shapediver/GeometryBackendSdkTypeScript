@@ -63,6 +63,13 @@ describe("model Api", () => {
         expect(res).toBeDefined()
     })
 
+    it("list", async () => {
+        const res = await sdk.model.list()
+        expect(res).toBeDefined()
+        expect(res.list?.model).toBeDefined()
+        expect(res.pagination).toBeDefined()
+    })
+
     it("get model file", async () => {
         const file = await sdk.model.getFile(modelId)
         expect(file).toBeDefined()

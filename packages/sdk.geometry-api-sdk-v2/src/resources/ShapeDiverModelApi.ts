@@ -63,6 +63,15 @@ export class ShapeDiverModelApi extends BaseResourceApi {
     }
 
     /**
+     * List models.
+     */
+    async list (): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(`${ this.commonPath }/list`))[1],
+        )
+    }
+
+    /**
      * Get configurations of the viewer.
      *
      * @param modelId

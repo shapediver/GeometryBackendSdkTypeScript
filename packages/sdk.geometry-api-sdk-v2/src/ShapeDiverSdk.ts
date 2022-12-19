@@ -10,6 +10,7 @@ import { ShapeDiverOutputApi } from "./resources/ShapeDiverOutputApi"
 import { ShapeDiverSdtfApi } from "./resources/ShapeDiverSdtfApi"
 import { ShapeDiverSessionApi } from "./resources/ShapeDiverSessionApi"
 import { ShapeDiverSystemApi } from "./resources/ShapeDiverSystemApi"
+import { ShapeDiverTextureApi } from "./resources/ShapeDiverTextureApi"
 import { ShapeDiverUtilsApi } from "./resources/ShapeDiverUtilsApi"
 
 export function create (baseUrl: string, jwt?: string): ShapeDiverSdk {
@@ -29,6 +30,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
     private readonly _sdtf: ShapeDiverSdtfApi
     private readonly _session: ShapeDiverSessionApi
     private readonly _system: ShapeDiverSystemApi
+    private readonly _texture: ShapeDiverTextureApi
     private readonly _utils: ShapeDiverUtilsApi
 
     /**
@@ -52,6 +54,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
         this._sdtf = new ShapeDiverSdtfApi(this.sdkApi)
         this._session = new ShapeDiverSessionApi(this.sdkApi)
         this._system = new ShapeDiverSystemApi(this.sdkApi)
+        this._texture = new ShapeDiverTextureApi(this.sdkApi)
         this._utils = new ShapeDiverUtilsApi(this.sdkApi)
     }
 
@@ -97,6 +100,10 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
     get system (): ShapeDiverSystemApi {
         return this._system
+    }
+
+    get texture (): ShapeDiverTextureApi {
+        return this._texture
     }
 
     get utils (): ShapeDiverUtilsApi {
