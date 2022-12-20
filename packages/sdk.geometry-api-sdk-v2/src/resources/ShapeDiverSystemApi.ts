@@ -68,4 +68,13 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
         )
     }
 
+    /**
+     * Returns system information about the Geometry Workers.
+     */
+    async getWorkerInfo (): Promise<ShapeDiverResponseDto> {
+        return sendRequest(async () =>
+            (await this.api.get<ShapeDiverResponseDto>(`${ this.buildSystemUri() }/workers/info`))[1],
+        )
+    }
+
 }

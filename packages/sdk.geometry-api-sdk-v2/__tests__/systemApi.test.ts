@@ -46,4 +46,11 @@ describe("system Api", () => {
         expect(res.system!.minions).toBeDefined()
     })
 
+    it("worker info", async () => {
+        const res = await sdk.system.getWorkerInfo()
+        expect(res).toBeDefined()
+        expect(res.system).toBeDefined()
+        expect(res.system!.workers).toBeDefined()
+    })
+
 })
