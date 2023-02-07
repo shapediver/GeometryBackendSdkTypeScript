@@ -13,8 +13,6 @@
     "apply-upgrade": "bash ./scripts/run_python.sh cli apply-upgrade",
     "publish": "bash ./scripts/run_python.sh cli publish",
     "pre-publish-global": "bash ./scripts/pre-publish-global.sh",
-    "pre-publish": "bash ./scripts/pre-publish.sh",
-    "post-publish": "bash ./scripts/post-publish.sh",
     "post-publish-global": "bash ./scripts/post-publish-global.sh",
     "init": "bash ./scripts/init.sh",
     "test": "npm run check-npm-version && lerna run test",
