@@ -54,6 +54,6 @@
   },
   "dependencies": {
     "@shapediver/sdk.geometry-api-sdk-core": "~1.2.4",
-    "@shapediver/api.geometry-api-dto-v2": "~1.7.0"
+    "@shapediver/api.geometry-api-dto-v2": "~1.8.0"
   }
 }

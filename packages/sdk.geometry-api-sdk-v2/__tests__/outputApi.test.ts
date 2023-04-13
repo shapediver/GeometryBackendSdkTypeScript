@@ -33,6 +33,7 @@ describe("output Api", () => {
     it("definitions", async () => {
         const res = await sdk.output.updateDefinitions(modelId, {
             "563ce4255d30c83e8736083ba4f1bfa4": {
+                chunks: [],
                 displayname: "Some awesome name",
                 hidden: false,
                 order: 1,
