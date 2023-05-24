@@ -1,9 +1,7 @@
-import { beforeEach, describe } from "@jest/globals"
-
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestSession1, getTestUrl } from "./testUtils"
+import { getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 
@@ -14,8 +12,8 @@ beforeEach(() => {
 describe("ar-scene Api", () => {
 
     it("exists", async () => {
-            const res = await sdk.arScene.exists("")
-            expect(res).toBeTruthy()
+        const res = await sdk.arScene.exists("")
+        expect(res).toBeTruthy()
     })
 
     it("get gltf", async () => {

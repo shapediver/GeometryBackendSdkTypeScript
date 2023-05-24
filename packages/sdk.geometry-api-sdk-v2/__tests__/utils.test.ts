@@ -1,4 +1,3 @@
-import { beforeEach, describe } from "@jest/globals"
 import { ShapeDiverResponseError } from "@shapediver/sdk.geometry-api-sdk-core"
 
 // @ts-ignore

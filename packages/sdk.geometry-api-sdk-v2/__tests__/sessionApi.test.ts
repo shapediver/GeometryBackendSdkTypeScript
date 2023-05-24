@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect } from "@jest/globals"
 import {
     ShapeDiverRequestTicket,
     ShapeDiverRequestTicketType,
@@ -24,7 +23,7 @@ describe("session Api", () => {
     const ticketId = getTestTicket()
     const sessionId = getTestSession1()
 
-    function extractSessionId (dto: ShapeDiverResponseDto): string {
+    function extractSessionId(dto: ShapeDiverResponseDto): string {
         if (!dto.actions) return ""
         const parts = dto.actions[0].href.split("/")
         if (parts.length === 0) return ""
@@ -32,8 +31,7 @@ describe("session Api", () => {
     }
 
     it("ticket", async () => {
-        // @ts-ignore
-        sdk.sdkConfig.jwt = getTestJwtBackend()
+        sdk.setConfigurationValue(ShapeDiverSdkConfigType.JWT_TOKEN, getTestJwtBackend())
 
         const body: ShapeDiverRequestTicket = {
             "pub": true,

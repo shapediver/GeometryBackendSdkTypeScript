@@ -1,5 +1,3 @@
-import { beforeEach, describe } from "@jest/globals"
-
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
@@ -22,7 +20,7 @@ describe("analytics Api", () => {
                 },
                 {
                     "modelid": getTestModel1(),
-                    "timestamp": [ "202112", "202101" ],
+                    "timestamp": ["202112", "202101"],
                 },
                 {
                     "modelid": getTestModel1(),

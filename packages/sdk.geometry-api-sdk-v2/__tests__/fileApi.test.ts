@@ -1,4 +1,3 @@
-import { beforeEach, describe } from "@jest/globals"
 import fs from "fs"
 
 // @ts-ignore
@@ -17,7 +16,7 @@ describe("file Api", () => {
     const sessionId = getTestSession1()
 
     it("request upload - upload - download - list - delete", async () => {
-        const data = await fs.readFileSync("test_data/Box.glb")
+        const data = fs.readFileSync("test_data/Box.glb")
         const paramId = "9725bdec-f398-42db-8404-503e7713ed73"
         const type = "image/gif"
 

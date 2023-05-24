@@ -1,4 +1,3 @@
-import { beforeEach, describe } from "@jest/globals"
 import { ShapeDiverRequestSdtfUploadPartType } from "@shapediver/api.geometry-api-dto-v2"
 import fs from "fs"
 
@@ -19,14 +18,14 @@ describe("sdtf Api", () => {
     const namespace = "pub"
 
     it("request upload - upload - download - list - delete", async () => {
-        const data = await fs.readFileSync("test_data/Box.glb")
+        const data = fs.readFileSync("test_data/Box.glb")
 
         /* REQUEST UPLOAD */
-        let res = await sdk.sdtf.requestUpload(sessionId, [ {
+        let res = await sdk.sdtf.requestUpload(sessionId, [{
             "content_length": data.length,
             "content_type": ShapeDiverRequestSdtfUploadPartType.MODEL_SDTF,
             "namespace": namespace,
-        } ])
+        }])
         expect(res).toBeDefined()
         expect(res.asset).toBeDefined()
         expect(res.asset!.sdtf).toBeDefined()

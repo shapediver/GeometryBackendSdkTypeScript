@@ -1,5 +1,3 @@
-import { beforeEach, describe } from "@jest/globals"
-
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore

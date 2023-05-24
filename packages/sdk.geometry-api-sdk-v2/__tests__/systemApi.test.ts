@@ -1,4 +1,3 @@
-import { beforeEach, describe } from "@jest/globals"
 import { ShapeDiverRequestLogMessageLevel } from "@shapediver/api.geometry-api-dto-v2"
 
 // @ts-ignore
@@ -33,7 +32,7 @@ describe("system Api", () => {
 
     it("authorization group", async () => {
         const res = await sdk.system.authGroup({
-            models: [ getTestModel1(), getTestModel2() ],
+            models: [getTestModel1(), getTestModel2()],
         })
         expect(res).toBeDefined()
         expect(res.auth_group).toBeDefined()
