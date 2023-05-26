@@ -8,3 +8,9 @@ export {
 } from "@shapediver/sdk.geometry-api-sdk-core"
 export { ShapeDiverResponseError } from "./ShapeDiverErrors"
 export { create, ShapeDiverSdk } from "./ShapeDiverSdk"
+export {
+    isGBError,
+    isGBGenericError,
+    isGBRequestError,
+    isGBResponseError,
+} from "./utils/utils"
