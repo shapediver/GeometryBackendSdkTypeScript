@@ -70,6 +70,42 @@ import { create } from "@shapediver/sdk.geometry-api-sdk-v2"
 })()
 ```
 
+## Handling Errors
+The SDK provides type guards to distinguish between error types.
+
+```
+import {
+  isGBError,
+  isGBGenericError,
+  isGBRequestError,
+  isGBResponseError,
+} from "@shapediver/sdk.geometry-api-sdk-v2"
+
+try {
+  sdk.model.get("be5d4ce5-f76d-417d-8496-1f038e6f0cab")
+catch (e: any) {
+  if (isGBRequestError(e)) {
+    // e is a request error.
+    // In this case, the request was made but no response was received.
+  }
+
+  if (isGBResponseError(e)) {
+    // e is a response error.
+    // In this case, the request was made and the server responded with a status code that falls
+    // out of the range of 2xx.
+  }
+
+  if (isGBGenericError(e)) {
+    // e is a generic error.
+    // Generic errors are used for everything that is neither a request error nor a response error.
+  }
+
+  if (isGBError(e)) {
+    // e is either a generic error, request error or response error.
+  }
+}
+```
+
 ## Examples
 Some practical use cases, we will regularly extend the list: 
 

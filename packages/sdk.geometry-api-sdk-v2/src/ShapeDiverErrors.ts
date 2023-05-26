@@ -4,17 +4,22 @@ import {
 } from "@shapediver/api.geometry-api-dto-v2"
 import {
     ShapeDiverError,
+    ShapeDiverErrorType,
     ShapeDiverResponseError as ShapeDiverResponseErrorCore,
 } from "@shapediver/sdk.geometry-api-sdk-core"
 
 /* Replaces core/ShapeDiverErrors/ShapeDiverResponseError with DTOv2-types */
-export class ShapeDiverResponseError extends ShapeDiverError implements ShapeDiverResponseErrorDto {
+export class ShapeDiverResponseError
+    extends ShapeDiverError
+    implements ShapeDiverResponseErrorDto {
+
+    public readonly errorType: ShapeDiverErrorType = ShapeDiverErrorType.Response
 
     public readonly status: number
     public readonly error: ShapeDiverResponseErrorType
     public readonly desc: string
 
-    constructor (e: ShapeDiverResponseErrorCore) {
+    constructor(e: ShapeDiverResponseErrorCore) {
         super(e.message)
 
         this.status = e.status
