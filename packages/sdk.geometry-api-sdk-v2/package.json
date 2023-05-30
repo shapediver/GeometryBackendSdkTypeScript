@@ -1,6 +1,6 @@
 {
   "name": "@shapediver/sdk.geometry-api-sdk-v2",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "SDK to communicate with the Geometry API version 2",
   "keywords": [
     "shapediver",
