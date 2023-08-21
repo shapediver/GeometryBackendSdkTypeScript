@@ -18,13 +18,13 @@ import { sendRequest, sleep } from "../utils/utils"
 // TypeScript wrapper for a response type that depend on an input type
 type ShapeDiverSdkUtilsDownloadType<T extends ShapeDiverSdkApiResponseType> =
     T extends ShapeDiverSdkApiResponseType.TEXT ? string :
-        T extends ShapeDiverSdkApiResponseType.JSON ? Record<string, any> :
-            T extends ShapeDiverSdkApiResponseType.DATA ? ArrayBuffer :
-                never;
+    T extends ShapeDiverSdkApiResponseType.JSON ? Record<string, any> :
+    T extends ShapeDiverSdkApiResponseType.DATA ? ArrayBuffer :
+    never;
 
 export class ShapeDiverUtilsApi extends BaseResourceApi {
 
-    constructor (api: ShapeDiverSdkApi) {
+    constructor(api: ShapeDiverSdkApi) {
         super(api)
     }
 
@@ -35,7 +35,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param data - The data that should be uploaded.
      * @param contentType - Indicate the original media type of the resource.
      */
-    async upload (url: string, data: ArrayBuffer | Record<string, any> | string, contentType: string): Promise<any> {
+    async upload(url: string, data: ArrayBuffer | Record<string, any> | string, contentType: string): Promise<any> {
         return await sendRequest(async () => this.api.put<any>(url, data, {
             contentType: contentType,
             responseType: ShapeDiverSdkApiResponseType.JSON,
@@ -51,7 +51,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param responseType - Indicates the type of data that the server should respond with if possible.
      * @returns Array of size 2: [0] = response headers, [1] = response data
      */
-    async download<T extends ShapeDiverSdkApiResponseType> (url: string, responseType: T): Promise<[
+    async download<T extends ShapeDiverSdkApiResponseType>(url: string, responseType: T): Promise<[
         Record<string, any>,
         ShapeDiverSdkUtilsDownloadType<T>,
     ]> {
@@ -73,7 +73,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @throws {@link ShapeDiverError} in case a maximum duration has been specified and is exceeded.
      * @returns
      */
-    async submitAndWaitForCustomization (
+    async submitAndWaitForCustomization(
         sdk: ShapeDiverSdk,
         sessionId: string,
         body: ShapeDiverRequestCustomization,
@@ -99,7 +99,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @throws {@link ShapeDiverError} in case a maximum duration has been specified and is exceeded.
      * @returns
      */
-    async submitAndWaitForExport (
+    async submitAndWaitForExport(
         sdk: ShapeDiverSdk,
         sessionId: string,
         body: ShapeDiverRequestExport,
@@ -112,7 +112,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
         // Reduce the total max waiting time by the amount the compute-request took
         maxWaitMsec = (maxWaitMsec < 0) ? maxWaitMsec : Math.max(0, maxWaitMsec - waitMsec)
 
-        return ShapeDiverUtilsApi.waitForExportResult(sdk, sessionId, dto, body.exports.id, maxWaitMsec)
+        return ShapeDiverUtilsApi.waitForExportResult(sdk, sessionId, body, dto, maxWaitMsec)
     }
 
     /**
@@ -124,7 +124,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param maxWaitMsec - Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
      * @returns
      */
-    private static async waitForCustomizationResult (
+    private static async waitForCustomizationResult(
         sdk: ShapeDiverSdk,
         sessionId: string,
         dto: ShapeDiverResponseDto,
@@ -146,7 +146,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
             if (maxWaitMsec >= 0) {
                 const waitMsec = Date.now() - startMsec
                 if (waitMsec >= maxWaitMsec) {
-                    throw new ShapeDiverError(`Maximum wait time of ${ maxWaitMsec } ms reached`)
+                    throw new ShapeDiverError(`Maximum wait time of ${maxWaitMsec} ms reached`)
                 }
                 if (waitMsec + delay > maxWaitMsec) {
                     delay = maxWaitMsec - waitMsec
@@ -169,24 +169,19 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param sdk
      * @param sessionId
      * @param dto
-     * @param exportId
+     * @param exportIds
+     * @param outputIds
      * @param maxWaitMsec - Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
      * @returns
      */
-    private static async waitForExportResult (
+    private static async waitForExportResult(
         sdk: ShapeDiverSdk,
         sessionId: string,
+        body: ShapeDiverRequestExport,
         dto: ShapeDiverResponseDto,
-        exportId: string,
         maxWaitMsec = -1,
     ): Promise<ShapeDiverResponseDto> {
-        if (!dto.exports) throw new ShapeDiverError("The given DTO does not contain any exports")
-
-        // Build new cache request
-        const exportVersion: ShapeDiverRequestCache = { [exportId]: (dto.exports![exportId] as ShapeDiverResponseExport).version! }
-        if (!dto.exports) throw new ShapeDiverError(`Could not find any export with the id '${ exportId }'`)
-
-        let delay = ShapeDiverUtilsApi.getExportDelay(dto, exportId)
+        let delay = ShapeDiverUtilsApi.getMaxExportDelay(dto, body)
         const startMsec = Date.now()
 
         while (delay > 0) {
@@ -194,7 +189,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
             if (maxWaitMsec >= 0) {
                 const waitMsec = Date.now() - startMsec
                 if (waitMsec >= maxWaitMsec) {
-                    throw new ShapeDiverError(`Maximum wait time of ${ maxWaitMsec } ms reached`)
+                    throw new ShapeDiverError(`Maximum wait time of ${maxWaitMsec} ms reached`)
                 }
                 if (waitMsec + delay > maxWaitMsec) {
                     delay = maxWaitMsec - waitMsec
@@ -204,20 +199,19 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
             await sleep(delay)
 
             // Send cache request
-            dto = await sendRequest(async () => sdk.export.getCache(sessionId, exportVersion))
-            delay = ShapeDiverUtilsApi.getExportDelay(dto, exportId)
+            dto = await sendRequest(async () => sdk.export.getCache(sessionId, body))
+            delay = ShapeDiverUtilsApi.getMaxExportDelay(dto, body)
         }
 
         return dto
     }
 
     /**
-     * Get the maximum delay which was reported for output versions.
+     * Get the maximum delay that was reported for output versions.
      *
-     * @param dto
      * @returns maximum delay, -1 in case no delay was reported
      */
-    private static getMaxOutputDelay (dto: ShapeDiverResponseDto): number {
+    private static getMaxOutputDelay(dto: ShapeDiverResponseDto): number {
         return Math.max(
             ...Object.values(dto.outputs!)
                 .map(output => output as ShapeDiverResponseOutput)
@@ -226,14 +220,28 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     }
 
     /**
-     * Get the delay which was reported for the export.
+     * Get the maximum delay that was reported for the exports. If outputs have been reported as
+     * well, their delay time is included too.
      *
-     * @param dto
-     * @param exportId
      * @returns delay, -1 in case no delay was reported
      */
-    private static getExportDelay (dto: ShapeDiverResponseDto, exportId: string): number {
-        return (dto.exports![exportId] as ShapeDiverResponseExport).delay ?? -1
+    private static getMaxExportDelay(
+        dto: ShapeDiverResponseDto,
+        body: ShapeDiverRequestExport,
+    ): number {
+        const exports = (Array.isArray(body.exports)) ? body.exports : [body.exports.id]
+        const outputs = body.outputs ?? []
+
+        return Math.max(
+            ...Object.values(dto.exports ?? {})
+                .filter(e => exports.includes(e.id))
+                .map(e => e as ShapeDiverResponseExport)
+                .map(e => e.delay ?? -1),
+            ...Object.values(dto.outputs ?? {})
+                .filter(o => outputs.includes(o.id))
+                .map(o => o as ShapeDiverResponseOutput)
+                .map(o => o.delay ?? -1),
+        )
     }
 
 }
