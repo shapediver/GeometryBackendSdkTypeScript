@@ -9,7 +9,7 @@ import { sendRequest } from "../utils/utils"
 
 export class ShapeDiverSessionApi extends BaseResourceApi {
 
-    constructor (api: ShapeDiverSdkApi) {
+    constructor(api: ShapeDiverSdkApi) {
         super(api)
     }
 
@@ -20,9 +20,27 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param modelId
      * @param body
      */
-    async ticket (modelId: string, body: ShapeDiverRequestTicket): Promise<ShapeDiverResponseDto> {
+    async ticket(modelId: string, body: ShapeDiverRequestTicket): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
-            (await this.api.post<ShapeDiverResponseDto>(this.buildModelUri(modelId) + "/ticket", body))[1],
+            (await this.api.post<ShapeDiverResponseDto>(
+                this.buildModelUri(modelId) + "/ticket",
+                body,
+            ))[1],
+        )
+    }
+
+    /**
+     * Create a new session for a ShapeDiver Model via a ticket.
+     *
+     * @param ticket
+     * @param request - Optional customization or export request.
+     */
+    async init(
+        ticket: string,
+        request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport,
+    ): Promise<ShapeDiverResponseDto> {
+        return await sendRequest(async () =>
+            (await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket), request))[1],
         )
     }
 
@@ -32,9 +50,15 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      * @param ticket
      * @param request - Optional customization or export request.
      */
-    async init (ticket: string, request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport): Promise<ShapeDiverResponseDto> {
+    async initForModel(
+        modelId: string,
+        request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport,
+    ): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
-            (await this.api.post<ShapeDiverResponseDto>(this.buildTicketUri(ticket), request))[1],
+            (await this.api.post<ShapeDiverResponseDto>(
+                this.buildModelUri(modelId) + "/session",
+                request,
+            ))[1],
         )
     }
 
@@ -43,9 +67,11 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      *
      * @param sessionId
      */
-    async default (sessionId: string): Promise<ShapeDiverResponseDto> {
+    async default(sessionId: string): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
-            (await this.api.get<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/default"))[1],
+            (await this.api.get<ShapeDiverResponseDto>(
+                this.buildSessionUri(sessionId) + "/default",
+            ))[1],
         )
     }
 
@@ -54,9 +80,11 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
      *
      * @param sessionId
      */
-    async close (sessionId: string): Promise<ShapeDiverResponseDto> {
+    async close(sessionId: string): Promise<ShapeDiverResponseDto> {
         return await sendRequest(async () =>
-            (await this.api.post<ShapeDiverResponseDto>(this.buildSessionUri(sessionId) + "/close"))[1],
+            (await this.api.post<ShapeDiverResponseDto>(
+                this.buildSessionUri(sessionId) + "/close",
+            ))[1],
         )
     }
 

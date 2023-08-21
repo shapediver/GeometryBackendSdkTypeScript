@@ -8,7 +8,7 @@ import { ShapeDiverSdkConfigType } from "@shapediver/sdk.geometry-api-sdk-core"
 // @ts-ignore
 import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
-import { getTestJwtBackend, getTestModel1, getTestOrigin, getTestSession1, getTestTicket, getTestUrl } from "./testUtils"
+import { getTestJwt1, getTestJwtBackend, getTestModel1, getTestOrigin, getTestTicket, getTestUrl } from "./testUtils"
 
 let sdk: ShapeDiverSdk
 
@@ -20,8 +20,10 @@ beforeEach(() => {
 describe("session Api", () => {
 
     const modelId = getTestModel1()
-    const ticketId = getTestTicket()
-    const sessionId = getTestSession1()
+
+    beforeEach(() => {
+        sdk.setConfigurationValue(ShapeDiverSdkConfigType.JWT_TOKEN, "")
+    })
 
     function extractSessionId(dto: ShapeDiverResponseDto): string {
         if (!dto.actions) return ""
@@ -43,17 +45,26 @@ describe("session Api", () => {
         expect(res).toBeDefined()
     })
 
-    it("init and close", async () => {
+    it("init, default and close", async () => {
+        const ticketId = getTestTicket()
         const res = await sdk.session.init(ticketId)
         expect(res).toBeDefined()
 
         const sessionId = extractSessionId(res)
+        expect(await sdk.session.default(sessionId)).toBeDefined()
         expect(await sdk.session.close(sessionId)).toBeDefined()
     })
 
-    it("default", async () => {
-        const res = await sdk.session.default(sessionId)
+    it("initForModel, default and close", async () => {
+        const jwt = getTestJwt1()
+        sdk.setConfigurationValue(ShapeDiverSdkConfigType.JWT_TOKEN, jwt)
+
+        const res = await sdk.session.initForModel(modelId)
         expect(res).toBeDefined()
+
+        const sessionId = extractSessionId(res)
+        expect(await sdk.session.default(sessionId)).toBeDefined()
+        expect(await sdk.session.close(sessionId)).toBeDefined()
     })
 
 })
