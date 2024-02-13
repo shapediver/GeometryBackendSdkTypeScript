@@ -1,6 +1,6 @@
 {
   "name": "@shapediver/sdk.geometry-api-sdk-v2",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "SDK to communicate with the Geometry API version 2",
   "keywords": [
     "shapediver",
@@ -53,7 +53,7 @@
     "webpack-dev-server": "~4.15.1"
   },
   "dependencies": {
-    "@shapediver/sdk.geometry-api-sdk-core": "~1.3.1",
+    "@shapediver/sdk.geometry-api-sdk-core": "~1.3.2",
     "@shapediver/api.geometry-api-dto-v2": "~1.13.0"
   }
 }
