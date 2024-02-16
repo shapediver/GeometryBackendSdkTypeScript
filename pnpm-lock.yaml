@@ -63,8 +63,8 @@ importers:
   packages/sdk.geometry-api-sdk-v2:
     dependencies:
       '@shapediver/api.geometry-api-dto-v2':
-        specifier: ~1.13.0
-        version: 1.13.0
+        specifier: ~1.14.1
+        version: 1.14.1
       '@shapediver/sdk.geometry-api-sdk-core':
         specifier: ~1.3.2
         version: link:../../libs/sdk.geometry-api-sdk-core
@@ -1236,8 +1236,8 @@ packages:
       config-chain: 1.1.13
     dev: true
 
-  /@shapediver/api.geometry-api-dto-v2@1.13.0:
-    resolution: {integrity: sha512-GFyHpBDaVSTAW4V+vUJu3kFMpUod2gMewERgBmR8oqGkQQR7gY/m1U/2OklF8mQKApyzqwY1YEbk2h2f71Cwqg==, tarball: https://npm.pkg.github.com/download/@shapediver/api.geometry-api-dto-v2/1.13.0/0379ca45687a82085d94fc03eed832fe2d96b96e}
+  /@shapediver/api.geometry-api-dto-v2@1.14.1:
+    resolution: {integrity: sha512-ZmNOSt8W4g5qtSiCiToYdTnPJFnTNwTrD6UZ0L7zc94WaUYkbLNoemN4K9MPgIYQUaPm6YRK+waV12E3LVSg0Q==, tarball: https://npm.pkg.github.com/download/@shapediver/api.geometry-api-dto-v2/1.14.1/a64970db08d146d79fb529d0d46a3bf04ef421fd}
     dev: false
 
   /@sigstore/bundle@1.1.0:

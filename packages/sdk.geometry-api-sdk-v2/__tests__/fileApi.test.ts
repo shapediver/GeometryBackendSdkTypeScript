@@ -5,7 +5,7 @@ import { create, ShapeDiverSdk } from "../src"
 // @ts-ignore
 import { getTestJwt1, getTestSession1, getTestUrl } from "./testUtils"
 
-let sdk: ShapeDiverSdk
+let sdk: ShapeDiverSdk;
 
 beforeEach(() => {
     sdk = create(getTestUrl(), getTestJwt1())
@@ -15,16 +15,18 @@ describe("file Api", () => {
 
     const sessionId = getTestSession1()
 
-    it("request upload - upload - download - list - delete", async () => {
-        const data = fs.readFileSync("test_data/Box.glb")
-        const paramId = "9725bdec-f398-42db-8404-503e7713ed73"
-        const type = "image/gif"
+    it("request upload - upload - info - download - list - delete", async () => {
+        const data = fs.readFileSync("test_data/Box.glb"),
+            paramId = "9725bdec-f398-42db-8404-503e7713ed73",
+            type = "image/gif",
+            filename = 'foobar'
 
         /* REQUEST UPLOAD */
         let res = await sdk.file.requestUpload(sessionId, {
             [paramId]: {
-                "format": type,
-                "size": data.length,
+                filename,
+                format: type,
+                size: data.length,
             },
         })
         expect(res).toBeDefined()
@@ -36,7 +38,12 @@ describe("file Api", () => {
         const fileId = res.asset!.file![paramId].id
 
         /* UPLOAD */
-        await sdk.utils.upload(res.asset!.file![paramId].href, data, type)
+        await sdk.utils.upload(res.asset!.file![paramId].href, data, type, filename)
+
+        /* INFO */
+        const info = await sdk.file.info(sessionId, paramId, fileId)
+        expect(info.filename).toBe(filename)
+        expect(info.size).toBeGreaterThan(0)
 
         /* DOWNLOAD */
         const file = await sdk.file.get(sessionId, paramId, fileId)

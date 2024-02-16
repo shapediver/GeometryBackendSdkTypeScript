@@ -17,6 +17,8 @@ enum Method {
 }
 
 export interface ShapeDiverSdkApiRequestOptions {
+    contentDisposition?: string
+
     contentType?: string
 
     responseType: ShapeDiverSdkApiResponseType
@@ -71,6 +73,11 @@ export class ShapeDiverSdkApi {
         // Set the HTTP Accept header if specified
         if (options.accept) {
             request.headers!["Accept"] = options.accept
+        }
+
+        // Set the HTTP Content-Disposition header if specified
+        if (options.contentDisposition) {
+            request.headers!["Content-Disposition"] = options.contentDisposition
         }
 
         return request

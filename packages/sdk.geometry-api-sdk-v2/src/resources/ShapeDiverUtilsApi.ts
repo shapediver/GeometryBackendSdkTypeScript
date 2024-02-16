@@ -34,10 +34,18 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
      * @param url - The target URL of the upload request.
      * @param data - The data that should be uploaded.
      * @param contentType - Indicate the original media type of the resource.
+     * @param filename - The name of the file to be uploaded. When a filename has been specified in
+     * the request-upload call, then the same filename has to be specified for the upload as well.
      */
-    async upload(url: string, data: ArrayBuffer | Record<string, any> | string, contentType: string): Promise<any> {
+    async upload(
+        url: string,
+        data: ArrayBuffer | Record<string, any> | string,
+        contentType: string,
+        filename?: string,
+    ): Promise<any> {
         return await sendRequest(async () => this.api.put<any>(url, data, {
             contentType: contentType,
+            contentDisposition: (filename) ? `attachment; filename="${filename}"` : undefined,
             responseType: ShapeDiverSdkApiResponseType.JSON,
             disableAuthorization: true,
             disableCustomHeaders: true,
