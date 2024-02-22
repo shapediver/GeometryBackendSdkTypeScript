@@ -4,13 +4,15 @@ export {
     ShapeDiverRequestError,
     ShapeDiverSdkApiResponseType,
     ShapeDiverSdkConfig,
-    ShapeDiverSdkConfigType,
+    ShapeDiverSdkConfigType
 } from "@shapediver/sdk.geometry-api-sdk-core"
 export { ShapeDiverResponseError } from "./ShapeDiverErrors"
-export { create, ShapeDiverSdk } from "./ShapeDiverSdk"
+export { ShapeDiverSdk, create } from "./ShapeDiverSdk"
+export { ShapeDiverResponseFileInfo } from "./resources/ShapeDiverFileApi"
 export {
     isGBError,
     isGBGenericError,
     isGBRequestError,
-    isGBResponseError,
+    isGBResponseError
 } from "./utils/utils"
+
