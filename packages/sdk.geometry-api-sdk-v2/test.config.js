@@ -3,15 +3,16 @@
  * been started.
  */
 
-global["sdUrl"] = "https://sddev2.eu-central-1.shapediver.com"
-global["sdOrigin"] = "http://localhost:8080"
-global["sdTicket"] = ""
-global["sdJwtBackend"] = ""
-global["sdJwt1"] = "" // Model 1
-global["sdJwt2"] = "" // Model 2
+global["sdUrl"] = "https://sddev2.eu-central-1.shapediver.com";
+global["sdOrigin"] = "http://localhost:8080";
+global["sdTicket"] = "";
+global["sdJwtBackend"] = "";
+global["sdJwt1"] =
+  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MTc2ODMzMDEsImV4cCI6MTcxNzY4NjkwMSwibmJmIjoxNzE3NjgzMzAxLCJpc3MiOiJodHRwczovL3NkZGV2Mi5ldS1jZW50cmFsLTEuc2hhcGVkaXZlci5jb20iLCJzdWIiOiIwZjU2MzI5Ni00ZTYxLTRjNTMtOTFlMS0wNTI2ZDc4NzIzYjkiLCJhdWQiOiJhZTNkODgyZi05ZWZjLTRhYjEtYjY4ZS1iMTdjMzg2NDdlNTEiLCJraWQiOiIxNmY2NDRmMGZlYTVlOTdlODViZGEyNWZiM2Q2MmY3NyIsInNjb3BlIjoiYW5hbHl0aWNzLm1vZGVsLmdldC4qIGFzc2V0LmZpbGUuY3JlYXRlLiogYXNzZXQuZmlsZS5nZXQuKiBhc3NldC5maWxlLmxpc3QuKiBhc3NldC5zZHRmLnB1Yi5jcmVhdGUuKiBhc3NldC5zZHRmLnB1Yi5nZXQuKiBhc3NldC5zZHRmLnB1Yi5saXN0LiogY2FjaGUuKiBjYWNoZS5leHBvcnQuZ2V0LiogY2FjaGUub3V0cHV0LmdldC4qIGNhY2hlLnRleHR1cmUuZ2V0LiogY29tcHV0ZS5leHBvcnQuKiBjb21wdXRlLm91dHB1dC4qIGRlbGV0ZS5zb2Z0IGZpbGUuZG93bmxvYWQgZmlsZS51cGxvYWQgZ2V0LmV4cG9ydC4qIGdldC5vdXRwdXQuKiBnZXQucGFyYW1ldGVyLiogZ2V0LnN0YXRpc3RpYy4qIGdyb3VwLmV4cG9ydCBncm91cC5vd25lciBncm91cC52aWV3IHNldC5leHBvcnQudWkgc2V0Lm91dHB1dC51aSBzZXQucGFyYW1ldGVyLmRlZnZhbCBzZXQucGFyYW1ldGVyLnVpIHNldHRpbmcuYXV0aC50aWNrZXQuZ2V0Liogc2V0dGluZy5hdXRoLnRva2VuLmdldC4qIHNldHRpbmcuY2FjaGUuZ2V0Liogc2V0dGluZy5jb21wdXRlLmdldC4qIHNldHRpbmcudmlld2VyLmdldC4qIHNldHRpbmcudmlld2VyLnNldC4qIiwic2RfdXNlcl9pZCI6IjkyYTg0MTBiLTY0OTYtNGI4Ni04YzNmLTEwMTRkNTlmN2ZhMyIsInNkX29yZ19pZCI6ImE3ODUzODBlLTE4M2QtMTFlZi05MjZhLWYzZjdkMmI5ZjQwNyIsInJ0bCI6MCwiY2hhcmdlIjowfQ.J4rBwcT5ruxwO3xWDLNYC1APFQT4f6gDbs3ZKhyJXxnBvqsHRaN_bK-CQpgP0t6Ucs5QdrMfq4z-wmQl27tO6g4ctHsZ-RbcTQEEVIrKuK2e_x391UpuZjLkVgzUOcCWv5eVaiSyFMzn92oGXGIuyLvIMN6Ylt6rf38H9hW5senR6T0Ef2kEdM0Z4lsIhVThF3N4JYsls2pqYPRdYylkk7oQQowgxD0HmD5Dzkx8peJutwRbZVXj5ThLLvQUkH7EKhsujezf8-IHiX0I_3e2NUZ35heFBlLBvjQ6TtFntgBRZ2ifbM00WWoakEVB7KXjCeExygqAoe6JAuIbQHXTNw"; // Model 1
+global["sdJwt2"] = ""; // Model 2
 // NOTE merge into single session when dedicated test model is in use
-global["sdModel1"] = "0f563296-4e61-4c53-91e1-0526d78723b9"
-global["sdModel2"] = "13e899fa-75d0-45d8-9335-d22d8288437c"
-global["sdSession1"] = "" // Session of model 1
-global["sdSession2"] = "" // Session of model 2
-global["sdArSceneId"] = ""
+global["sdModel1"] = "0f563296-4e61-4c53-91e1-0526d78723b9";
+global["sdModel2"] = "13e899fa-75d0-45d8-9335-d22d8288437c";
+global["sdSession1"] = "469e6475-10e0-4a0b-ac43-b202cf53fd8a"; // Session of model 1
+global["sdSession2"] = ""; // Session of model 2
+global["sdArSceneId"] = "";
