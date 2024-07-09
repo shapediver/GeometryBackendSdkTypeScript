@@ -1,13 +1,13 @@
-const path = require('path');
-const { merge } = require('webpack-merge');
-const common = require('./webpack.common.js');
+const path = require("path");
+const { merge } = require("webpack-merge");
+const common = require("./webpack.common.js");
 
 module.exports = merge(common, {
-  mode: 'development',
-  devtool: 'inline-source-map',
+  mode: "development",
+  devtool: "inline-source-map",
   devServer: {
-    open: true
-  }, 
+    open: true,
+  },
   module: {
     rules: [
       {
@@ -15,9 +15,10 @@ module.exports = merge(common, {
         loader: "ts-loader",
         options: {
           transpileOnly: true,
-          onlyCompileBundledFiles: true
-        }
-      }
-    ]
-  }
+          onlyCompileBundledFiles: true,
+        },
+      },
+    ],
+  },
 });
+

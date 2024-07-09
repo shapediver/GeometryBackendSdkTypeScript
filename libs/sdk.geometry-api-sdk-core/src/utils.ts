@@ -3,8 +3,8 @@
  * @param _
  * @throws {@link ShapeDiverError} if called.
  */
-import { ShapeDiverError } from "./ShapeDiverErrors"
+import { ShapeDiverError } from "./ShapeDiverErrors";
 
-export function sdAssertUnreachable (_: never): never {
-    throw new ShapeDiverError("Reached unreachable block")
+export function sdAssertUnreachable(_: never): never {
+  throw new ShapeDiverError("Reached unreachable block");
 }

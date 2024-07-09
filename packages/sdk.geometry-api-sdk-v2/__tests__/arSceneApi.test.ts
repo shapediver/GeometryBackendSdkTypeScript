@@ -1,29 +1,27 @@
 // @ts-ignore
-import { create, ShapeDiverSdk } from "../src"
+import { create, ShapeDiverSdk } from "../src";
 // @ts-ignore
-import { getTestUrl } from "./testUtils"
+import { getTestUrl } from "./testUtils";
 
-let sdk: ShapeDiverSdk
+let sdk: ShapeDiverSdk;
 
 beforeEach(() => {
-    sdk = create(getTestUrl())
-})
+  sdk = create(getTestUrl());
+});
 
 describe("ar-scene Api", () => {
+  it("exists", async () => {
+    const res = await sdk.arScene.exists("");
+    expect(res).toBeTruthy();
+  });
 
-    it("exists", async () => {
-        const res = await sdk.arScene.exists("")
-        expect(res).toBeTruthy()
-    })
+  it("get gltf", async () => {
+    const res = await sdk.arScene.getGltf("");
+    expect(res).toBeDefined();
+  });
 
-    it("get gltf", async () => {
-        const res = await sdk.arScene.getGltf("")
-        expect(res).toBeDefined()
-    })
-
-    it("get usdz", async () => {
-        const res = await sdk.arScene.getUsdz("")
-        expect(res).toBeDefined()
-    })
-
-})
+  it("get usdz", async () => {
+    const res = await sdk.arScene.getUsdz("");
+    expect(res).toBeDefined();
+  });
+});

@@ -1,28 +1,31 @@
 import {
-    ShapeDiverSdkApi,
-    ShapeDiverSdkApiRequestOptions,
-    ShapeDiverSdkApiResponseType,
-} from "./api/ShapeDiverSdkApi"
-import { BaseShapeDiverSdk } from "./BaseShapeDiverSdk"
-import { ShapeDiverSdkConfig, ShapeDiverSdkConfigType } from "./config/ShapeDiverSdkConfig"
-import { BaseResourceApi } from "./resources/BaseResourceApi"
+  ShapeDiverSdkApi,
+  ShapeDiverSdkApiRequestOptions,
+  ShapeDiverSdkApiResponseType,
+} from "./api/ShapeDiverSdkApi";
+import { BaseShapeDiverSdk } from "./BaseShapeDiverSdk";
 import {
-    ShapeDiverError,
-    ShapeDiverErrorType,
-    ShapeDiverRequestError,
-    ShapeDiverResponseError,
-} from "./ShapeDiverErrors"
+  ShapeDiverSdkConfig,
+  ShapeDiverSdkConfigType,
+} from "./config/ShapeDiverSdkConfig";
+import { BaseResourceApi } from "./resources/BaseResourceApi";
+import {
+  ShapeDiverError,
+  ShapeDiverErrorType,
+  ShapeDiverRequestError,
+  ShapeDiverResponseError,
+} from "./ShapeDiverErrors";
 
 export {
-    BaseResourceApi,
-    BaseShapeDiverSdk,
-    ShapeDiverError,
-    ShapeDiverErrorType,
-    ShapeDiverRequestError,
-    ShapeDiverResponseError,
-    ShapeDiverSdkApi,
-    ShapeDiverSdkApiRequestOptions,
-    ShapeDiverSdkApiResponseType,
-    ShapeDiverSdkConfig,
-    ShapeDiverSdkConfigType,
-}
+  BaseResourceApi,
+  BaseShapeDiverSdk,
+  ShapeDiverError,
+  ShapeDiverErrorType,
+  ShapeDiverRequestError,
+  ShapeDiverResponseError,
+  ShapeDiverSdkApi,
+  ShapeDiverSdkApiRequestOptions,
+  ShapeDiverSdkApiResponseType,
+  ShapeDiverSdkConfig,
+  ShapeDiverSdkConfigType,
+};
