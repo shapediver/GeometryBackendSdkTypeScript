@@ -18,7 +18,7 @@ describe("file Api", () => {
     const data = fs.readFileSync("test_data/Box.glb"),
       paramId = "9725bdec-f398-42db-8404-503e7713ed73",
       type = "image/gif",
-      filename = "foobar";
+      filename = "foo-ä€öü.jpg";
 
     /* REQUEST UPLOAD */
     let res = await sdk.file.requestUpload(sessionId, {
@@ -33,15 +33,15 @@ describe("file Api", () => {
     expect(res.asset!.file![paramId]).toBeDefined();
     expect(res.asset!.file![paramId].href).toBeDefined();
     expect(res.asset!.file![paramId].id).toBeDefined();
+    expect(res.asset!.file![paramId].headers).toBeDefined();
 
     const fileId = res.asset!.file![paramId].id;
 
     /* UPLOAD */
-    await sdk.utils.upload(
+    await sdk.utils.uploadAsset(
       res.asset!.file![paramId].href,
       data,
-      type,
-      filename,
+      res.asset!.file![paramId].headers,
     );
 
     /* INFO */

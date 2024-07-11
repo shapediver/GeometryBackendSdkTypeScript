@@ -3,6 +3,7 @@ import {
   ShapeDiverRequestCustomization,
   ShapeDiverRequestExport,
   ShapeDiverResponseDto,
+  ShapeDiverResponseAssetUploadHeaders,
   ShapeDiverResponseExport,
   ShapeDiverResponseOutput,
 } from "@shapediver/api.geometry-api-dto-v2";
@@ -14,6 +15,8 @@ import {
 } from "@shapediver/sdk.geometry-api-sdk-core";
 import { ShapeDiverSdk } from "../ShapeDiverSdk";
 import { sendRequest, sleep } from "../utils/utils";
+
+const contentDisposition = require("content-disposition");
 
 // TypeScript wrapper for a response type that depend on an input type
 type ShapeDiverSdkUtilsDownloadType<T extends ShapeDiverSdkApiResponseType> =
@@ -48,9 +51,30 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     return await sendRequest(async () =>
       this.api.put<any>(url, data, {
         contentType: contentType,
-        contentDisposition: filename
-          ? `attachment; filename="${filename}"`
-          : undefined,
+        contentDisposition: filename ? contentDisposition(filename) : undefined,
+        responseType: ShapeDiverSdkApiResponseType.JSON,
+        disableAuthorization: true,
+        disableCustomHeaders: true,
+      }),
+    );
+  }
+
+  /**
+   * Upload the given asset to the specified ShapeDiver URL.
+   *
+   * @param url - The ShapeDiver URL of the upload request.
+   * @param data - The data that should be uploaded.
+   * @param headers - The headers object that was returned from the request-upload call.
+   */
+  async uploadAsset(
+    url: string,
+    data: ArrayBuffer | Record<string, any> | string,
+    headers: ShapeDiverResponseAssetUploadHeaders,
+  ): Promise<any> {
+    return await sendRequest(async () =>
+      this.api.put<any>(url, data, {
+        contentType: headers.contentType,
+        contentDisposition: headers.contentDisposition,
         responseType: ShapeDiverSdkApiResponseType.JSON,
         disableAuthorization: true,
         disableCustomHeaders: true,

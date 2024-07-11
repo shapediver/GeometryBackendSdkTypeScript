@@ -9,6 +9,8 @@ import {
 } from "@shapediver/sdk.geometry-api-sdk-core";
 import { sendRequest } from "../utils/utils";
 
+const contentDisposition = require("content-disposition");
+
 export interface ShapeDiverResponseFileInfo {
   filename?: string;
   size?: number;
@@ -64,16 +66,17 @@ export class ShapeDiverFileApi extends BaseResourceApi {
       };
 
       // Extract filename from Content-Disposition header if available
-      const contentDisposition =
+      const contentDispositionHeader =
         headers.get("Content-Disposition") ||
         headers.get("content-disposition");
-      if (
-        typeof contentDisposition === "string" &&
-        contentDisposition.indexOf("=") > 0
-      ) {
-        res.filename = contentDisposition
-          .split("=")[1] // Extract filename
-          .slice(1, -1); // remove leading and trailing double quotes
+      if (typeof contentDispositionHeader === "string") {
+        try {
+          res.filename = contentDisposition.parse(
+            contentDispositionHeader,
+          ).parameters.filename;
+        } catch (_) {
+          res.filename = undefined;
+        }
       }
 
       return res;
