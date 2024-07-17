@@ -12,7 +12,11 @@ import {
 } from "..";
 
 // @ts-ignore
-import { sendRequest } from "../src/utils/utils";
+import {
+  contentDispositionFromFilename,
+  filenameFromContentDisposition,
+  sendRequest,
+} from "../src/utils/utils";
 
 describe("isGBError", () => {
   test.each([
@@ -175,5 +179,49 @@ describe("sendRequest", () => {
     ).rejects.toThrow();
 
     expect(spyCall).toBe(5);
+  });
+});
+
+describe("contentDispositionFromFilename", function () {
+  test("ascii characters", () => {
+    expect(contentDispositionFromFilename("foobar.txt")).toBe(
+      'attachment; filename="foobar.txt"',
+    );
+  });
+
+  test("non-ascii characters", () => {
+    expect(contentDispositionFromFilename("ä€öü.jpg")).toBe(
+      "attachment; filename=\"aou.jpg\"; filename*=UTF-8''a%CC%88%E2%82%ACo%CC%88u%CC%88.jpg",
+    );
+  });
+});
+
+describe("filenameFromContentDisposition", function () {
+  test("invalid format; should return undefined", () => {
+    expect(
+      filenameFromContentDisposition('attachment; something="else"'),
+    ).toBeUndefined();
+  });
+
+  test("ascii_characters", () => {
+    expect(
+      filenameFromContentDisposition('attachment; filename="foobar.txt"'),
+    ).toBe("foobar.txt");
+  });
+
+  test("non_ascii_characters, with encoding", () => {
+    expect(
+      filenameFromContentDisposition(
+        "attachment; filename=\"aou.jpg\"; filename*=UTF-8''a%CC%88%E2%82%ACo%CC%88u%CC%88.jpg",
+      ),
+    ).toBe("ä€öü.jpg");
+  });
+
+  test("non_ascii_characters, without encoding", () => {
+    expect(
+      filenameFromContentDisposition(
+        'attachment; filename="aou.jpg"; filename*=a%CC%88%E2%82%ACo%CC%88u%CC%88.jpg',
+      ),
+    ).toBe("ä€öü.jpg");
   });
 });

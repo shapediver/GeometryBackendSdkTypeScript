@@ -95,3 +95,41 @@ export function encodeBase64(str: string): string {
     return Buffer.from(str).toString("base64");
   }
 }
+
+/** Set content headers according to RFC 5987 */
+export function contentDispositionFromFilename(filename: string): string {
+  const asciiName = filename.replace(/[^\x00-\x7F]/g, "");
+  let header = `attachment; filename="${asciiName}"`;
+
+  if (filename.length !== asciiName.length) {
+    header += `; filename*=UTF-8''${encodeURIComponent(filename)}`;
+  }
+
+  return header;
+}
+
+/**
+ * Extract and return the filename from a content-disposition HTTP header. Decodes the filename*
+ * property if set.
+ */
+export function filenameFromContentDisposition(
+  contentDisposition: string,
+): string | undefined {
+  let filename, filenameStar;
+
+  // Search for filename
+  const match = contentDisposition.match(/filename="([^"]+)"/);
+  if (match) filename = match[1];
+
+  // Search for filename*
+  const matchStar = contentDisposition.match(/filename\*=([^\'\']+\'\')?(.+)/);
+  if (matchStar) {
+    const encoding = matchStar[1] ? matchStar[1] : "utf-8";
+    const encodedName = matchStar[2] ?? matchStar[1];
+    if (encoding.toLowerCase().startsWith("utf-8")) {
+      filenameStar = decodeURIComponent(encodedName);
+    }
+  }
+
+  return filenameStar ?? filename;
+}

@@ -14,9 +14,11 @@ import {
   ShapeDiverSdkApiResponseType,
 } from "@shapediver/sdk.geometry-api-sdk-core";
 import { ShapeDiverSdk } from "../ShapeDiverSdk";
-import { sendRequest, sleep } from "../utils/utils";
-
-const contentDisposition = require("content-disposition");
+import {
+  contentDispositionFromFilename,
+  sendRequest,
+  sleep,
+} from "../utils/utils";
 
 // TypeScript wrapper for a response type that depend on an input type
 type ShapeDiverSdkUtilsDownloadType<T extends ShapeDiverSdkApiResponseType> =
@@ -51,7 +53,9 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     return await sendRequest(async () =>
       this.api.put<any>(url, data, {
         contentType: contentType,
-        contentDisposition: filename ? contentDisposition(filename) : undefined,
+        contentDisposition: filename
+          ? contentDispositionFromFilename(filename)
+          : undefined,
         responseType: ShapeDiverSdkApiResponseType.JSON,
         disableAuthorization: true,
         disableCustomHeaders: true,

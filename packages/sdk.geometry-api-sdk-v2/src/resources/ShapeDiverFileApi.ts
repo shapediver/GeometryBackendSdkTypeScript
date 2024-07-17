@@ -7,9 +7,7 @@ import {
   ShapeDiverSdkApi,
   ShapeDiverSdkApiResponseType,
 } from "@shapediver/sdk.geometry-api-sdk-core";
-import { sendRequest } from "../utils/utils";
-
-const contentDisposition = require("content-disposition");
+import { filenameFromContentDisposition, sendRequest } from "../utils/utils";
 
 export interface ShapeDiverResponseFileInfo {
   filename?: string;
@@ -69,15 +67,8 @@ export class ShapeDiverFileApi extends BaseResourceApi {
       const contentDispositionHeader =
         headers.get("Content-Disposition") ||
         headers.get("content-disposition");
-      if (typeof contentDispositionHeader === "string") {
-        try {
-          res.filename = contentDisposition.parse(
-            contentDispositionHeader,
-          ).parameters.filename;
-        } catch (_) {
-          res.filename = undefined;
-        }
-      }
+      if (typeof contentDispositionHeader === "string")
+        res.filename = filenameFromContentDisposition(contentDispositionHeader);
 
       return res;
     });
