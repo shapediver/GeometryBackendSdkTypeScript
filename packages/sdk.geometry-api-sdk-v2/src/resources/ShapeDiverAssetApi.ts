@@ -33,6 +33,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
         `${this.buildSessionUri(sessionId)}/export/${assetData}`,
+        undefined,
         { responseType: ShapeDiverSdkApiResponseType.DATA },
       );
       const contentType = header["Content-Type"] ?? header["content-type"];
@@ -53,6 +54,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
         `${this.buildSessionUri(sessionId)}/output/${assetData}`,
+        undefined,
         { responseType: ShapeDiverSdkApiResponseType.DATA },
       );
       const contentType = header["Content-Type"] ?? header["content-type"];
@@ -75,6 +77,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
         (
           await this.api.get<ArrayBuffer>(
             `${this.buildSessionUri(sessionId)}/output/${assetData}`,
+            undefined,
             {
               responseType: ShapeDiverSdkApiResponseType.JSON,
               accept: "model/vnd.sdtf+json",
@@ -97,6 +100,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
         `${this.buildSessionUri(sessionId)}/texture/${assetData}`,
+        undefined,
         { responseType: ShapeDiverSdkApiResponseType.DATA },
       );
       const contentType = header["Content-Type"] ?? header["content-type"];
@@ -116,6 +120,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
         (
           await this.api.get<ArrayBuffer>(
             `${this.buildSessionUri(sessionId)}/gltf/${assetData}`,
+            undefined,
             { responseType: ShapeDiverSdkApiResponseType.DATA },
           )
         )[1],
@@ -134,6 +139,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
         (
           await this.api.get<ArrayBuffer>(
             `${this.buildSessionUri(sessionId)}/usdz/${assetData}`,
+            undefined,
             { responseType: ShapeDiverSdkApiResponseType.DATA },
           )
         )[1],
@@ -151,21 +157,27 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     sessionId: string,
     url: string,
   ): Promise<[ArrayBuffer, string]> {
-    let targetUrl: string;
+    let targetUrl: string, queries: string[];
 
     if (apiAssetTextureUri.test(url) || cdnAssetTextureUri.test(url)) {
       // Call ShapeDiver texture-asset URLs directly
       targetUrl = url;
+      queries = [];
     } else {
       // All other source URLs are called via the download-image endpoint
-      targetUrl = `${this.buildSessionUri(sessionId)}/image?url=${encodeBase64(url)}`;
+      targetUrl = `${this.buildSessionUri(sessionId)}/image`;
+      queries = [`url=${encodeBase64(url)}`];
     }
 
     return await sendRequest(async () => {
-      const [header, data] = await this.api.get<ArrayBuffer>(targetUrl, {
-        responseType: ShapeDiverSdkApiResponseType.DATA,
-        disableAuthorization: cdnAssetUri.test(url), // disable for CDN URLs
-      });
+      const [header, data] = await this.api.get<ArrayBuffer>(
+        targetUrl,
+        queries,
+        {
+          responseType: ShapeDiverSdkApiResponseType.DATA,
+          disableAuthorization: cdnAssetUri.test(url), // disable for CDN URLs
+        },
+      );
       const contentType = header["Content-Type"] ?? header["content-type"];
       return [data, contentType];
     });
@@ -202,7 +214,7 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
       );
 
     return await sendRequest(async () => {
-      const [header, data] = await this.api.get<ArrayBuffer>(url, {
+      const [header, data] = await this.api.get<ArrayBuffer>(url, undefined, {
         responseType: ShapeDiverSdkApiResponseType.DATA,
         disableAuthorization: cdnAssetUri.test(url), // disable for CDN URLs
       });

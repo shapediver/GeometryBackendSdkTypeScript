@@ -46,6 +46,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
         (
           await this.api.get<ArrayBuffer>(
             `${this.buildSessionUri(sessionId)}/sdtf/${sdtfId}`,
+            undefined,
             { responseType: ShapeDiverSdkApiResponseType.DATA },
           )
         )[1],
@@ -87,6 +88,7 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildSessionUri(sessionId) + "/sdtf/upload",
+            undefined,
             body,
           )
         )[1],

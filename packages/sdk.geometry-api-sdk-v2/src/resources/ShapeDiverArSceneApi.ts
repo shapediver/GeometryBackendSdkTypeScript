@@ -43,6 +43,7 @@ export class ShapeDiverArSceneApi extends BaseResourceApi {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
         `${this.buildArSceneUri()}/${sceneId}/gltf`,
+        undefined,
         {
           responseType: ShapeDiverSdkApiResponseType.DATA,
           disableAuthorization: true,
@@ -63,6 +64,7 @@ export class ShapeDiverArSceneApi extends BaseResourceApi {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
         `${this.buildArSceneUri()}/${sceneId}/usdz`,
+        undefined,
         {
           responseType: ShapeDiverSdkApiResponseType.DATA,
           disableAuthorization: true,

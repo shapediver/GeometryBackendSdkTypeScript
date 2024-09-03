@@ -31,6 +31,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/ticket",
+            undefined,
             body,
           )
         )[1],
@@ -52,6 +53,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildTicketUri(ticket),
+            undefined,
             request,
           )
         )[1],
@@ -73,6 +75,7 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/session",
+            undefined,
             request,
           )
         )[1],

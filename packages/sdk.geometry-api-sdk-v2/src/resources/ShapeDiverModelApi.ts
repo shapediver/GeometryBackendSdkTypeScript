@@ -42,7 +42,13 @@ export class ShapeDiverModelApi extends BaseResourceApi {
   async create(body: ShapeDiverRequestModel): Promise<ShapeDiverResponseDto> {
     return await sendRequest(
       async () =>
-        (await this.api.post<ShapeDiverResponseDto>(this.commonPath, body))[1],
+        (
+          await this.api.post<ShapeDiverResponseDto>(
+            this.commonPath,
+            undefined,
+            body,
+          )
+        )[1],
     );
   }
 
@@ -61,6 +67,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         (
           await this.api.put<ShapeDiverResponseDto>(
             this.buildModelUri(modelId),
+            undefined,
             body,
           )
         )[1],
@@ -126,6 +133,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/config",
+            undefined,
             body,
           )
         )[1],
@@ -147,6 +155,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         (
           await this.api.patch<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/config",
+            undefined,
             body,
           )
         )[1],
@@ -164,6 +173,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         (
           await this.api.get<ArrayBuffer>(
             this.buildModelUri(modelId) + "/file/download",
+            undefined,
             {
               contentType: "application/json",
               responseType: ShapeDiverSdkApiResponseType.DATA,
@@ -188,6 +198,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         (
           await this.api.patch<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/parameter/defval",
+            undefined,
             body,
           )
         )[1],
@@ -209,6 +220,7 @@ export class ShapeDiverModelApi extends BaseResourceApi {
         (
           await this.api.patch<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/parameter",
+            undefined,
             body,
           )
         )[1],
@@ -255,7 +267,8 @@ export class ShapeDiverModelApi extends BaseResourceApi {
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
-            this.buildModelUri(modelId) + "/computations?" + queries.join("&"),
+            this.buildModelUri(modelId) + "/computations",
+            queries,
           )
         )[1],
     );
@@ -279,9 +292,8 @@ export class ShapeDiverModelApi extends BaseResourceApi {
       async () =>
         (
           await this.api.post<ShapeDiverResponseDto>(
-            this.buildModelUri(modelId) +
-              "/cleanup/export?untilLastSeen=" +
-              untilLastSeen,
+            this.buildModelUri(modelId) + "/cleanup/export",
+            [`untilLastSeen=${untilLastSeen}`],
           )
         )[1],
     );
@@ -305,9 +317,8 @@ export class ShapeDiverModelApi extends BaseResourceApi {
       async () =>
         (
           await this.api.post<ShapeDiverResponseDto>(
-            this.buildModelUri(modelId) +
-              "/cleanup/output?untilLastSeen=" +
-              untilLastSeen,
+            this.buildModelUri(modelId) + "/cleanup/output",
+            [`untilLastSeen=${untilLastSeen}`],
           )
         )[1],
     );
@@ -331,9 +342,8 @@ export class ShapeDiverModelApi extends BaseResourceApi {
       async () =>
         (
           await this.api.post<ShapeDiverResponseDto>(
-            this.buildModelUri(modelId) +
-              "/cleanup/texture?untilLastSeen=" +
-              untilLastSeen,
+            this.buildModelUri(modelId) + "/cleanup/texture",
+            [`untilLastSeen=${untilLastSeen}`],
           )
         )[1],
     );

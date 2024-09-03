@@ -32,7 +32,8 @@ export class ShapeDiverGltfApi extends BaseResourceApi {
       async () =>
         (
           await this.api.post<ShapeDiverResponseDto>(
-            `${this.buildSessionUri(sessionId)}/gltf?conversion=${queryConvert}`,
+            `${this.buildSessionUri(sessionId)}/gltf`,
+            [`conversion=${queryConvert}`],
             body,
             {
               contentType: type,

@@ -29,6 +29,7 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildSessionUri(sessionId) + "/log/message",
+            undefined,
             body,
           )
         )[1],
@@ -80,6 +81,7 @@ export class ShapeDiverSystemApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildAuthGroupUri(),
+            undefined,
             body,
           )
         )[1],

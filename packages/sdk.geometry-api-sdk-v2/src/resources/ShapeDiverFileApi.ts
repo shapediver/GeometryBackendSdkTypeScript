@@ -91,6 +91,7 @@ export class ShapeDiverFileApi extends BaseResourceApi {
         (
           await this.api.get<ArrayBuffer>(
             `${this.buildSessionUri(sessionId)}/file/${paramId}/${fileId}`,
+            undefined,
             { responseType: ShapeDiverSdkApiResponseType.DATA },
           )
         )[1],
@@ -134,6 +135,7 @@ export class ShapeDiverFileApi extends BaseResourceApi {
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildSessionUri(sessionId) + "/file/upload",
+            undefined,
             body,
           )
         )[1],

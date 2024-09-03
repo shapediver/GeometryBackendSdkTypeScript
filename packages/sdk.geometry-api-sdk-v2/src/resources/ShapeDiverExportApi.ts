@@ -30,6 +30,7 @@ export class ShapeDiverExportApi extends BaseResourceApi {
         (
           await this.api.put<ShapeDiverResponseDto>(
             this.buildSessionUri(sessionId) + "/export",
+            undefined,
             body,
           )
         )[1],
@@ -51,6 +52,7 @@ export class ShapeDiverExportApi extends BaseResourceApi {
         (
           await this.api.put<ShapeDiverResponseDto>(
             this.buildSessionUri(sessionId) + "/export/cache",
+            undefined,
             body,
           )
         )[1],
@@ -72,6 +74,7 @@ export class ShapeDiverExportApi extends BaseResourceApi {
         (
           await this.api.patch<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/export",
+            undefined,
             body,
           )
         )[1],
@@ -92,7 +95,7 @@ export class ShapeDiverExportApi extends BaseResourceApi {
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
-            this.buildSessionUri(sessionId) + "/export/" + exportId + "/list",
+            `${this.buildSessionUri(sessionId)}/export/${exportId}/list`,
           )
         )[1],
     );

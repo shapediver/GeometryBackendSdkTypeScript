@@ -82,16 +82,20 @@ export class ShapeDiverSdkApi {
     return request;
   }
 
-  private buildUrl(uri: unknown): string {
+  private buildUrl(uri: unknown, queries: string[]): string {
     if (typeof uri !== "string") {
       throw new ShapeDiverError("No URL or URI was specified");
-    } else if (uri.startsWith("http")) {
-      return uri;
-    } else if (uri.startsWith("/")) {
-      return `${this.config.baseUrl}/${uri.substring(1)}`;
-    } else {
-      return `${this.config.baseUrl}/${uri}`;
     }
+
+    let url = uri.startsWith("http")
+      ? uri
+      : `${this.config.baseUrl}/${uri.startsWith("/") ? uri.substring(1) : uri}`;
+
+    if (queries.length) {
+      url += `?${queries.join("&")}`;
+    }
+
+    return url;
   }
 
   /**
@@ -199,7 +203,7 @@ export class ShapeDiverSdkApi {
     };
     const config = this.buildRequestConfig(Method.HEAD, fullOptions, undefined);
     try {
-      const response = await axios(this.buildUrl(url), config);
+      const response = await axios(this.buildUrl(url, []), config);
       return [response.headers, response.status];
     } catch (e: any) {
       return await ShapeDiverSdkApi.processError(e, fullOptions.responseType);
@@ -208,6 +212,7 @@ export class ShapeDiverSdkApi {
 
   async get<T>(
     url: string,
+    queries: string[] = [],
     options: ShapeDiverSdkApiRequestOptions = {
       contentType: "application/json",
       responseType: ShapeDiverSdkApiResponseType.JSON,
@@ -215,7 +220,7 @@ export class ShapeDiverSdkApi {
   ): Promise<[Record<string, any>, T]> {
     const config = this.buildRequestConfig(Method.GET, options, undefined);
     try {
-      const response = await axios(this.buildUrl(url), config);
+      const response = await axios(this.buildUrl(url, queries), config);
       return [
         response.headers,
         ShapeDiverSdkApi.parseResponse(
@@ -230,6 +235,7 @@ export class ShapeDiverSdkApi {
 
   async post<T>(
     url: string,
+    queries: string[] = [],
     data: any = {},
     options: ShapeDiverSdkApiRequestOptions = {
       contentType: "application/json",
@@ -238,7 +244,7 @@ export class ShapeDiverSdkApi {
   ): Promise<[Record<string, any>, T]> {
     const config = this.buildRequestConfig(Method.POST, options, data);
     try {
-      const response = await axios(this.buildUrl(url), config);
+      const response = await axios(this.buildUrl(url, queries), config);
       return [
         response.headers,
         ShapeDiverSdkApi.parseResponse(
@@ -253,6 +259,7 @@ export class ShapeDiverSdkApi {
 
   async put<T>(
     url: string,
+    queries: string[] = [],
     data: any = {},
     options: ShapeDiverSdkApiRequestOptions = {
       contentType: "application/json",
@@ -261,7 +268,7 @@ export class ShapeDiverSdkApi {
   ): Promise<[Record<string, any>, T]> {
     const config = this.buildRequestConfig(Method.PUT, options, data);
     try {
-      const response = await axios(this.buildUrl(url), config);
+      const response = await axios(this.buildUrl(url, queries), config);
       return [
         response.headers,
         ShapeDiverSdkApi.parseResponse(
@@ -276,6 +283,7 @@ export class ShapeDiverSdkApi {
 
   async patch<T>(
     url: string,
+    queries: string[] = [],
     data: any = {},
     options: ShapeDiverSdkApiRequestOptions = {
       contentType: "application/json",
@@ -284,7 +292,7 @@ export class ShapeDiverSdkApi {
   ): Promise<[Record<string, any>, T]> {
     const config = this.buildRequestConfig(Method.PATCH, options, data);
     try {
-      const response = await axios(this.buildUrl(url), config);
+      const response = await axios(this.buildUrl(url, queries), config);
       return [
         response.headers,
         ShapeDiverSdkApi.parseResponse(
@@ -299,6 +307,7 @@ export class ShapeDiverSdkApi {
 
   async delete<T>(
     url: string,
+    queries: string[] = [],
     options: ShapeDiverSdkApiRequestOptions = {
       contentType: "application/json",
       responseType: ShapeDiverSdkApiResponseType.JSON,
@@ -306,7 +315,7 @@ export class ShapeDiverSdkApi {
   ): Promise<[Record<string, any>, T]> {
     const config = this.buildRequestConfig(Method.DELETE, options, {});
     try {
-      const response = await axios(this.buildUrl(url), config);
+      const response = await axios(this.buildUrl(url, queries), config);
       return [
         response.headers,
         ShapeDiverSdkApi.parseResponse(

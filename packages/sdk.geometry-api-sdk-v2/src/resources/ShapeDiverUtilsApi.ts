@@ -51,7 +51,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     filename?: string,
   ): Promise<any> {
     return await sendRequest(async () =>
-      this.api.put<any>(url, data, {
+      this.api.put<any>(url, undefined, data, {
         contentType: contentType,
         contentDisposition: filename
           ? contentDispositionFromFilename(filename)
@@ -76,7 +76,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     headers: ShapeDiverResponseAssetUploadHeaders,
   ): Promise<any> {
     return await sendRequest(async () =>
-      this.api.put<any>(url, data, {
+      this.api.put<any>(url, undefined, data, {
         contentType: headers.contentType,
         contentDisposition: headers.contentDisposition,
         responseType: ShapeDiverSdkApiResponseType.JSON,
@@ -98,7 +98,7 @@ export class ShapeDiverUtilsApi extends BaseResourceApi {
     responseType: T,
   ): Promise<[Record<string, any>, ShapeDiverSdkUtilsDownloadType<T>]> {
     return await sendRequest(async () =>
-      this.api.get<any>(url, {
+      this.api.get<any>(url, undefined, {
         contentType: "application/json",
         responseType: responseType,
         disableAuthorization: true,

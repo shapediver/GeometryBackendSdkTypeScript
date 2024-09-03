@@ -27,6 +27,7 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
         (
           await this.api.put<ShapeDiverResponseDto>(
             this.buildAnalyticsUri() + "/session/model",
+            undefined,
             body,
           )
         )[1],
@@ -42,6 +43,7 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
         (
           await this.api.put<ShapeDiverResponseDto>(
             this.buildAnalyticsUri() + "/credit-metrics",
+            undefined,
             body,
           )
         )[1],
@@ -54,10 +56,7 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
-            this.buildAnalyticsUri() +
-              "/credit-metrics/timestamp/" +
-              timestamp +
-              "/user",
+            `${this.buildAnalyticsUri()}/credit-metrics/timestamp/${timestamp}/user`,
           )
         )[1],
     );
@@ -71,10 +70,7 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
-            this.buildAnalyticsUri() +
-              "/credit-metrics/timestamp/" +
-              timestamp +
-              "/org",
+            `${this.buildAnalyticsUri()}/credit-metrics/timestamp/${timestamp}/org`,
           )
         )[1],
     );
@@ -89,11 +85,7 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
-            this.buildAnalyticsUri() +
-              "/credit-metrics/timestamp/" +
-              timestamp +
-              "/user/" +
-              userId,
+            `${this.buildAnalyticsUri()}/credit-metrics/timestamp/${timestamp}/user/${userId}`,
           )
         )[1],
     );
@@ -108,11 +100,7 @@ export class ShapeDiverAnalyticsApi extends BaseResourceApi {
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
-            this.buildAnalyticsUri() +
-              "/credit-metrics/timestamp/" +
-              timestamp +
-              "/org/" +
-              orgId,
+            `${this.buildAnalyticsUri()}/credit-metrics/timestamp/${timestamp}/org/${orgId}`,
           )
         )[1],
     );
