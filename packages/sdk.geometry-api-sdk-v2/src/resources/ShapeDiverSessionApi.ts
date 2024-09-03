@@ -43,17 +43,30 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
    *
    * @param ticket
    * @param request - Optional customization or export request.
+   * @param modelStateId - ID of the Model-State to apply.
+   * @param strictValidation - When `false`, any Model-State parameter that cannot be applied to the
+   * model is ignored. However, when set to `true`, any validation error will result in an error
+   * response.
    */
   async init(
     ticket: string,
     request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport,
+    modelStateId?: string,
+    strictValidation?: boolean,
   ): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (modelStateId !== undefined)
+      queries.push("modelStateId=" + modelStateId);
+    if (strictValidation !== undefined)
+      queries.push("strictValidation=" + strictValidation);
+
     return await sendRequest(
       async () =>
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildTicketUri(ticket),
-            undefined,
+            queries,
             request,
           )
         )[1],
@@ -65,17 +78,30 @@ export class ShapeDiverSessionApi extends BaseResourceApi {
    *
    * @param ticket
    * @param request - Optional customization or export request.
+   * @param modelStateId - ID of the Model-State to apply.
+   * @param strictValidation - When `false`, any Model-State parameter that cannot be applied to the
+   * model is ignored. However, when set to `true`, any validation error will result in an error
+   * response.
    */
   async initForModel(
     modelId: string,
     request?: ShapeDiverRequestCustomization | ShapeDiverRequestExport,
+    modelStateId?: string,
+    strictValidation?: boolean,
   ): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (modelStateId !== undefined)
+      queries.push("modelStateId=" + modelStateId);
+    if (strictValidation !== undefined)
+      queries.push("strictValidation=" + strictValidation);
+
     return await sendRequest(
       async () =>
         (
           await this.api.post<ShapeDiverResponseDto>(
             this.buildModelUri(modelId) + "/session",
-            undefined,
+            queries,
             request,
           )
         )[1],

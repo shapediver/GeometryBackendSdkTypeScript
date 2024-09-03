@@ -13,14 +13,14 @@ export class ShapeDiverArSceneApi extends BaseResourceApi {
 
   /**
    * Checks the existence of the specific AR scene.
-   * @param sceneId
+   * @param id AR scene ID or Model-State ID.
    * @returns `true` when the AR scene exists, otherwise `false`.
    */
-  async exists(sceneId: string): Promise<boolean> {
+  async exists(id: string): Promise<boolean> {
     return await sendRequest(async () => {
       try {
         const [_, status] = await this.api.head(
-          `${this.buildArSceneUri()}/${sceneId}`,
+          `${this.buildArSceneUri()}/${id}`,
           { disableAuthorization: true },
         );
         return status === 200;
@@ -36,13 +36,13 @@ export class ShapeDiverArSceneApi extends BaseResourceApi {
   /**
    * Download the glTF file of the specified AR scene.
    *
-   * @param sceneId - The ID of the AR scene.
+   * @param id AR scene ID or Model-State ID.
    * @returns Array of size 2: [0] = content data, [1] = content type
    */
-  async getGltf(sceneId: string): Promise<[ArrayBuffer, string]> {
+  async getGltf(id: string): Promise<[ArrayBuffer, string]> {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
-        `${this.buildArSceneUri()}/${sceneId}/gltf`,
+        `${this.buildArSceneUri()}/${id}/gltf`,
         undefined,
         {
           responseType: ShapeDiverSdkApiResponseType.DATA,
@@ -57,13 +57,13 @@ export class ShapeDiverArSceneApi extends BaseResourceApi {
   /**
    * Download the USDZ file of the specified AR scene.
    *
-   * @param sceneId - The ID of the AR scene.
+   * @param id AR scene ID or Model-State ID.
    * @returns Array of size 2: [0] = content data, [1] = content type
    */
-  async getUsdz(sceneId: string): Promise<[ArrayBuffer, string]> {
+  async getUsdz(id: string): Promise<[ArrayBuffer, string]> {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(
-        `${this.buildArSceneUri()}/${sceneId}/usdz`,
+        `${this.buildArSceneUri()}/${id}/usdz`,
         undefined,
         {
           responseType: ShapeDiverSdkApiResponseType.DATA,

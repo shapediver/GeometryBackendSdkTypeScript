@@ -66,6 +66,17 @@ export abstract class BaseResourceApi {
   }
 
   /**
+   * Create the URI for model-state-based controller endpoints.
+   *
+   * @param modelStateId
+   * @protected
+   */
+  protected buildModelStateUri(modelStateId?: string): string {
+    const base = `${this.commonPath}/model-state`;
+    return modelStateId ? base + `/${modelStateId}` : base;
+  }
+
+  /**
    * Create the URI for system-based controller endpoints.
    *
    * @protected

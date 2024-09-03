@@ -15,6 +15,7 @@ import { ShapeDiverSessionApi } from "./resources/ShapeDiverSessionApi";
 import { ShapeDiverSystemApi } from "./resources/ShapeDiverSystemApi";
 import { ShapeDiverTextureApi } from "./resources/ShapeDiverTextureApi";
 import { ShapeDiverUtilsApi } from "./resources/ShapeDiverUtilsApi";
+import { ShapeDiverModelStateApi } from "./resources/ShapeDiverModelStateApi";
 
 export function create(baseUrl: string, jwt?: string): ShapeDiverSdk {
   return new ShapeDiverSdk(baseUrl, jwt);
@@ -28,6 +29,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
   private readonly _file: ShapeDiverFileApi;
   private readonly _gltf: ShapeDiverGltfApi;
   private readonly _model: ShapeDiverModelApi;
+  private readonly _modelState: ShapeDiverModelStateApi;
   private readonly _output: ShapeDiverOutputApi;
   private readonly _sdtf: ShapeDiverSdtfApi;
   private readonly _session: ShapeDiverSessionApi;
@@ -52,6 +54,7 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
     this._file = new ShapeDiverFileApi(this.sdkApi);
     this._gltf = new ShapeDiverGltfApi(this.sdkApi);
     this._model = new ShapeDiverModelApi(this.sdkApi);
+    this._modelState = new ShapeDiverModelStateApi(this.sdkApi);
     this._output = new ShapeDiverOutputApi(this.sdkApi);
     this._sdtf = new ShapeDiverSdtfApi(this.sdkApi);
     this._session = new ShapeDiverSessionApi(this.sdkApi);
@@ -86,6 +89,10 @@ export class ShapeDiverSdk extends BaseShapeDiverSdk {
 
   get model(): ShapeDiverModelApi {
     return this._model;
+  }
+
+  get modelState(): ShapeDiverModelStateApi {
+    return this._modelState;
   }
 
   get output(): ShapeDiverOutputApi {
