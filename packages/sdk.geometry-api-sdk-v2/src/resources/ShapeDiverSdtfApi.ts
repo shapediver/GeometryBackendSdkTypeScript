@@ -23,12 +23,18 @@ export class ShapeDiverSdtfApi extends BaseResourceApi {
   async list(
     sessionId: string,
     namespace: string,
+    offset?: string,
   ): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (offset !== undefined) queries.push("offset=" + offset);
+
     return await sendRequest(
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
             `${this.buildSessionUri(sessionId)}/sdtf/${namespace}/list`,
+            queries,
           )
         )[1],
     );

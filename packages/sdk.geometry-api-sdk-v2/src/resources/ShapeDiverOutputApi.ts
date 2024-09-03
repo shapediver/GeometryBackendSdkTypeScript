@@ -90,12 +90,18 @@ export class ShapeDiverOutputApi extends BaseResourceApi {
   async listVersions(
     sessionId: string,
     outputId: string,
+    offset?: string,
   ): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (offset !== undefined) queries.push("offset=" + offset);
+
     return await sendRequest(
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
             `${this.buildSessionUri(sessionId)}/output/${outputId}/list`,
+            queries,
           )
         )[1],
     );

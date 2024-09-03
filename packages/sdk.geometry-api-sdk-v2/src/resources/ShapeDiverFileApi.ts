@@ -28,12 +28,18 @@ export class ShapeDiverFileApi extends BaseResourceApi {
   async list(
     sessionId: string,
     paramId: string,
+    offset?: string,
   ): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (offset !== undefined) queries.push("offset=" + offset);
+
     return await sendRequest(
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
             `${this.buildSessionUri(sessionId)}/file/${paramId}/list`,
+            queries,
           )
         )[1],
     );

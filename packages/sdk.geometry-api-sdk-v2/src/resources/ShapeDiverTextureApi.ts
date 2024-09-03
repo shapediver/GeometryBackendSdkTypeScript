@@ -15,12 +15,20 @@ export class ShapeDiverTextureApi extends BaseResourceApi {
    *
    * @param sessionId
    */
-  async listModelTextures(sessionId: string): Promise<ShapeDiverResponseDto> {
+  async listModelTextures(
+    sessionId: string,
+    offset?: string,
+  ): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (offset !== undefined) queries.push("offset=" + offset);
+
     return await sendRequest(
       async () =>
         (
           await this.api.get<ShapeDiverResponseDto>(
             this.buildSessionUri(sessionId) + "/texture/list",
+            queries,
           )
         )[1],
     );

@@ -93,11 +93,18 @@ export class ShapeDiverModelApi extends BaseResourceApi {
   /**
    * List models.
    */
-  async list(): Promise<ShapeDiverResponseDto> {
+  async list(offset?: string): Promise<ShapeDiverResponseDto> {
+    // Build queries
+    const queries: string[] = [];
+    if (offset !== undefined) queries.push("offset=" + offset);
+
     return await sendRequest(
       async () =>
         (
-          await this.api.get<ShapeDiverResponseDto>(`${this.commonPath}/list`)
+          await this.api.get<ShapeDiverResponseDto>(
+            `${this.commonPath}/list`,
+            queries,
+          )
         )[1],
     );
   }
