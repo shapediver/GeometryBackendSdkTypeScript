@@ -1,6 +1,6 @@
 {
   "name": "@shapediver/sdk.geometry-api-sdk-core",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Core-library for SDK-packages to communicate with the Geometry API",
   "keywords": [],
   "author": "Matthias Reisacher <matt@shapediver.com>",
