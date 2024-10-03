@@ -15,6 +15,9 @@ const cdnAssetExportUri = /.+\/cdn-asset-exports\/.+/;
 const cdnAssetOutputUri = /.+\/cdn-asset-outputs\/.+/;
 const cdnAssetTextureUri = /.+\/cdn-asset-textures\/.+/;
 
+const directDownloadUri =
+  /^(http[s]?:\/\/)?(viewer|textures|downloads)\.shapediver\.com(\/.*)?$/;
+
 export class ShapeDiverAssetApi extends BaseResourceApi {
   constructor(api: ShapeDiverSdkApi) {
     super(api);
@@ -159,7 +162,11 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
   ): Promise<[ArrayBuffer, string]> {
     let targetUrl: string, queries: string[];
 
-    if (apiAssetTextureUri.test(url) || cdnAssetTextureUri.test(url)) {
+    if (
+      apiAssetTextureUri.test(url) ||
+      cdnAssetTextureUri.test(url) ||
+      directDownloadUri.test(url)
+    ) {
       // Call ShapeDiver texture-asset URLs directly
       targetUrl = url;
       queries = [];
