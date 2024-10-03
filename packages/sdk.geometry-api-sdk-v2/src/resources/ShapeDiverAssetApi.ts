@@ -182,7 +182,14 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
         queries,
         {
           responseType: ShapeDiverSdkApiResponseType.DATA,
-          disableAuthorization: cdnAssetUri.test(url), // disable for CDN URLs
+          /*
+           * Disable authorization and custom headers for CDN and direct download URLs to preserve
+           * simple GETs whenever possible (do not require preflight requests).
+           */
+          disableAuthorization:
+            cdnAssetUri.test(url) || directDownloadUri.test(url),
+          disableCustomHeaders:
+            cdnAssetUri.test(url) || directDownloadUri.test(url),
         },
       );
       const contentType = header["Content-Type"] ?? header["content-type"];
@@ -223,7 +230,9 @@ export class ShapeDiverAssetApi extends BaseResourceApi {
     return await sendRequest(async () => {
       const [header, data] = await this.api.get<ArrayBuffer>(url, undefined, {
         responseType: ShapeDiverSdkApiResponseType.DATA,
-        disableAuthorization: cdnAssetUri.test(url), // disable for CDN URLs
+        /* Disable authorization and custom headers for CDN URLs to preserve simple GETs. */
+        disableAuthorization: cdnAssetUri.test(url),
+        disableCustomHeaders: cdnAssetUri.test(url),
       });
       const contentType = header["Content-Type"] ?? header["content-type"];
       return [data, contentType, type];
