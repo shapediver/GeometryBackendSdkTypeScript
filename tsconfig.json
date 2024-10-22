@@ -1,20 +1,20 @@
 {
-  "compilerOptions": {
-    "target": "ES2015",
-    "module": "commonjs",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "rootDir": ".",
-    "outDir": "dist",
-    "removeComments": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "moduleResolution": "node",
-    "types": ["jest", "node"],
-    "esModuleInterop": true,
-    "sourceRoot": "",
-    "forceConsistentCasingInFileNames": true,
-    "useUnknownInCatchVariables": false
-  }
+    "compilerOptions": {
+        "target": "ES2015",
+        "module": "commonjs",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "rootDir": ".",
+        "outDir": "dist",
+        "removeComments": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "moduleResolution": "node",
+        "types": ["jest", "node"],
+        "esModuleInterop": true,
+        "sourceRoot": "",
+        "forceConsistentCasingInFileNames": true,
+        "useUnknownInCatchVariables": false
+    }
 }

@@ -1,0 +1,548 @@
+import {
+    ExportApi,
+    OutputApi,
+    ResComputeExports,
+    ResComputeOutputs,
+    ResExportDefinitionType,
+    ResGetCachedExports,
+    ResGetCachedOutputs,
+    TimeoutError,
+    UtilsApi,
+} from '../src';
+import { AxiosHeaders } from 'axios';
+
+describe('waitForOutputResult', function () {
+    const utilsApi = new UtilsApi(),
+        sessionId = '12a210fa-2804-11ef-b7a5-1bc3e7751d5d';
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('no outputs', async () => {
+        const resCompute: ResComputeOutputs = { version: '1' };
+
+        // Mock
+        const getMaxOutputDelay = jest.spyOn(UtilsApi.prototype as any, 'getMaxOutputDelay');
+
+        // @ts-expect-error
+        const res = await utilsApi.waitForOutputResult(sessionId, resCompute, 123.4);
+
+        expect(res).toStrictEqual(resCompute);
+        expect(getMaxOutputDelay).toHaveBeenCalledTimes(0);
+    });
+
+    test('negative delay', async () => {
+        const resCompute: ResComputeOutputs = {
+            version: '1',
+            outputs: {
+                '33c694f3a090a06560777870d3d1d317': {
+                    id: '33c694f3a090a06560777870d3d1d317',
+                    version: 'c8b8874fda26cee295faf97d22dcbb5b',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                },
+            },
+        };
+
+        // Mock
+        const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
+
+        // @ts-expect-error
+        const res = await utilsApi.waitForOutputResult(sessionId, resCompute, -1);
+
+        expect(res).toStrictEqual(resCompute);
+        expect(getCachedOutputs).toHaveBeenCalledTimes(0);
+    });
+
+    test('positive delay and no timeout', async () => {
+        const resCache: ResGetCachedOutputs = {
+            version: '1',
+            outputs: {
+                '33c694f3a090a06560777870d3d1d317': {
+                    id: '33c694f3a090a06560777870d3d1d317',
+                    version: '22e93a3339da89bd6d4e027614c8f644',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                    content: [],
+                },
+                '6298d3d386252e6c0d2a0606fa17b470': {
+                    id: '6298d3d386252e6c0d2a0606fa17b470',
+                    version: '526d24be587bbd8ad9ef09c19295d5e1',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                    content: [],
+                },
+            },
+        };
+
+        // Mock
+        const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
+        getCachedOutputs.mockReturnValue(
+            Promise.resolve({
+                data: resCache,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: { headers: new AxiosHeaders() },
+            })
+        );
+
+        // @ts-expect-error
+        const res = await utilsApi.waitForOutputResult(
+            sessionId,
+            {
+                version: '1',
+                outputs: {
+                    '0ca411fecc995160971ed9d965acd218': {
+                        id: '0ca411fecc995160971ed9d965acd218',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '33c694f3a090a06560777870d3d1d317': {
+                        id: '33c694f3a090a06560777870d3d1d317',
+                        version: '22e93a3339da89bd6d4e027614c8f644',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '6298d3d386252e6c0d2a0606fa17b470': {
+                        id: '6298d3d386252e6c0d2a0606fa17b470',
+                        version: '526d24be587bbd8ad9ef09c19295d5e1',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                        delay: 100,
+                    },
+                },
+            },
+            123.4
+        );
+
+        expect(res).toStrictEqual(resCache);
+        expect(getCachedOutputs).toHaveBeenCalledTimes(1);
+        expect(getCachedOutputs).toHaveBeenCalledWith(
+            sessionId,
+            {
+                '33c694f3a090a06560777870d3d1d317': '22e93a3339da89bd6d4e027614c8f644',
+                '6298d3d386252e6c0d2a0606fa17b470': '526d24be587bbd8ad9ef09c19295d5e1',
+            },
+            undefined // options
+        );
+    });
+
+    test('positive delay and timeout', async () => {
+        const resCache: ResGetCachedOutputs = {
+            version: '1',
+            outputs: {
+                '33c694f3a090a06560777870d3d1d317': {
+                    id: '33c694f3a090a06560777870d3d1d317',
+                    version: '22e93a3339da89bd6d4e027614c8f644',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                    delay: 250,
+                },
+            },
+        };
+
+        // Mock
+        const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
+        getCachedOutputs.mockReturnValue(
+            Promise.resolve({
+                data: resCache,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: { headers: new AxiosHeaders() },
+            })
+        );
+
+        await expect(
+            // @ts-expect-error
+            utilsApi.waitForOutputResult(
+                sessionId,
+                {
+                    version: '1',
+                    outputs: {
+                        '33c694f3a090a06560777870d3d1d317': {
+                            id: '33c694f3a090a06560777870d3d1d317',
+                            version: '22e93a3339da89bd6d4e027614c8f644',
+                            name: 'some-name',
+                            hidden: false,
+                            dependency: [],
+                            delay: 100,
+                        },
+                    },
+                },
+                500
+            )
+        ).rejects.toThrow(TimeoutError);
+        expect(getCachedOutputs).toHaveBeenCalledTimes(3);
+    });
+});
+
+describe('waitForExportResult', function () {
+    const utilsApi = new UtilsApi(),
+        sessionId = '12a210fa-2804-11ef-b7a5-1bc3e7751d5d';
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test('negative delay', async () => {
+        const resCompute: ResComputeExports = {
+            version: '1',
+            exports: {
+                '4c77e42cee6f1be8afacffd4806cfdc3': {
+                    id: '4c77e42cee6f1be8afacffd4806cfdc3',
+                    version: '3faf86a8467e83f0ac969bf03bece264',
+                    name: 'some-name',
+                    type: ResExportDefinitionType.DOWNLOAD,
+                    hidden: false,
+                    dependency: [],
+                },
+            },
+        };
+
+        // Mock
+        const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
+
+        // @ts-expect-error
+        const res = await utilsApi.waitForExportResult(
+            sessionId,
+            { parameters: {}, exports: ['4c77e42cee6f1be8afacffd4806cfdc3'] },
+            resCompute,
+            -1
+        );
+
+        expect(res).toStrictEqual(resCompute);
+        expect(getCachedExports).toHaveBeenCalledTimes(0);
+    });
+
+    test('positive delay and no timeout', async () => {
+        const resCache: ResGetCachedExports = {
+            version: '1',
+            exports: {
+                '4c77e42cee6f1be8afacffd4806cfdc3': {
+                    id: '4c77e42cee6f1be8afacffd4806cfdc3',
+                    version: '3faf86a8467e83f0ac969bf03bece264',
+                    name: 'some-name',
+                    type: ResExportDefinitionType.DOWNLOAD,
+                    hidden: false,
+                    dependency: [],
+                },
+            },
+        };
+
+        // Mock
+        const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
+        getCachedExports.mockReturnValue(
+            Promise.resolve({
+                data: resCache,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: { headers: new AxiosHeaders() },
+            })
+        );
+
+        // @ts-expect-error
+        const res = await utilsApi.waitForExportResult(
+            sessionId,
+            { parameters: {}, exports: ['4c77e42cee6f1be8afacffd4806cfdc3'] },
+            {
+                version: '1',
+                exports: {
+                    '4c77e42cee6f1be8afacffd4806cfdc3': {
+                        id: '4c77e42cee6f1be8afacffd4806cfdc3',
+                        version: '3faf86a8467e83f0ac969bf03bece264',
+                        name: 'some-name',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                        delay: 100,
+                    },
+                },
+            },
+            123.4
+        );
+
+        expect(res).toStrictEqual(resCache);
+        expect(getCachedExports).toHaveBeenCalledTimes(1);
+    });
+
+    test('positive delay and timeout', async () => {
+        const resCache: ResGetCachedExports = {
+            version: '1',
+            exports: {
+                '4c77e42cee6f1be8afacffd4806cfdc3': {
+                    id: '4c77e42cee6f1be8afacffd4806cfdc3',
+                    version: '3faf86a8467e83f0ac969bf03bece264',
+                    name: 'some-name',
+                    type: ResExportDefinitionType.DOWNLOAD,
+                    hidden: false,
+                    dependency: [],
+                    delay: 250,
+                },
+            },
+        };
+
+        // Mock
+        const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
+        getCachedExports.mockReturnValue(
+            Promise.resolve({
+                data: resCache,
+                status: 200,
+                statusText: 'OK',
+                headers: {},
+                config: { headers: new AxiosHeaders() },
+            })
+        );
+
+        await expect(
+            // @ts-expect-error
+            utilsApi.waitForExportResult(
+                sessionId,
+                { parameters: {}, exports: ['4c77e42cee6f1be8afacffd4806cfdc3'] },
+                {
+                    version: '1',
+                    exports: {
+                        '4c77e42cee6f1be8afacffd4806cfdc3': {
+                            id: '4c77e42cee6f1be8afacffd4806cfdc3',
+                            version: '3faf86a8467e83f0ac969bf03bece264',
+                            name: 'some-name',
+                            type: ResExportDefinitionType.DOWNLOAD,
+                            hidden: false,
+                            dependency: [],
+                            delay: 100,
+                        },
+                    },
+                },
+                500
+            )
+        ).rejects.toThrow(TimeoutError);
+        expect(getCachedExports).toHaveBeenCalledTimes(3);
+    });
+});
+
+describe('getMaxOutputDelay', function () {
+    const utilsApi = new UtilsApi();
+
+    test('no outputs', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxOutputDelay({ version: '1', outputs: undefined });
+        expect(res).toBe(-1);
+    });
+
+    test('empty outputs', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxOutputDelay({ version: '1', outputs: {} });
+        expect(res).toBe(-1);
+    });
+
+    test('mixed', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxOutputDelay({
+            version: '1',
+            outputs: {
+                '0ca411fecc995160971ed9d965acd218': {
+                    id: '0ca411fecc995160971ed9d965acd218',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                },
+                '33c694f3a090a06560777870d3d1d317': {
+                    id: '33c694f3a090a06560777870d3d1d317',
+                    version: '0cb58bc66f41e5d02e7698041c61a267',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                },
+                '6298d3d386252e6c0d2a0606fa17b470': {
+                    id: '6298d3d386252e6c0d2a0606fa17b470',
+                    version: '164b3792229712add59cb8c20ae896d0',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                    delay: 1000,
+                },
+                e82d5ea72507658f8d20d73d2e36e329: {
+                    id: 'e82d5ea72507658f8d20d73d2e36e329',
+                    version: '20f19cbcecab95db84ef14be587d786b',
+                    name: 'some-name',
+                    hidden: false,
+                    dependency: [],
+                    delay: 1001,
+                },
+            },
+        });
+        expect(res).toBe(1001);
+    });
+});
+
+describe('getMaxExportDelay', function () {
+    const utilsApi = new UtilsApi();
+
+    test('no exports, no outputs', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxExportDelay(
+            { parameters: {}, exports: [] },
+            { version: '1', exports: undefined, outputs: undefined }
+        );
+        expect(res).toBe(-1);
+    });
+
+    test('empty exports, empty outputs', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxExportDelay(
+            { parameters: {}, exports: [] },
+            { version: '1', exports: {}, outputs: {} }
+        );
+        expect(res).toBe(-1);
+    });
+
+    test('mixed exports and outputs', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxExportDelay(
+            {
+                parameters: {},
+                exports: [
+                    'df4a9c34b6c0cde97ca9ed4862c83d3d',
+                    '4c77e42cee6f1be8afacffd4806cfdc3',
+                    '81de396951f26b0c1aaeafe54c1711c3',
+                    '2e18f3c4fa47270676af072d0ef3d7a6',
+                ],
+                outputs: [
+                    '0ca411fecc995160971ed9d965acd218',
+                    '33c694f3a090a06560777870d3d1d317',
+                    '6298d3d386252e6c0d2a0606fa17b470',
+                    'e82d5ea72507658f8d20d73d2e36e329',
+                ],
+            },
+            {
+                version: '1',
+                exports: {
+                    df4a9c34b6c0cde97ca9ed4862c83d3d: {
+                        id: 'df4a9c34b6c0cde97ca9ed4862c83d3d',
+                        name: '9ad04b1f9080be40d558bcb9bd8e82ab',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '4c77e42cee6f1be8afacffd4806cfdc3': {
+                        id: '4c77e42cee6f1be8afacffd4806cfdc3',
+                        version: '3faf86a8467e83f0ac969bf03bece264',
+                        name: 'some-name',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '81de396951f26b0c1aaeafe54c1711c3': {
+                        id: '81de396951f26b0c1aaeafe54c1711c3',
+                        version: '8131411b9ab5ed20a3e277fa640136ef',
+                        name: 'some-name',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                        delay: 998,
+                    },
+                    '2e18f3c4fa47270676af072d0ef3d7a6': {
+                        id: '2e18f3c4fa47270676af072d0ef3d7a6',
+                        version: 'f4c56df78c0851f9889c9ca44f3709dc',
+                        name: 'some-name',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                        delay: 999,
+                    },
+                },
+                outputs: {
+                    '0ca411fecc995160971ed9d965acd218': {
+                        id: '0ca411fecc995160971ed9d965acd218',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '33c694f3a090a06560777870d3d1d317': {
+                        id: '33c694f3a090a06560777870d3d1d317',
+                        version: 'some-version',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '6298d3d386252e6c0d2a0606fa17b470': {
+                        id: '6298d3d386252e6c0d2a0606fa17b470',
+                        version: 'some-version',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                        delay: 1000,
+                    },
+                    e82d5ea72507658f8d20d73d2e36e329: {
+                        id: 'e82d5ea72507658f8d20d73d2e36e329',
+                        version: 'some-version',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                        delay: 1001,
+                    },
+                },
+            }
+        );
+        expect(res).toBe(1001);
+    });
+
+    test('ignore non requested exports and outputs', () => {
+        // @ts-expect-error
+        const res = utilsApi.getMaxExportDelay(
+            {
+                parameters: {},
+                exports: ['df4a9c34b6c0cde97ca9ed4862c83d3d'],
+                outputs: ['0ca411fecc995160971ed9d965acd218'],
+            },
+            {
+                version: '1',
+                exports: {
+                    df4a9c34b6c0cde97ca9ed4862c83d3d: {
+                        id: 'df4a9c34b6c0cde97ca9ed4862c83d3d',
+                        name: '9ad04b1f9080be40d558bcb9bd8e82ab',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                    },
+                    '2e18f3c4fa47270676af072d0ef3d7a6': {
+                        id: '2e18f3c4fa47270676af072d0ef3d7a6',
+                        version: 'f4c56df78c0851f9889c9ca44f3709dc',
+                        name: 'some-name',
+                        type: ResExportDefinitionType.DOWNLOAD,
+                        hidden: false,
+                        dependency: [],
+                        delay: 1000,
+                    },
+                },
+                outputs: {
+                    '0ca411fecc995160971ed9d965acd218': {
+                        id: '0ca411fecc995160971ed9d965acd218',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                    },
+                    e82d5ea72507658f8d20d73d2e36e329: {
+                        id: 'e82d5ea72507658f8d20d73d2e36e329',
+                        version: 'some-version',
+                        name: 'some-name',
+                        hidden: false,
+                        dependency: [],
+                        delay: 1000,
+                    },
+                },
+            }
+        );
+        expect(res).toBe(-1);
+    });
+});
