@@ -1,3 +1,6 @@
+import { AxiosError, AxiosPromise } from 'axios';
+import { SdError, SdRequestError, SdResponseError } from './error';
+
 /** Delays the response for the given number of milliseconds */
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -70,4 +73,54 @@ export function filenameFromContentDisposition(contentDisposition: string): stri
 
     // Prefer filename* over filename
     return filenameStar || filename;
+}
+
+/**
+ * Helper function to check if an API call succeeded. This is useful for `metadata` endpoints when
+ * we want to check if a resource exists or not.
+ *
+ * @param apiCall The API call to execute.
+ * @returns A promise that resolves to `true` if the API call resulted in a `200` HTTP status, and
+ * `false` for a `404` HTTP error status. Any other error status will be propagated.
+ */
+export async function exists(apiCall: () => AxiosPromise<unknown>): Promise<boolean> {
+    return apiCall()
+        .then(() => true)
+        .catch((error) => {
+            if (error.response?.status === 404) return false;
+            throw error;
+        });
+}
+
+/**
+ * Converts a generic Axios error into a more specific ShapeDiver error.
+ * @param error The Axios error to convert.
+ */
+export function processError(
+    error: AxiosError | Error
+): SdError | SdRequestError | SdResponseError {
+    if ('response' in error) {
+        const err = error as AxiosError,
+            status = err.response!.status,
+            data = err.response!.data;
+
+        if (
+            data &&
+            typeof data === 'object' &&
+            'desc' in data &&
+            typeof data.desc === 'string' &&
+            'error' in data &&
+            typeof data.error === 'string' &&
+            'message' in data &&
+            typeof data.message === 'string'
+        ) {
+            return new SdResponseError(status, data.message, data.desc, data.error);
+        } else {
+            return new SdResponseError(status, err.message, 'No error description provided');
+        }
+    } else if ('request' in error) {
+        return new SdRequestError(error.message);
+    } else {
+        return new SdError(error.message);
+    }
 }

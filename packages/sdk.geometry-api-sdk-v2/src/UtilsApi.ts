@@ -1,6 +1,7 @@
 import { AxiosInstance, AxiosPromise, RawAxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
 import { createRequestFunction, serializeDataIfNeeded } from './client/common';
 import {
+    AssetsApi,
     Configuration,
     ExportApi,
     OutputApi,
@@ -17,7 +18,21 @@ import {
 } from './client';
 import { BaseAPI, RequestArgs } from './client/base';
 import { contentDispositionFromFilename, sleep } from './utils';
-import { TimeoutError } from './error';
+import { IllegalArgumentError, TimeoutError } from './error';
+
+/* Regex patterns for different asset types targeting the ShapeDiver API. */
+const apiAssetExportUri = /.+\/session\/.+\/export\/.+/;
+const apiAssetOutputUri = /.+\/session\/.+\/output\/.+/;
+const apiAssetTextureUri = /.+\/session\/.+\/texture\/.+/;
+
+/* Regex patterns for different asset types targeting the ShapeDiver CDN. */
+const cdnAssetUri = /.+\/cdn-asset-(exports|outputs|textures)\/.+/;
+const cdnAssetExportUri = /.+\/cdn-asset-exports\/.+/;
+const cdnAssetOutputUri = /.+\/cdn-asset-outputs\/.+/;
+const cdnAssetTextureUri = /.+\/cdn-asset-textures\/.+/;
+
+/* Regex patterns for direct download URIs. */
+const directDownloadUri = /^(http[s]?:\/\/)?(viewer|textures|downloads)\.shapediver\.com(\/.*)?$/;
 
 export class UtilsApi extends BaseAPI {
     constructor(configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
@@ -40,7 +55,10 @@ export class UtilsApi extends BaseAPI {
         options?: RawAxiosRequestConfig
     ): AxiosPromise<unknown> {
         // Prepare headers for the upload.
-        const reqHeaders: RawAxiosRequestHeaders = { 'Content-Type': contentType };
+        const reqHeaders: RawAxiosRequestHeaders = {
+            Authorization: undefined, // Disable by default to avoid accidental token exposure.
+            'Content-Type': contentType,
+        };
         if (filename) reqHeaders['Content-Disposition'] = contentDispositionFromFilename(filename);
 
         const reqOptions: RawAxiosRequestConfig = { ...options };
@@ -64,7 +82,10 @@ export class UtilsApi extends BaseAPI {
         options?: RawAxiosRequestConfig
     ): AxiosPromise<unknown> {
         // Prepare headers for the upload.
-        const reqHeaders: RawAxiosRequestHeaders = { 'Content-Type': headers.contentType };
+        const reqHeaders: RawAxiosRequestHeaders = {
+            Authorization: undefined, // Disable by default to avoid accidental token exposure.
+            'Content-Type': headers.contentType,
+        };
         if (headers.contentDisposition)
             reqHeaders['Content-Disposition'] = headers.contentDisposition;
 
@@ -83,6 +104,60 @@ export class UtilsApi extends BaseAPI {
     public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<File> {
         const request = this.buildRequest('GET', url, options)();
         return request();
+    }
+
+    /**
+     * Downloads a ShapeDiver export, output, or texture asset from the specified URL. The type of
+     * the asset is determined by the URL and returned with the promise.
+     * @param {string} url The URL of the asset to download.
+     * @param {*} [options] Override http request option.
+     * @throws {IllegalArgumentError} in case the URL is not a valid ShapeDiver asset URL.
+     */
+    public downloadAsset(
+        url: string,
+        options?: RawAxiosRequestConfig
+    ): [AxiosPromise<File>, 'export' | 'output' | 'texture'] {
+        let type: 'output' | 'export' | 'texture';
+        this.disableAuthHeaderForShapeDiverUris(url, options);
+
+        // Check if the given URL is a valid API or CDN asset URL
+        if (apiAssetExportUri.test(url) || cdnAssetExportUri.test(url)) type = 'export';
+        else if (apiAssetOutputUri.test(url) || cdnAssetOutputUri.test(url)) type = 'output';
+        else if (apiAssetTextureUri.test(url) || cdnAssetTextureUri.test(url)) type = 'texture';
+        else {
+            throw new IllegalArgumentError(
+                `Cannot fetch asset: Invalid URL '${url}' - Only ShapeDiver asset URLs are allowed.`
+            );
+        }
+
+        return [this.download(url, options), type];
+    }
+
+    /**
+     * Helper function that downloads all ShapeDiver texture URLs directly, and redirects all other
+     * URLs to the `AssetsApi.downloadImage` endpoint to avoid CORS issues.
+     * @param {string} sessionId The session ID.
+     * @param {string} url The URL of the image to download.
+     * @param {*} [options] Override http request option.
+     */
+    public downloadImage(
+        sessionId: string,
+        url: string,
+        options?: RawAxiosRequestConfig
+    ): AxiosPromise<File> {
+        this.disableAuthHeaderForShapeDiverUris(url, options);
+
+        if (
+            apiAssetTextureUri.test(url) ||
+            cdnAssetTextureUri.test(url) ||
+            directDownloadUri.test(url)
+        ) {
+            // Call ShapeDiver texture-asset URLs directly
+            return this.download(url, options);
+        } else {
+            // All other source URLs are called via the download-image endpoint
+            return new AssetsApi(this.configuration).downloadImage(sessionId, url, options);
+        }
     }
 
     /**
@@ -301,5 +376,18 @@ export class UtilsApi extends BaseAPI {
                 this.axios
             );
         };
+    }
+
+    /** Disable the Authorization header for ShapeDiver URIs if not explicitly set. */
+    private disableAuthHeaderForShapeDiverUris(
+        url: string,
+        options?: RawAxiosRequestConfig
+    ): void {
+        options = { ...options };
+        if (
+            !options.headers?.Authorization &&
+            (cdnAssetUri.test(url) || directDownloadUri.test(url))
+        )
+            options.headers = { Authorization: undefined, ...options.headers };
     }
 }

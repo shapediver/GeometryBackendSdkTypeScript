@@ -1,6 +1,7 @@
 import { basePath, jwtBackend, createTicket, now, readFile } from './config';
 import {
     Configuration,
+    exists,
     ModelStateApi,
     ReqModelState,
     ResParameterType,
@@ -46,6 +47,11 @@ test('basic model state', async () => {
     const resMetadata = await new ModelStateApi(config).getModelStateMetadata(modelStateId);
     expect(resMetadata.status).toBe(200);
 
+    // Or use the helper function to check if the Model-State was created successfully.
+    expect(
+        await exists(() => new ModelStateApi(config).getModelStateMetadata(modelStateId))
+    ).toBeTruthy();
+
     // Fetch all available information of the Model-State.
     const resModelStateInfo = (await new ModelStateApi(config).getModelState(modelStateId)).data;
     let parameter = resModelStateInfo.modelState.parameters[customParamId];
@@ -61,13 +67,9 @@ test('basic model state', async () => {
     expect(resModelStateData.modelState.data).toStrictEqual(customData);
 
     // Check if the Model-State has an image.
-    try {
-        await new ModelStateApi(config).getModelStateImageMetadata(modelStateId);
-        expect(true).toBeFalsy(); // This call should not succeed
-    } catch (err) {
-        const e = err as AxiosError;
-        expect(e.status).toBe(404); // We expect a NotFoundException
-    }
+    expect(
+        await exists(() => new ModelStateApi(config).getModelStateImageMetadata(modelStateId))
+    ).toBeFalsy();
 
     // Fetch all Model-States of a model.
     const resList = (
@@ -124,6 +126,11 @@ test('model state with image', async () => {
         modelStateId
     );
     expect(resImageMetadata.status).toBe(200);
+
+    // Or use the helper function to check if the Model-State has an image.
+    expect(
+        await exists(() => new ModelStateApi(config).getModelStateImageMetadata(modelStateId))
+    ).toBeTruthy();
 
     // Download the uploaded image.
     const resImage = (await new ModelStateApi(config).downloadModelStateImage(modelStateId))

@@ -1,6 +1,7 @@
 import {
     ArSceneApi,
     Configuration,
+    exists,
     GltfApi,
     ModelStateApi,
     QueryGltfConversion,
@@ -29,6 +30,9 @@ test('metadata and downloads', async () => {
     // Get metadata of an existing AR scene.
     const resMetadata = await new ArSceneApi(config).getArSceneMetadata(sceneId);
     expect(resMetadata.status).toBe(200);
+
+    // Or use the helper function to check if the AR scene exists.
+    expect(await exists(() => new ArSceneApi(config).getArSceneMetadata(sceneId))).toBeTruthy();
 
     // Download the created AR scene as glTF.
     const resGltf = (await new ArSceneApi(config).downloadArSceneGltf(sceneId))
@@ -77,6 +81,11 @@ test('model state from ar-scene', async () => {
     // Get metadata of the Model-State's AR scene.
     const resMetadata = await new ArSceneApi(config).getArSceneMetadata(modelStateId);
     expect(resMetadata.status).toBe(200);
+
+    // Or use the helper function to check if the Model-State's AR scene exists.
+    expect(
+        await exists(() => new ArSceneApi(config).getArSceneMetadata(modelStateId))
+    ).toBeTruthy();
 
     // Download the created Model-State's AR scene as glTF.
     const resGltf = (await new ArSceneApi(config).downloadArSceneGltf(modelStateId))
