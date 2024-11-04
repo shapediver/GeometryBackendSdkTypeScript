@@ -6,7 +6,7 @@
 
 # GeometryBackendSdkTypeScript
 
-> :warning: **You might be looking for the [v1 docs](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/legacy/v1) - [Migration Guide](https://help.shapediver.com/doc/geometry-backend-sdk-typescript-migration-guide#GeometryBackendSDKTypeScript-MigrationGuide-MigratingfromVersion1.x.xto2.x.x(03/11/2024)).**
+> :warning: **You might be looking for the [v1 docs](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/legacy/v1) - [Migration Guide](<https://help.shapediver.com/doc/geometry-backend-sdk-typescript-migration-guide#GeometryBackendSDKTypeScript-MigrationGuide-MigratingfromVersion1.x.xto2.x.x(03/11/2024)>).**
 
 [ShapeDiver](https://www.shapediver.com/) is a cloud platform for building online applications
 based on parametric 3D files made with [Rhinoceros 3D](https://www.rhino3d.com/) and
@@ -45,17 +45,24 @@ the _model view url_.
 ## Usage - Ticket only
 
 ```typescript
-import { Configuration, SessionApi } from '@shapediver/sdk.geometry-api-sdk-v2';
+import {
+  Configuration,
+  SessionApi
+} from '@shapediver/sdk.geometry-api-sdk-v2';
 
 (async function () {
     // Please see above on how to obtain a ticket
     const ticket = '8b23fae66cf535719a9ec797e390208b2003e3cfc894b7624ada2f6894515f8836a4-66303337623538322d34386';
 
     // Initialize the SDK configuration instance by providing the base URL
-    const config = new Configuration({ basePath: 'https://sdeuc1.eu-central-1.shapediver.com' });
+    const config = new Configuration({
+      basePath: 'https://sdeuc1.eu-central-1.shapediver.com'
+    });
 
     // Initialize a new session using the ticket.
-    const res = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const res = (
+      await new SessionApi(config).createSessionByTicket(ticket)
+    ).data;
 
     console.log(res);
 })();
@@ -69,7 +76,10 @@ with them, which provides a strong authorisation mechanism. In this case you wil
 your model on demand:
 
 ```typescript
-import { Configuration, SessionApi } from '@shapediver/sdk.geometry-api-sdk-v2';
+import {
+  Configuration,
+  SessionApi
+} from '@shapediver/sdk.geometry-api-sdk-v2';
 
 (async function () {
     // Please see above on how to obtain a ticket and a JWT.
@@ -83,7 +93,9 @@ import { Configuration, SessionApi } from '@shapediver/sdk.geometry-api-sdk-v2';
     });
 
     // Initialize a new session using the ticket.
-    const res = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const res = (
+      await new SessionApi(config).createSessionByTicket(ticket)
+    ).data;
 
     console.log(res);
 })();
@@ -126,8 +138,21 @@ catch (err) {
 
 ## Examples
 
-Examples on how to interact with available endpoints are given in the
-[tests](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/master/packages/sdk.geometry-api-sdk-v2/__tests__) folder.
+- For examples of interacting with SDK endpoints, refer to the [tests
+    directory](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/master/packages/sdk.geometry-api-sdk-v2/__tests__),
+    which provides detailed usage scenarios for each endpoint.
+
+- [ShapeDiver CAD to sdTF and sdTF to glTF
+    Conversion](https://github.com/shapediver/TypeScriptSdkExample-sdTF-in-out): An example of using
+    the ShapeDiver backend to convert _CAD files to sdTF_ and _sdTF files to glTF_.
+
+- [ShapeDiver CAD to glTF
+    Conversion](https://github.com/shapediver/TypeScriptSdkExample-glTF-Converter): An example of
+    using the ShapeDiver backend to convert _CAD files to glTF format_.
+
+- [Command-Line Interface Example](https://github.com/shapediver/TypeScriptSdkExample-CLI): A simple
+    example demonstrating how to use the ShapeDiver TypeScript SDKs (_Platform SDK_ and _Geometry
+    Backend SDK_) within a CLI tool.
 
 ## Making Changes & Contributing
 
