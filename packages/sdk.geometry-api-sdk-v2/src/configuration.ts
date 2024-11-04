@@ -6,7 +6,7 @@ import {
 export interface ConfigurationParameters extends ClientConfigParams {}
 
 export class Configuration extends ClientConfig {
-    protected readonly sdkVersion = '2.0.0'; // WARNING: This value is updated automatically!
+    protected readonly sdkVersion = '2.0.1'; // WARNING: This value is updated automatically!
 
     constructor(param: ConfigurationParameters = {}) {
         super(param);
