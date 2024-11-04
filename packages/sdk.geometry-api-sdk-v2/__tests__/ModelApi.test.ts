@@ -41,9 +41,10 @@ test('model', async () => {
     expect(resGet.model.id).toBe(modelId);
 
     // Download the model's Grasshopper file.
-    const resGh = (await new ModelApi(modelConfig).downloadModelFile(modelId))
-        .data as unknown as string;
-    expect(resGh.length).toBeGreaterThan(0);
+    const resGh = (
+        await new ModelApi(modelConfig).downloadModelFile(modelId, { responseType: 'arraybuffer' })
+    ).data as unknown as Buffer;
+    expect(resGh.byteLength).toBeGreaterThan(0);
 
     // Get the model's computation statistics by status.
     const resComp = (

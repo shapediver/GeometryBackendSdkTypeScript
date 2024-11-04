@@ -133,9 +133,12 @@ test('model state with image', async () => {
     ).toBeTruthy();
 
     // Download the uploaded image.
-    const resImage = (await new ModelStateApi(config).downloadModelStateImage(modelStateId))
-        .data as unknown as string;
-    expect(resImage.length).toBeGreaterThan(0);
+    const resImage = (
+        await new ModelStateApi(config).downloadModelStateImage(modelStateId, {
+            responseType: 'arraybuffer',
+        })
+    ).data as unknown as Buffer;
+    expect(resImage.byteLength).toBeGreaterThan(0);
 
     // Fetch all available information of the Model-State.
     const resModelStateInfo = (await new ModelStateApi(config).getModelState(modelStateId)).data;

@@ -35,14 +35,16 @@ test('metadata and downloads', async () => {
     expect(await exists(() => new ArSceneApi(config).getArSceneMetadata(sceneId))).toBeTruthy();
 
     // Download the created AR scene as glTF.
-    const resGltf = (await new ArSceneApi(config).downloadArSceneGltf(sceneId))
-        .data as unknown as string;
-    expect(resGltf.length).toBeGreaterThan(0);
+    const resGltf = (
+        await new ArSceneApi(config).downloadArSceneGltf(sceneId, { responseType: 'arraybuffer' })
+    ).data as unknown as Buffer;
+    expect(resGltf.byteLength).toBeGreaterThan(0);
 
     // Download the created AR scene as USDZ.
-    const resUsdz = (await new ArSceneApi(config).downloadArSceneUsdz(sceneId))
-        .data as unknown as string;
-    expect(resUsdz.length).toBeGreaterThan(0);
+    const resUsdz = (
+        await new ArSceneApi(config).downloadArSceneUsdz(sceneId, { responseType: 'arraybuffer' })
+    ).data as unknown as Buffer;
+    expect(resUsdz.byteLength).toBeGreaterThan(0);
 
     // Close the session.
     await new SessionApi(config).closeSession(sessionId);
@@ -88,14 +90,20 @@ test('model state from ar-scene', async () => {
     ).toBeTruthy();
 
     // Download the created Model-State's AR scene as glTF.
-    const resGltf = (await new ArSceneApi(config).downloadArSceneGltf(modelStateId))
-        .data as unknown as string;
-    expect(resGltf.length).toBeGreaterThan(0);
+    const resGltf = (
+        await new ArSceneApi(config).downloadArSceneGltf(modelStateId, {
+            responseType: 'arraybuffer',
+        })
+    ).data as unknown as Buffer;
+    expect(resGltf.byteLength).toBeGreaterThan(0);
 
     // Download the created Model-State's AR scene as USDZ.
-    const resUsdz = (await new ArSceneApi(config).downloadArSceneUsdz(modelStateId))
-        .data as unknown as string;
-    expect(resUsdz.length).toBeGreaterThan(0);
+    const resUsdz = (
+        await new ArSceneApi(config).downloadArSceneUsdz(modelStateId, {
+            responseType: 'arraybuffer',
+        })
+    ).data as unknown as Buffer;
+    expect(resUsdz.byteLength).toBeGreaterThan(0);
 
     // Delete the Model-State.
     await new ModelStateApi(backendConfig).deleteModelState(modelStateId);

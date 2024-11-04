@@ -54,9 +54,11 @@ test('file parameter', async () => {
 
     // Download the uploaded file.
     const resData = (
-        await new FileApi(modelConfig).downloadFile(sessionId, fileParams[0].id, file.id)
-    ).data as unknown as string;
-    expect(resData.length).toBeGreaterThan(0);
+        await new FileApi(modelConfig).downloadFile(sessionId, fileParams[0].id, file.id, {
+            responseType: 'arraybuffer',
+        })
+    ).data as unknown as Buffer;
+    expect(resData.byteLength).toBeGreaterThan(0);
 
     // Get metadata of an existing file.
     const resMetadata = await new FileApi(config).getFileMetadata(

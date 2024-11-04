@@ -37,9 +37,12 @@ test('sdtf', async () => {
     expect(upload.status).toBe(200);
 
     // Download the uploaded sdTF.
-    const resData = (await new SdtfApi(modelConfig).downloadSdtf(sessionId, namespace, sdtf.id))
-        .data as unknown as string;
-    expect(resData.length).toBeGreaterThan(0);
+    const resData = (
+        await new SdtfApi(modelConfig).downloadSdtf(sessionId, namespace, sdtf.id, {
+            responseType: 'arraybuffer',
+        })
+    ).data as unknown as Buffer;
+    expect(resData.byteLength).toBeGreaterThan(0);
 
     // List all sdTFs of a specific namespace.
     const resListNew = (await new SdtfApi(modelConfig).listSdtfs(sessionId, namespace)).data;

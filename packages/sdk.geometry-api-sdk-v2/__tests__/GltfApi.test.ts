@@ -15,8 +15,10 @@ test('upload gltf', async () => {
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the uploaded glTF.
-    const resGltf = (await new UtilsApi().download(resUpload.gltf.href)).data as unknown as string;
-    expect(resGltf.length).toBe(data.size);
+    const resGltf = (
+        await new UtilsApi().download(resUpload.gltf.href, { responseType: 'arraybuffer' })
+    ).data as unknown as Buffer;
+    expect(resGltf.byteLength).toBe(data.size);
 
     // Close the session.
     await new SessionApi(config).closeSession(sessionId);
@@ -38,8 +40,10 @@ test('upload gltf and convert to usdz', async () => {
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the created USDZ.
-    const resUsdz = (await new UtilsApi().download(resUpload.gltf.href)).data as unknown as string;
-    expect(resUsdz.length !== data.size).toBeTruthy();
+    const resUsdz = (
+        await new UtilsApi().download(resUpload.gltf.href, { responseType: 'arraybuffer' })
+    ).data as unknown as Buffer;
+    expect(resUsdz.byteLength !== data.size).toBeTruthy();
 
     // Close the session.
     await new SessionApi(config).closeSession(session);
