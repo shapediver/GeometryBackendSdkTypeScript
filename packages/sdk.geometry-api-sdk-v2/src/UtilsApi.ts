@@ -102,7 +102,7 @@ export class UtilsApi extends BaseAPI {
      * @param {*} [options] Override http request option.
      */
     public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<File> {
-        const request = this.buildRequest('GET', url, options)();
+        const request = this.buildRequest('GET', url, undefined, options)();
         return request();
     }
 
