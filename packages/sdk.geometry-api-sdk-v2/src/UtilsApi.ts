@@ -408,8 +408,14 @@ export class UtilsApi extends BaseAPI {
                 reqOptions.data = serializeDataIfNeeded(data, reqOptions, configuration);
             }
 
+            // Remove the base path configuration if the URL is a full URL.
+            const configuration =
+                this.configuration && url.startsWith('http')
+                    ? new Configuration({ ...this.configuration, basePath: undefined })
+                    : this.configuration;
+
             const axiosArgs: RequestArgs = { url, options: reqOptions };
-            return createRequestFunction(axiosArgs, this.axios, basePath, this.configuration).bind(
+            return createRequestFunction(axiosArgs, this.axios, basePath, configuration).bind(
                 this.axios
             );
         };
