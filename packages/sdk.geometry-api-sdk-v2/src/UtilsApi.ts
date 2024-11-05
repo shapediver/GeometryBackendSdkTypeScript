@@ -42,14 +42,14 @@ export class UtilsApi extends BaseAPI {
     /**
      * Upload the given file to the specified URL.
      * @param {string} url The target URL of the upload request.
-     * @param {string | Record<string, any> | ArrayBuffer | File} data The data that should be uploaded. Warning: Type `File` in Node.js might lead to problems!
+     * @param {*} data The data that should be uploaded.
      * @param {string} contentType Indicate the original media type of the resource.
      * @param {string} [filename] The name of the file to be uploaded. When a filename has been specified in the request-upload call, then the same filename has to be specified for the upload as well.
      * @param {*} [options] Override http request option.
      */
     public upload(
         url: string,
-        data: string | Record<string, any> | ArrayBuffer | File,
+        data: any,
         contentType: string,
         filename?: string,
         options?: RawAxiosRequestConfig
@@ -71,13 +71,13 @@ export class UtilsApi extends BaseAPI {
     /**
      * Upload the given asset to the specified ShapeDiver URL.
      * @param {string} url The target URL of the upload request.
-     * @param {string | Record<string, any> | ArrayBuffer | File} data The data that should be uploaded. Warning: Type `File` in Node.js might lead to problems!
+     * @param {*} data The data that should be uploaded.
      * @param {ResAssetUploadHeaders} headers The headers object that was returned from the request-upload call.
      * @param {*} [options] Override http request option.
      */
     public uploadAsset(
         url: string,
-        data: string | Record<string, any> | ArrayBuffer | File,
+        data: any,
         headers: ResAssetUploadHeaders,
         options?: RawAxiosRequestConfig
     ): AxiosPromise<unknown> {
@@ -98,10 +98,25 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Download from the specified URL.
+     *
+     * The response type can be controlled by setting the `responseType` in the `options` object.
      * @param {string} url The target URL of the download request.
      * @param {*} [options] Override http request option.
      */
-    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<File> {
+    public download(
+        url: string,
+        options: { responseType: 'arraybuffer' | 'blob' } & RawAxiosRequestConfig
+    ): AxiosPromise<File>;
+    public download(
+        url: string,
+        options: { responseType: 'json' } & RawAxiosRequestConfig
+    ): AxiosPromise<Record<string, unknown>>;
+    public download(
+        url: string,
+        options: { responseType: 'text' } & RawAxiosRequestConfig
+    ): AxiosPromise<string>;
+    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<unknown>;
+    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<unknown> {
         const request = this.buildRequest('GET', url, undefined, options)();
         return request();
     }
@@ -109,14 +124,24 @@ export class UtilsApi extends BaseAPI {
     /**
      * Downloads a ShapeDiver export, output, or texture asset from the specified URL. The type of
      * the asset is determined by the URL and returned with the promise.
+     *
+     * The response type can be controlled by setting the `responseType` in the `options` object.
      * @param {string} url The URL of the asset to download.
      * @param {*} [options] Override http request option.
      * @throws {IllegalArgumentError} in case the URL is not a valid ShapeDiver asset URL.
      */
     public downloadAsset(
         url: string,
+        options: { responseType: 'arraybuffer' | 'blob' } & RawAxiosRequestConfig
+    ): [AxiosPromise<File>, 'export' | 'output' | 'texture'];
+    public downloadAsset(
+        url: string,
         options?: RawAxiosRequestConfig
-    ): [AxiosPromise<File>, 'export' | 'output' | 'texture'] {
+    ): [AxiosPromise<unknown>, 'export' | 'output' | 'texture'];
+    public downloadAsset(
+        url: string,
+        options?: RawAxiosRequestConfig
+    ): [AxiosPromise<unknown>, 'export' | 'output' | 'texture'] {
         let type: 'output' | 'export' | 'texture';
         this.disableAuthHeaderForShapeDiverUris(url, options);
 
@@ -130,12 +155,14 @@ export class UtilsApi extends BaseAPI {
             );
         }
 
-        return [this.download(url, options), type];
+        return [this.download(url, options) as any, type];
     }
 
     /**
      * Helper function that downloads all ShapeDiver texture URLs directly, and redirects all other
      * URLs to the `AssetsApi.downloadImage` endpoint to avoid CORS issues.
+     *
+     * The response type can be controlled by setting the `responseType` in the `options` object.
      * @param {string} sessionId The session ID.
      * @param {string} url The URL of the image to download.
      * @param {*} [options] Override http request option.
@@ -143,8 +170,18 @@ export class UtilsApi extends BaseAPI {
     public downloadImage(
         sessionId: string,
         url: string,
+        options: { responseType: 'arraybuffer' | 'blob' } & RawAxiosRequestConfig
+    ): AxiosPromise<File>;
+    public downloadImage(
+        sessionId: string,
+        url: string,
         options?: RawAxiosRequestConfig
-    ): AxiosPromise<File> {
+    ): AxiosPromise<unknown>;
+    public downloadImage(
+        sessionId: string,
+        url: string,
+        options?: RawAxiosRequestConfig
+    ): AxiosPromise<unknown> {
         this.disableAuthHeaderForShapeDiverUris(url, options);
 
         if (
@@ -153,7 +190,7 @@ export class UtilsApi extends BaseAPI {
             directDownloadUri.test(url)
         ) {
             // Call ShapeDiver texture-asset URLs directly
-            return this.download(url, options);
+            return this.download(url, options) as any;
         } else {
             // All other source URLs are called via the download-image endpoint
             return new AssetsApi(this.configuration).downloadImage(sessionId, url, options);
