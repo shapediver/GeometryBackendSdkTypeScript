@@ -1,5 +1,5 @@
 import { AxiosError, AxiosPromise } from 'axios';
-import { SdError, SdRequestError, SdResponseError } from './error';
+import { RequestError, ResponseError } from './error';
 
 /** Delays the response for the given number of milliseconds */
 export function sleep(ms: number): Promise<void> {
@@ -93,12 +93,11 @@ export async function exists(apiCall: () => AxiosPromise<unknown>): Promise<bool
 }
 
 /**
- * Converts a generic Axios error into a more specific ShapeDiver error.
+ * Tries to convert a generic Axios error into a more specific ShapeDiver error. When no match is
+ * found, the original error is returned instead.
  * @param error The Axios error to convert.
  */
-export function processError(
-    error: AxiosError | Error
-): SdError | SdRequestError | SdResponseError {
+export function processError(error: AxiosError | Error): Error | RequestError | ResponseError {
     if ('response' in error) {
         const err = error as AxiosError,
             status = err.response!.status,
@@ -114,13 +113,13 @@ export function processError(
             'message' in data &&
             typeof data.message === 'string'
         ) {
-            return new SdResponseError(status, data.message, data.desc, data.error);
+            return new ResponseError(status, data.message, data.desc, data.error);
         } else {
-            return new SdResponseError(status, err.message, 'No error description provided');
+            return new ResponseError(status, err.message, 'No error description provided');
         }
     } else if ('request' in error) {
-        return new SdRequestError(error.message);
+        return new RequestError(error.message);
     } else {
-        return new SdError(error.message);
+        return error;
     }
 }

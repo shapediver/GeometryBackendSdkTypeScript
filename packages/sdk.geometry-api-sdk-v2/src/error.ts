@@ -1,17 +1,17 @@
 import { ResErrorType } from './client';
 
 /**
- * Represents a generic (non-request and non-response) error.
+ * Represents a generic ShapeDiver error.
  *
  * Something happened in setting up the request that triggered an Error.
  * @export
- * @class SdError
+ * @class SdGeometryError
  * @extends {Error}
  */
-export class SdError extends Error {
-    constructor(message: string) {
+export class SdGeometryError extends Error {
+    constructor(message?: string) {
         super(message);
-        this.name = 'SdError';
+        this.name = 'SdGeometryError';
     }
 }
 
@@ -20,13 +20,13 @@ export class SdError extends Error {
  *
  * The request was made but no response was received.
  * @export
- * @class SdRequestError
- * @extends {Error}
+ * @class RequestError
+ * @extends {SdGeometryError}
  */
-export class SdRequestError extends Error {
+export class RequestError extends SdGeometryError {
     constructor(message: string) {
         super(message);
-        this.name = 'SdRequestError';
+        this.name = 'RequestError';
     }
 }
 
@@ -36,10 +36,10 @@ export class SdRequestError extends Error {
  * The request was made and the server responded with a status code that falls out of the range of
  * 2xx.
  * @export
- * @class SdResponseError
- * @extends {Error}
+ * @class ResponseError
+ * @extends {SdGeometryError}
  */
-export class SdResponseError extends Error {
+export class ResponseError extends SdGeometryError {
     /** The HTTP status code from the server response. */
     public readonly status: number;
 
@@ -51,7 +51,7 @@ export class SdResponseError extends Error {
 
     constructor(status: number, message: string, desc: string, type?: string) {
         super(message);
-        this.name = 'SdResponseError';
+        this.name = 'ResponseError';
         this.status = status;
         this.description = desc;
         this.type =
@@ -64,9 +64,9 @@ export class SdResponseError extends Error {
 /**
  * @export
  * @class IllegalArgumentError
- * @extends {Error}
+ * @extends {SdGeometryError}
  */
-export class IllegalArgumentError extends Error {
+export class IllegalArgumentError extends SdGeometryError {
     constructor(
         public field: string,
         msg?: string
@@ -79,9 +79,9 @@ export class IllegalArgumentError extends Error {
 /**
  * @export
  * @class TimeoutError
- * @extends {Error}
+ * @extends {SdGeometryError}
  */
-export class TimeoutError extends Error {
+export class TimeoutError extends SdGeometryError {
     constructor(
         public field: string,
         msg?: string

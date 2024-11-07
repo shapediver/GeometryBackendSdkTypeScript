@@ -20,9 +20,6 @@ importers:
       '@types/node':
         specifier: ~20.16.3
         version: 20.16.3
-      axios-mock-adapter:
-        specifier: ~2.1.0
-        version: 2.1.0(axios@1.7.7)
       eslint:
         specifier: ~9.12.0
         version: 9.12.0
@@ -75,6 +72,9 @@ importers:
       '@types/uuid':
         specifier: ~10.0.0
         version: 10.0.0
+      axios-mock-adapter:
+        specifier: ~2.1.0
+        version: 2.1.0(axios@1.7.7)
       jest:
         specifier: ~29.7.0
         version: 29.7.0(@types/node@20.16.3)

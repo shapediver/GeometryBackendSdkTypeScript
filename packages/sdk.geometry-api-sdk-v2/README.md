@@ -108,30 +108,44 @@ The SDK provides a helper function to extract ShapeDiver error information from 
 ```typescript
 import {
   processError,
-  SdError,
-  SdRequestError,
-  SdResponseError,
+  SdGeometryError,
+  RequestError,
+  ResponseError,
 } from "@shapediver/sdk.geometry-api-sdk-v2"
 
 try {
   sdk.model.get("be5d4ce5-f76d-417d-8496-1f038e6f0cab")
-catch (err) {
+} catch (err) {
   const e = processError(err);
 
-  if (e instanceof SdRequestError) {
-    // e is a request error.
-    // In this case, the request was made but no response was received.
+  if (e instanceof SdGeometryError) {
+    /*
+     * Generic ShapeDiver error.
+     *
+     * Generic errors are the base class of all custom ShapeDiver errors, like RequestError,
+     * ResponseError, IllegalArgumentError, TimeoutError, etc.
+     *
+     * Warning:
+     *  Generic Axios errors (non-request/response errors) that are thrown when setting up the
+     *  request are not converted into a SdGeometryError!
+     */
   }
 
-  if (e instanceof SdResponseError) {
-    // e is a response error.
-    // In this case, the request was made and the server responded with a status code that falls
-    // out of the range of 2xx.
+  if (e instanceof RequestError) {
+    /*
+     * Wrapper around an Axios request error.
+     *
+     * In this case, the request was made but no response was received.
+     */
   }
 
-  if (e instanceof SdError) {
-    // e is a generic error.
-    // Generic errors are used for everything that is neither a request error nor a response error.
+  if (e instanceof ResponseError) {
+    /*
+     * Wrapper around an Axios response error.
+     *
+     * In this case, the request was made and the server responded with a status code that falls
+     * out of the range of 2xx.
+     */
   }
 }
 ```
