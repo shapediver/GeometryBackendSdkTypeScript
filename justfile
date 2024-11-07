@@ -53,6 +53,9 @@ generate version:
         "{{target_dir}}/configuration.ts" \
         "{{target_dir}}/index.ts"
 
+    # Apply manual modifications to the generated DTO files.
+    just _post-generation
+
     # Clean up.
     rm -rf "{{target_dir}}"
 
@@ -74,3 +77,13 @@ test-generator:
         --dry-run \
         -i "{{oas_repo}}/geometry_backend_v2.yaml" \
         -g typescript-axios
+
+# Steps to be executed after the generation of the TypeScript client.
+_post-generation:
+    #!/usr/bin/env bash
+    # Replace client BaseAPI import in api.ts with custom BaseAPI implementation.
+    pattern="^import \{(.*)BaseAPI,?\s?(.*)\} from '.\/base';$"
+    replacement="import \{\1\2\} from '.\/base';"
+    added_line="import \{ BaseAPI \} from '..\/base';"
+    sed -ri "s/${pattern}/${replacement}\n${added_line}/g" \
+        "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
