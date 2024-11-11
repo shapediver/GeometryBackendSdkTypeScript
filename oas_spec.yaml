@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.6.1
+  version: 1.7.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -244,6 +244,16 @@ components:
       required:
         - id
         - name
+    CommonsModelBlockingReasons: &CommonsModelBlockingReasons
+      description: Reasons why the model may be blocked.
+      type: object
+      properties:
+        creditLimit:
+          description: The model owner's credit limit has been exceeded.
+          type: boolean
+        owner:
+          description: The model has been blocked explicitly by its owner.
+          type: boolean
     CommonsModelStatus: &CommonsModelStatus
       description: Status of a model.
       type: string
@@ -263,13 +273,13 @@ components:
         - CONFIRMED
         - DENIED
         - DELETED
-    CommonsBasicParameter:
+    CommonsBasicParameter: &CommonsBasicParameter
       description: Definition of a basic ShapeDiver parameter.
       oneOf:
         - type: string
         - type: number
         - type: boolean
-    CommonsStypeParameter:
+    CommonsStypeParameter: &CommonsStypeParameter
       description: Definition of the value to use for s-type parameters.
       type: object
       properties:
@@ -605,11 +615,15 @@ components:
               - id
       required:
         - parameters
+    ReqBasicParameter:
+      <<: *CommonsBasicParameter
+    ReqStypeParameter:
+      <<: *CommonsStypeParameter
     ReqParameterValue:
       description: The value of a single model parameter.
       oneOf:
-        - $ref: "#/components/schemas/CommonsBasicParameter"
-        - $ref: "#/components/schemas/CommonsStypeParameter"
+        - $ref: "#/components/schemas/ReqBasicParameter"
+        - $ref: "#/components/schemas/ReqStypeParameter"
     ReqCustomization:
       description: |-
         A directory of parameter keys and values.
@@ -621,8 +635,8 @@ components:
         * `displayname`
 
         Supported parameter values are:
-        * Basic parameter (`CommonsBasicParameter`)
-        * S-type parameter (`CommonsStypeParameter`)
+        * Basic parameter (`ReqBasicParameter`)
+        * S-type parameter (`ReqStypeParameter`)
       type: object
       additionalProperties:
         $ref: "#/components/schemas/ReqParameterValue"
@@ -810,6 +824,9 @@ components:
         backendaccess:
           description: Should backend access to the model be allowed.
           type: boolean
+        blockingReasons:
+          title: ReqModelBlockingReasons
+          <<: *CommonsModelBlockingReasons
         filename:
           description: Original name of the model's grasshopper file.
           type: string
@@ -2757,6 +2774,20 @@ components:
         backlinkurl:
           description: Link to view the model on the ShapeDiver Platform.
           type: string
+        blockingReasons:
+          title: ResModelBlockingReasons
+          allOf:
+            - $ref: "#/components/schemas/CommonsModelBlockingReasons"
+            - type: object
+              properties:
+                pluginPermission:
+                  description: >-
+                    The model uses a Grasshopper plugin that is not allowed for the owner.
+                  type: boolean
+              required:
+                - creditLimit
+                - owner
+                - pluginPermission
         checkurl:
           description: >-
             Link to continue the checking process of the model on the ShapeDiver Platform.
@@ -3368,16 +3399,20 @@ components:
         - hasImage
         - hasGltf
         - hasUsdz
+    ResBasicParameter:
+      <<: *CommonsBasicParameter
+    ResStypeParameter:
+      <<: *CommonsStypeParameter
     ResParameterValue:
       description: >-
         The value of a single model parameter.
 
         Supported parameter values are:
-        * Basic parameter (`CommonsBasicParameter`)
-        * S-type parameter (`CommonsStypeParameter`)
+        * Basic parameter (`ResBasicParameter`)
+        * S-type parameter (`ResStypeParameter`)
       oneOf:
-        - $ref: "#/components/schemas/CommonsBasicParameter"
-        - $ref: "#/components/schemas/CommonsStypeParameter"
+        - $ref: "#/components/schemas/ResBasicParameter"
+        - $ref: "#/components/schemas/ResStypeParameter"
     ResModelComputationStats:
       description: Stats of a computation request.
       type: object
