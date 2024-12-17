@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.7.0
+  version: 1.8.1
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -949,8 +949,6 @@ components:
         deny_scripts:
           description: Allows to control whether the model's Grasshopper file can contain scripts.
           type: boolean
-      required:
-        - pub
     ReqParameterDefinitions:
       description: >-
         Definition of model parameters. A directory of parameter-IDs and parameter-definitions.
@@ -2774,20 +2772,6 @@ components:
         backlinkurl:
           description: Link to view the model on the ShapeDiver Platform.
           type: string
-        blockingReasons:
-          title: ResModelBlockingReasons
-          allOf:
-            - $ref: "#/components/schemas/CommonsModelBlockingReasons"
-            - type: object
-              properties:
-                pluginPermission:
-                  description: >-
-                    The model uses a Grasshopper plugin that is not allowed for the owner.
-                  type: boolean
-              required:
-                - creditLimit
-                - owner
-                - pluginPermission
         checkurl:
           description: >-
             Link to continue the checking process of the model on the ShapeDiver Platform.
@@ -3319,6 +3303,9 @@ components:
           description: Model's limits at the time of the computation process.
           allOf:
             - $ref: "#/components/schemas/ResComputationLimits"
+        credits:
+          description: The number of credits that are charged for this computation.
+          type: number
       required:
         - id
         - timestamp
@@ -4089,6 +4076,20 @@ components:
         cdn_supported:
           description: Indicates if the model supports CDN-based asset URLs.
           type: boolean
+        blockingReasons:
+          title: ResModelBlockingReasons
+          allOf:
+            - $ref: "#/components/schemas/CommonsModelBlockingReasons"
+            - type: object
+              properties:
+                pluginPermission:
+                  description: >-
+                    The model uses a Grasshopper plugin that is not allowed for the owner.
+                  type: boolean
+              required:
+                - creditLimit
+                - owner
+                - pluginPermission
     ResSystem:
       description: ShapeDiver API response of system-request.
       type: object
