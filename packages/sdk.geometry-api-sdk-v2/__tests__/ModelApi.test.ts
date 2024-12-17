@@ -8,6 +8,7 @@ import {
     ReqCustomization,
     ReqModel,
     ReqParameterDefinitions,
+    SessionApi,
 } from '../src';
 
 test('model config', async () => {
@@ -110,6 +111,45 @@ test('parameters', async () => {
     const reqParam: ReqParameterDefinitions = {};
     for (const id of Object.keys(resModel.parameters!)) reqParam[id] = { tooltip: tooltip };
     await new ModelApi(modelConfig).updateParameterDefinitions(modelId, reqParam);
+});
+
+test('model blocking', async () => {
+    const backendConfig = new Configuration({
+        basePath,
+        accessToken: jwtBackend,
+    });
+    const modelConfig = new Configuration({
+        basePath,
+        accessToken: jwtModel,
+    });
+
+    // Fetch a model.
+    let resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
+    expect(resModel.setting.model?.blockingReasons?.owner).toBeFalsy();
+    expect(resModel.setting.model?.blockingReasons?.creditLimit).toBeFalsy();
+    expect(resModel.setting.model?.blockingReasons?.pluginPermission).toBeFalsy();
+
+    // Block the model.
+    let reqModel: ReqModel = { blockingReasons: { owner: true } };
+    new ModelApi(backendConfig).updateModel(modelId, reqModel);
+
+    // Fetch a model.
+    resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
+    expect(resModel.setting.model?.blockingReasons?.owner).toBeTruthy();
+    expect(resModel.setting.model?.blockingReasons?.creditLimit).toBeFalsy();
+    expect(resModel.setting.model?.blockingReasons?.pluginPermission).toBeFalsy();
+
+    // Init session should not work anymore.
+    expect(new SessionApi(modelConfig).createSessionByModel(modelId)).rejects.toThrow();
+
+    // Unblock the model.
+    reqModel = { blockingReasons: { owner: false } };
+    await new ModelApi(backendConfig).updateModel(modelId, reqModel);
+
+    // Session init should work again.
+    const sessionId = (await new SessionApi(modelConfig).createSessionByModel(modelId)).data
+        .sessionId;
+    await new SessionApi(modelConfig).closeSession(sessionId);
 });
 
 test('soft delete and restore', async () => {
