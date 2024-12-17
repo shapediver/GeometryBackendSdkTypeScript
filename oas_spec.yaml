@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.8.1
+  version: 1.8.2
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -233,7 +233,7 @@ components:
         - NO_OUTPUT_DATA_FOR_DEFAULT_PARAMETER_VALUES
         - MODEL_WITHOUT_GEOMETRY_OUTPUT
         - UNKNOWN
-    CommonsGroup:
+    CommonsGroup: &CommonsGroup
       description: Group of a parameter, export or output.
       type: object
       properties:
@@ -397,9 +397,7 @@ components:
     #- Request data structures                                               -#
     #-------------------------------------------------------------------------#
     ReqGroup:
-      description: Group information.
-      allOf:
-        - $ref: "#/components/schemas/CommonsGroup"
+      <<: *CommonsGroup
     ReqTicket:
       description: Body of a ticket request.
       allOf:
