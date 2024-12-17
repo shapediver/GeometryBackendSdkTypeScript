@@ -6,6 +6,7 @@ remote_file_name := "geometry_backend_v2.yaml"
 
 spec_file := "oas_spec.yaml"
 target_dir := "./out"
+sdk_client_dir := "./packages/sdk.geometry-api-sdk-v2/src/client/"
 
 # Path of the local OAS repository.
 oas_repo := "../OpenApiSpecifications/"
@@ -44,14 +45,13 @@ generate version:
         }
 
     # Replace old client with new one.
-    rm -rf "packages/sdk.geometry-api-sdk-v2/src/client/" || :
-    mkdir "packages/sdk.geometry-api-sdk-v2/src/client/"
-    mv -t "packages/sdk.geometry-api-sdk-v2/src/client/" \
-        "{{target_dir}}/api.ts" \
-        "{{target_dir}}/base.ts" \
-        "{{target_dir}}/common.ts" \
-        "{{target_dir}}/configuration.ts" \
-        "{{target_dir}}/index.ts"
+    rm -rf "{{sdk_client_dir}}" || :
+    mkdir -p "{{sdk_client_dir}}"
+    mv "{{target_dir}}/api.ts" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/base.ts" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/common.ts" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/configuration.ts" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/index.ts" "{{sdk_client_dir}}"
 
     # Apply manual modifications to the generated DTO files.
     just _post-generation
@@ -85,5 +85,14 @@ _post-generation:
     pattern="^import \{(.*)BaseAPI,?\s?(.*)\} from '.\/base';$"
     replacement="import \{\1\2\} from '.\/base';"
     added_line="import \{ BaseAPI \} from '..\/base';"
-    sed -ri "s/${pattern}/${replacement}\n${added_line}/g" \
-        "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
+    case $(uname -s) in
+    Linux) 
+        sed -ri "s/${pattern}/${replacement}\n${added_line}/g" \
+            "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
+        ;;
+    Darwin)
+        sed -ri '' "s/${pattern}/${replacement}\n${added_line}/g" \
+            "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
+        ;;
+    *) exit 1 ;;
+    esac
