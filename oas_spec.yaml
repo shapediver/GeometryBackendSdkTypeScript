@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.8.2
+  version: 1.9.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -908,9 +908,20 @@ components:
           allOf:
             - $ref: "#/components/schemas/Uuid"
         prev_id:
-          description: Model ID of this model's previous version.
+          description: >-
+            The Model ID of the previous version of this model.
+
+            This property is applicable only when creating a new model and cannot be used in
+            conjunction with `prev_id`.
           allOf:
             - $ref: "#/components/schemas/Uuid"
+        with_repo:
+          description: >-
+            If set to `true`, a new repository will be created for the model.
+
+            This property is applicable only when creating a new model and cannot be used in
+            conjunction with `prev_id`.
+          type: boolean
         pub:
           description: Allows public access (ignore `accessdomains`).
           type: boolean
@@ -4488,7 +4499,7 @@ paths:
         - analytics
       summary: Get model session analytics.
       description: |-
-        Permissions: 
+        Permissions:
         * `analytics.model.get.*` - __required__.
       requestBody:
         required: true
@@ -4520,7 +4531,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__ - ONLY for _system-metrics_.
 
-        Permissions: 
+        Permissions:
         * `analytics.model.get.*` - __required__.
       requestBody:
         required: true
@@ -4552,7 +4563,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions: 
+        Permissions:
         * `analytics.model.get.*` - __required__.
       parameters:
         - in: path
@@ -4585,7 +4596,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions: 
+        Permissions:
         * `analytics.model.get.*` - __required__.
       parameters:
         - in: path
@@ -4616,7 +4627,7 @@ paths:
         - analytics
       summary: Get model credit metrics of the user at timestamp.
       description: |-
-        Permissions: 
+        Permissions:
         * `analytics.model.get.*` - __required__.
       parameters:
         - in: path
@@ -4653,7 +4664,7 @@ paths:
         - analytics
       summary: Get model credit metrics of the organization at timestamp.
       description: |-
-        Permissions: 
+        Permissions:
         * `analytics.model.get.*` - __required__.
       parameters:
         - in: path
@@ -5038,7 +5049,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions: 
+        Permissions:
         * `auth_group.create` - __required__.
       requestBody:
         required: true
@@ -5072,7 +5083,7 @@ paths:
         - export
       summary: Compute a Grasshopper exports for given parameter values.
       description: |-
-        Permissions: 
+        Permissions:
         * `compute.export.*` - __required__.
         * `compute.output.*` - __required__ when _outputs_ are requested.
       parameters:
@@ -5110,7 +5121,7 @@ paths:
         - export
       summary: Get Export from cache / check if computation is done.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.export.get.*` - __required__.
         * `cache.output.get.*` - __required__ when _outputs_ are requested.
       parameters:
@@ -5148,7 +5159,7 @@ paths:
         - export
       summary: Update definition of exports.
       description: |-
-        Permissions: 
+        Permissions:
         * `set.export.ui` - __required__.
       parameters:
         - name: modelId
@@ -5185,7 +5196,7 @@ paths:
         - export
       summary: List export versions.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.export.list.*` - __required__.
       parameters:
         - name: sessionId
@@ -5244,7 +5255,7 @@ paths:
         - file
       summary: List all file-assets of a parameter.
       description: |-
-        Permissions:  
+        Permissions:
         * `asset.file.list.*` - __required__.
       parameters:
         - name: sessionId
@@ -5324,7 +5335,7 @@ paths:
         - file
       summary: Download a file-asset.
       description: |-
-        Permissions: 
+        Permissions:
         * `asset.file.get.*` - __required__.
       parameters:
         - name: sessionId
@@ -5366,7 +5377,7 @@ paths:
         - file
       summary: Delete a file-asset.
       description: |-
-        Permissions: 
+        Permissions:
         * `asset.file.delete.*` - __required__.
       parameters:
         - name: sessionId
@@ -5409,7 +5420,7 @@ paths:
         - file
       summary: Request upload URL for a file-asset.
       description: |-
-        Permissions: 
+        Permissions:
         * `asset.file.create.*` - __required__.
       parameters:
         - name: sessionId
@@ -5532,7 +5543,7 @@ paths:
         - model
       summary: Get model config.
       description: |-
-        Permissions: 
+        Permissions:
         * `setting.viewer.get.*` - __required__.
       parameters:
         - name: modelId
@@ -5562,7 +5573,7 @@ paths:
         - model
       summary: Create model config.
       description: |-
-        Permissions: 
+        Permissions:
         * `setting.viewer.set.*` - __required__.
       parameters:
         - name: modelId
@@ -5600,7 +5611,7 @@ paths:
       description: |-
         Updating the model configuration requires _model authoring privilege_.
 
-        Permissions: 
+        Permissions:
         * `setting.viewer.set.*` - __required__.
       parameters:
         - name: modelId
@@ -5673,7 +5684,7 @@ paths:
         - model
       summary: Get model.
       description: |-
-        Permissions: 
+        Permissions:
         * `setting.auth.ticket.get.*` - optional: adds _settings.auth.ticket_.
         * `setting.auth.token.get.*` - optional: adds _settings.auth.token_.
         * `setting.compute.get.*` - optional: adds _settings.compute_.
@@ -5712,7 +5723,7 @@ paths:
         - model
       summary: Update model.
       description: |-
-        Permissions: 
+        Permissions:
         * `setting.auth.ticket.get.*` - optional: adds _settings.auth.ticket_ to response.
         * `setting.auth.token.get.*` - optional: adds _settings.auth.token_ to response.
         * `setting.compute.get.*` - optional: adds _settings.compute_ to response.
@@ -5755,7 +5766,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions: 
+        Permissions:
         * `delete.soft` - __required__.
       parameters:
         - name: modelId
@@ -5854,7 +5865,7 @@ paths:
         - model
       summary: Download Grasshopper file.
       description: |-
-        Permissions:  
+        Permissions:
         * `file.download` - __required__.
       parameters:
         - name: modelId
@@ -5885,7 +5896,7 @@ paths:
         - model
       summary: Get model computation statistics.
       description: |-
-        Permissions:  
+        Permissions:
         * `analytics.model.get.*` - __required__.
       parameters:
         - name: modelId
@@ -5987,7 +5998,7 @@ paths:
         - model
       summary: Delete old export components.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.export.delete.*` - __required__.
       parameters:
         - name: modelId
@@ -6030,7 +6041,7 @@ paths:
         - model
       summary: Delete old output components.
       description: |-
-        Permissions:  
+        Permissions:
         * `cache.output.delete.*` - __required__.
       parameters:
         - name: modelId
@@ -6073,7 +6084,7 @@ paths:
         - model
       summary: Delete old texture components.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.texture.delete.*` - __required__.
       parameters:
         - name: modelId
@@ -6147,7 +6158,7 @@ paths:
       description: |-
         Updating default parameter values requires model authoring privilege.
 
-        Permissions:  
+        Permissions:
         * `set.parameter.defval` - __required__.
       parameters:
         - name: modelId
@@ -6184,7 +6195,7 @@ paths:
         - model
       summary: Update definition of parameters.
       description: |-
-        Permissions: 
+        Permissions:
         * `set.parameter.ui` - __required__.
       parameters:
         - name: modelId
@@ -6457,7 +6468,7 @@ paths:
         - output
       summary: Compute all outputs for given parameter values.
       description: |-
-        Permissions:  
+        Permissions:
         * `compute.output.*` - __required__.
       parameters:
         - name: sessionId
@@ -6494,7 +6505,7 @@ paths:
         - output
       summary: Get output from cache / check if computation is done.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.output.get.*` - __required__.
       parameters:
         - name: sessionId
@@ -6531,7 +6542,7 @@ paths:
         - output
       summary: Update definition of outputs.
       description: |-
-        Permissions: 
+        Permissions:
         * `set.output.ui` - __required__.
       parameters:
         - name: modelId
@@ -6568,7 +6579,7 @@ paths:
         - output
       summary: List output versions.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.output.list.*` - __required__.
       parameters:
         - name: sessionId
@@ -6627,7 +6638,7 @@ paths:
         - script
       summary: Confirm script.
       description: |-
-        Permissions:  
+        Permissions:
         * `script.confirm.*` - __required__.
       parameters:
         - name: scriptId
@@ -6658,7 +6669,7 @@ paths:
         - script
       summary: Deny script.
       description: |-
-        Permissions:  
+        Permissions:
         * `script.deny.*` - __required__.
       parameters:
         - name: scriptId
@@ -6693,7 +6704,7 @@ paths:
         - sdtf
       summary: List all sdTF-assets of a namespace.
       description: |-
-        Permissions: 
+        Permissions:
         * `asset.sdtf.list.*` - __required__.
       parameters:
         - name: sessionId
@@ -6736,7 +6747,7 @@ paths:
         - sdtf
       summary: Download a sdTF-asset.
       description: |-
-        Permissions: 
+        Permissions:
         * `asset.sdtf.get.*` - __required__.
       parameters:
         - name: sessionId
@@ -6778,7 +6789,7 @@ paths:
         - sdtf
       summary: Delete a sdTF-assets.
       description: |-
-        Permissions: 
+        Permissions:
         * `asset.sdtf.delete.*` - __required__.
       parameters:
         - name: sessionId
@@ -6821,7 +6832,7 @@ paths:
         - sdtf
       summary: Request upload URL for a sdTF-asset.
       description: |-
-        Permissions:  
+        Permissions:
         * `asset.sdtf.create.*` - __required__.
       parameters:
         - name: sessionId
@@ -6866,15 +6877,15 @@ paths:
         - session
       summary: Initialize new session by model ID.
       description: |-
-        Permissions: 
+        Permissions:
         * `auth.session` - __required__.
         * `get.parameter.*` - optional: adds _parameters_ to response.
-        * Output: 
+        * Output:
           * If body contains a computation request: `compute.output.*` - __required__.
           * If no computation request: `compute.output.*` - optional: adds _output for default
             parameter_ to response.
           * otherwise tries: `get.output.*` - optional: adds _output definitions_ to response.
-        * Export:  
+        * Export:
           * Body contains an export request: `compute.export.*` - __required__.
           * No export request: `get.export.*` - optional: adds _export definitions_ to response.
       parameters:
@@ -6928,9 +6939,9 @@ paths:
         - session
       summary: Initialize new session by ticket.
       description: |-
-        Permissions: 
+        Permissions:
         * `get.parameter.*` - optional: adds _parameters_ to response.
-        * Output: 
+        * Output:
           * If body contains a computation request: `compute.output.*` - __required__.
           * If no computation request: `compute.output.*` - optional: adds _output for default
             parameter_ to response.
@@ -6989,7 +7000,7 @@ paths:
       summary: >-
         Get session defaults (corresponds to the content of the session initialization request).
       description: |-
-        Permissions: 
+        Permissions:
         * `get.parameter.*` - optional: adds _parameter defaults_ to response.
         * `get.export.*` - optional: adds _export definitions_ to response.
         * `compute.output.*` - optional: adds _outputs for default parameters_ to response.
@@ -7053,7 +7064,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions:  
+        Permissions:
         * `setting.auth.ticket.create.*` - __required__.
         * `setting.auth.ticket.get.*` - optional: adds _settings.auth.ticket_ to response.
         * `setting.auth.token.get.*` - optional: adds _settings.auth.token_ to response.
@@ -7098,7 +7109,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions: 
+        Permissions:
         * `setting.auth.ticket.decrypt.*` - __required__.
       parameters:
         - name: ticketEncrypted
@@ -7135,7 +7146,7 @@ paths:
       description: |-
         Subject-Restriction: __backend__.
 
-        Permissions: 
+        Permissions:
         * `delete.hard` - __required__.
       parameters:
         - name: modelId
@@ -7251,7 +7262,7 @@ paths:
         - texture
       summary: List model textures.
       description: |-
-        Permissions: 
+        Permissions:
         * `cache.texture.list.*` - __required__.
       parameters:
         - name: sessionId
