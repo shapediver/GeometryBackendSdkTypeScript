@@ -202,6 +202,9 @@ export class UtilsApi extends BaseAPI {
      * @param {string} sessionId The session ID.
      * @param {ReqCustomization} body The body of the customization request.
      * @param {number} [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
+     * @param {boolean} [ignoreUnknownParams=false] Allow relaxed validation of parameter
+     * identifiers. When set to `true`, unrecognized parameters will be ignored rather than causing
+     * an error.  Defaults to `false`.
      * @param {*} [options] Override http request option.
      * @throws {TimeoutError} in case a maximum duration has been specified and is exceeded.
      */
@@ -209,11 +212,17 @@ export class UtilsApi extends BaseAPI {
         sessionId: string,
         body: ReqCustomization,
         maxWaitMsec = -1,
+        ignoreUnknownParams?: boolean,
         options?: RawAxiosRequestConfig
     ): Promise<ResComputeOutputs> {
         const startMsec = Date.now();
         const dto = (
-            await new OutputApi(this.configuration).computeOutputs(sessionId, body, options)
+            await new OutputApi(this.configuration).computeOutputs(
+                sessionId,
+                body,
+                ignoreUnknownParams,
+                options
+            )
         ).data;
         const waitMsec = Date.now() - startMsec;
 
@@ -228,6 +237,9 @@ export class UtilsApi extends BaseAPI {
      * @param {string} sessionId The session ID.
      * @param {ReqExport} body The body of the export request.
      * @param {number} [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
+     * @param {boolean} [ignoreUnknownParams=false] Allow relaxed validation of parameter
+     * identifiers. When set to `true`, unrecognized parameters will be ignored rather than causing
+     * an error.  Defaults to `false`.
      * @param {*} [options] Override http request option.
      * @throws {TimeoutError} in case a maximum duration has been specified and is exceeded.
      */
@@ -235,11 +247,17 @@ export class UtilsApi extends BaseAPI {
         sessionId: string,
         body: ReqExport,
         maxWaitMsec = -1,
+        ignoreUnknownParams?: boolean,
         options?: RawAxiosRequestConfig
     ): Promise<ResComputeExports> {
         const startMsec = Date.now();
         const dto = (
-            await new ExportApi(this.configuration).computeExports(sessionId, body, options)
+            await new ExportApi(this.configuration).computeExports(
+                sessionId,
+                body,
+                ignoreUnknownParams,
+                options
+            )
         ).data;
         const waitMsec = Date.now() - startMsec;
 

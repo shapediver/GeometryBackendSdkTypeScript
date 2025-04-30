@@ -8,7 +8,6 @@ import {
     SessionApi,
     UtilsApi,
 } from '../src';
-import { AxiosError } from 'axios';
 
 test('basic model state', async () => {
     const backendConfig = new Configuration({
