@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.10.0
+  version: 1.11.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -6944,18 +6944,19 @@ paths:
         - name: ignoreUnknownParams
           in: query
           description: |-
-            Allow relaxed validation of parameter identifiers. When set to `true`, unrecognized
-            parameters will be ignored rather than causing an error.
+            Allow relaxed validation of parameter identifiers for customization and export requests.
+            When set to `true`, unknown parameter IDs will be ignored instead of causing an error.
 
             Defaults to `false`.
           required: false
           schema:
             type: boolean
-        - name: strictValidation
+        - name: strictModelStateValidation
           in: query
           description: |-
-            When `false`, any Model-State parameter that cannot be applied to the model is ignored.
-            However, when set to `true`, any validation error will result in an error response.
+            When set to `false`, any Model-State parameter that cannot be applied to the model -
+            either because the parameter ID is unknown or the parameter value is invalid - will be
+            ignored. When set to `true`, any validation error will result in an error response.
 
             Defaults to `false`.
           required: false
@@ -7015,18 +7016,19 @@ paths:
         - name: ignoreUnknownParams
           in: query
           description: |-
-            Allow relaxed validation of parameter identifiers. When set to `true`, unrecognized
-            parameters will be ignored rather than causing an error.
+            Allow relaxed validation of parameter identifiers for customization and export requests.
+            When set to `true`, unknown parameter IDs will be ignored instead of causing an error.
 
             Defaults to `false`.
           required: false
           schema:
             type: boolean
-        - name: strictValidation
+        - name: strictModelStateValidation
           in: query
           description: |-
-            When `false`, any Model-State parameter that cannot be applied to the model is ignored.
-            However, when set to `true`, any validation error will result in an error response.
+            When set to `false`, any Model-State parameter that cannot be applied to the model -
+            either because the parameter ID is unknown or the parameter value is invalid - will be
+            ignored. When set to `true`, any validation error will result in an error response.
 
             Defaults to `false`.
           required: false
