@@ -193,7 +193,18 @@ export class UtilsApi extends BaseAPI {
             return this.download(url, options) as any;
         } else {
             // All other source URLs are called via the download-image endpoint
-            return new AssetsApi(this.configuration).downloadImage(sessionId, url, options);
+
+            // Use a universal base64 encoder for browser and Node.js environments
+            const encodedUrl =
+                typeof window !== 'undefined' && window.btoa
+                    ? window.btoa(
+                          encodeURIComponent(url).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+                              String.fromCharCode(parseInt(p1, 16))
+                          )
+                      )
+                    : Buffer.from(url, 'utf-8').toString('base64');
+
+            return new AssetsApi(this.configuration).downloadImage(sessionId, encodedUrl, options);
         }
     }
 
