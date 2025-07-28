@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.11.0
+  version: 1.12.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -7053,7 +7053,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResError"
-      security: []
+      security:
+        - JwtAuth: []
   "/api/v2/session/{sessionId}/default":
     get:
       operationId: GetSessionDefaults
