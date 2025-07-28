@@ -52,9 +52,9 @@ export class Configuration extends ClientConfig {
         if (typeof process === 'object' && !this.baseOptions.headers['User-Agent']) {
             // Overwrite User-Agent on Node.js applications.
             this.baseOptions.headers['User-Agent'] = userAgent;
-        } else if (!this.baseOptions.headers['x-shapediver-useragent']) {
+        } else if (!this.baseOptions.headers['X-ShapeDiver-UserAgent']) {
             // Set a custom User-Agent header on Browser applications.
-            this.baseOptions.headers['x-shapediver-useragent'] = userAgent;
+            this.baseOptions.headers['X-ShapeDiver-UserAgent'] = userAgent;
         }
     }
 }

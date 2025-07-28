@@ -58,6 +58,12 @@ export class UtilsApi extends BaseAPI {
         const reqHeaders: RawAxiosRequestHeaders = {
             Authorization: undefined, // Disable by default to avoid accidental token exposure.
             'Content-Type': contentType,
+            /* Override custom ShapeDiver headers to avoid CORS issues. */
+            'X-ShapeDiver-Origin': undefined,
+            'X-ShapeDiver-SessionEngineId': undefined,
+            'X-ShapeDiver-BuildVersion': undefined,
+            'X-ShapeDiver-BuildDate': undefined,
+            'X-ShapeDiver-UserAgent': undefined,
         };
         if (filename) reqHeaders['Content-Disposition'] = contentDispositionFromFilename(filename);
 
@@ -85,6 +91,12 @@ export class UtilsApi extends BaseAPI {
         const reqHeaders: RawAxiosRequestHeaders = {
             Authorization: undefined, // Disable by default to avoid accidental token exposure.
             'Content-Type': headers.contentType,
+            /* Override custom ShapeDiver headers to avoid CORS issues. */
+            'X-ShapeDiver-Origin': undefined,
+            'X-ShapeDiver-SessionEngineId': undefined,
+            'X-ShapeDiver-BuildVersion': undefined,
+            'X-ShapeDiver-BuildDate': undefined,
+            'X-ShapeDiver-UserAgent': undefined,
         };
         if (headers.contentDisposition)
             reqHeaders['Content-Disposition'] = headers.contentDisposition;
