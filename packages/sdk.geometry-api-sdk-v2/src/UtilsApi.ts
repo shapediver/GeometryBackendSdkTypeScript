@@ -446,7 +446,7 @@ export class UtilsApi extends BaseAPI {
                 // Create a new configuration object if necessary to enable mime type detection
                 // in the serialization process.
                 const configuration = this.configuration ?? new Configuration();
-                reqOptions.data = serializeDataIfNeeded(data, reqOptions, configuration);
+                reqOptions.data = this.serializeDataSafely(data, reqOptions, configuration);
             }
 
             // Remove the base path configuration if the URL is a full URL.
@@ -460,6 +460,44 @@ export class UtilsApi extends BaseAPI {
                 this.axios
             );
         };
+    }
+
+    /**
+     * A wrapper around the auto-generated `serializeDataIfNeeded` that safely serializes data for
+     * Axios. The idea of the base function is to stringify objects for application-json requests.
+     * However, this does not work on all data types. Thus, this wrapper passes through all data
+     * types that can be handled natively by Axios, and only calls the base function for the rest.
+     * @param value The data to serialize.
+     * @param requestOptions The request options.
+     * @param configuration The API configuration.
+     * @returns The serialized data.
+     */
+    private serializeDataSafely(
+        value: any,
+        requestOptions: any,
+        configuration?: Configuration
+    ): any {
+        // Helper: detect Node.js stream
+        function isStream(val: any): boolean {
+            return val !== null && typeof val === 'object' && typeof val.pipe === 'function';
+        }
+
+        // Pass through raw binary types that Axios can handle
+        if (
+            value instanceof ArrayBuffer ||
+            ArrayBuffer.isView(value) || // TypedArray (Uint8Array, Int16Array, etc.) and DataView
+            isStream(value) ||
+            (typeof Buffer !== 'undefined' && Buffer.isBuffer(value)) ||
+            (typeof Blob !== 'undefined' && value instanceof Blob) ||
+            (typeof File !== 'undefined' && value instanceof File) ||
+            (typeof FormData !== 'undefined' && value instanceof FormData) ||
+            (typeof URLSearchParams !== 'undefined' && value instanceof URLSearchParams)
+        ) {
+            return value;
+        }
+
+        // Fallback to the generated serializer
+        return serializeDataIfNeeded(value, requestOptions, configuration);
     }
 
     /** Disable the Authorization header for ShapeDiver URIs if not explicitly set. */
