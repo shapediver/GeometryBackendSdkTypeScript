@@ -6,6 +6,7 @@ dist-prod
 lerna-debug.log
 .npmrc
 .nx
+*.tsbuildinfo
 
 # Python
 .venv/
@@ -18,5 +19,4 @@ __pycache__/
 # JetBrains products are ignored by default - remove where needed
 .idea/
 
-.vscode/
 **/.DS_Store
