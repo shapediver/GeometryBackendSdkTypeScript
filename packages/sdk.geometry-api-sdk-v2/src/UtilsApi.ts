@@ -1,5 +1,4 @@
 import { AxiosInstance, AxiosPromise, RawAxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
-import { createRequestFunction, serializeDataIfNeeded } from './client/common';
 import {
     AssetsApi,
     Configuration,
@@ -17,8 +16,9 @@ import {
     ResOutput,
 } from './client';
 import { BaseAPI, RequestArgs } from './client/base';
+import { createRequestFunction, serializeDataIfNeeded } from './client/common';
+import { IllegalArgumentError, ResponseError, TimeoutError } from './error';
 import { contentDispositionFromFilename, sleep } from './utils';
-import { IllegalArgumentError, TimeoutError } from './error';
 
 /* Regex patterns for different asset types targeting the ShapeDiver API. */
 const apiAssetExportUri = /.+\/session\/.+\/export\/.+/;
@@ -53,7 +53,7 @@ export class UtilsApi extends BaseAPI {
         contentType: string,
         filename?: string,
         options?: RawAxiosRequestConfig
-    ): AxiosPromise<unknown> {
+    ): AxiosPromise<any> {
         // Prepare headers for the upload.
         const reqHeaders: RawAxiosRequestHeaders = {
             Authorization: undefined, // Disable by default to avoid accidental token exposure.
@@ -86,7 +86,7 @@ export class UtilsApi extends BaseAPI {
         data: any,
         headers: ResAssetUploadHeaders,
         options?: RawAxiosRequestConfig
-    ): AxiosPromise<unknown> {
+    ): AxiosPromise<any> {
         // Prepare headers for the upload.
         const reqHeaders: RawAxiosRequestHeaders = {
             Authorization: undefined, // Disable by default to avoid accidental token exposure.
@@ -109,28 +109,74 @@ export class UtilsApi extends BaseAPI {
     }
 
     /**
-     * Download from the specified URL.
+     * Downloads data from the specified URL.
      *
-     * The response type can be controlled by setting the `responseType` in the `options` object.
-     * @param {string} url The target URL of the download request.
-     * @param {*} [options] Override http request option.
+     * You can set the response type using the `responseType` property in the `options` object.
+     * @param {string} url The URL to download from.
+     * @param {*} [options] Optional HTTP request overrides.
+     * @throws {ResponseError} if the response type cannot be handled, such as when JSON parsing
+     * fails.
      */
     public download(
         url: string,
-        options: { responseType: 'arraybuffer' | 'blob' } & RawAxiosRequestConfig
-    ): AxiosPromise<File>;
+        options: { responseType: 'arraybuffer' } & RawAxiosRequestConfig
+    ): AxiosPromise<ArrayBuffer>;
     public download(
         url: string,
         options: { responseType: 'json' } & RawAxiosRequestConfig
-    ): AxiosPromise<Record<string, unknown>>;
+    ): AxiosPromise<Record<string, any>>;
     public download(
         url: string,
         options: { responseType: 'text' } & RawAxiosRequestConfig
     ): AxiosPromise<string>;
-    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<unknown>;
-    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<unknown> {
+    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
         const request = this.buildRequest('GET', url, undefined, options)();
-        return request();
+        const res = request();
+
+        // Convert Buffer to ArrayBuffer in Node.js when responseType is 'arraybuffer'
+        if (options?.responseType === 'arraybuffer') {
+            return res.then((response) => {
+                const data = response.data;
+
+                // In Node.js, Axios returns a Buffer for arraybuffer responseType
+                // Convert it to ArrayBuffer for consistency with browser behavior
+                if (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) {
+                    // Convert Buffer to ArrayBuffer by copying to a new Uint8Array
+                    const uint8Array = new Uint8Array(data);
+                    response.data = uint8Array.buffer;
+                }
+
+                return response;
+            });
+        }
+
+        // Validate JSON responses when responseType is 'json'
+        if (options?.responseType === 'json') {
+            return res.then((response) => {
+                const data = response.data;
+
+                // Throw a single error if the response is not valid JSON (object or array)
+                if (
+                    data === null ||
+                    data === undefined ||
+                    typeof data === 'string' ||
+                    data instanceof ArrayBuffer ||
+                    (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) ||
+                    (typeof Blob !== 'undefined' && data instanceof Blob)
+                ) {
+                    throw new ResponseError(
+                        response.status,
+                        'Invalid JSON response: Could not parse response as JSON',
+                        'Expected valid JSON but received incompatible response'
+                    );
+                }
+
+                return response;
+            });
+        }
+
+        return res;
     }
 
     /**
@@ -144,16 +190,16 @@ export class UtilsApi extends BaseAPI {
      */
     public downloadAsset(
         url: string,
-        options: { responseType: 'arraybuffer' | 'blob' } & RawAxiosRequestConfig
-    ): [AxiosPromise<File>, 'export' | 'output' | 'texture'];
+        options: { responseType: 'arraybuffer' } & RawAxiosRequestConfig
+    ): [AxiosPromise<ArrayBuffer>, 'export' | 'output' | 'texture'];
     public downloadAsset(
         url: string,
         options?: RawAxiosRequestConfig
-    ): [AxiosPromise<unknown>, 'export' | 'output' | 'texture'];
+    ): [AxiosPromise<any>, 'export' | 'output' | 'texture'];
     public downloadAsset(
         url: string,
         options?: RawAxiosRequestConfig
-    ): [AxiosPromise<unknown>, 'export' | 'output' | 'texture'] {
+    ): [AxiosPromise<any>, 'export' | 'output' | 'texture'] {
         let type: 'output' | 'export' | 'texture';
         this.disableAuthHeaderForShapeDiverUris(url, options);
 
@@ -182,18 +228,18 @@ export class UtilsApi extends BaseAPI {
     public downloadImage(
         sessionId: string,
         url: string,
-        options: { responseType: 'arraybuffer' | 'blob' } & RawAxiosRequestConfig
-    ): AxiosPromise<File>;
+        options: { responseType: 'arraybuffer' } & RawAxiosRequestConfig
+    ): AxiosPromise<ArrayBuffer>;
     public downloadImage(
         sessionId: string,
         url: string,
         options?: RawAxiosRequestConfig
-    ): AxiosPromise<unknown>;
+    ): AxiosPromise<any>;
     public downloadImage(
         sessionId: string,
         url: string,
         options?: RawAxiosRequestConfig
-    ): AxiosPromise<unknown> {
+    ): AxiosPromise<any> {
         this.disableAuthHeaderForShapeDiverUris(url, options);
 
         if (
