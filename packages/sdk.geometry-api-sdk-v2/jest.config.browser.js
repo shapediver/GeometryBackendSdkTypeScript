@@ -5,6 +5,7 @@ module.exports = {
         url: 'http://localhost:9090',
         resources: 'usable',
     },
+    setupFilesAfterEnv: ['<rootDir>/__tests-browser__/setup.ts'],
     testTimeout: 60000,
     testMatch: ['**/__tests__/**/*.browser.test.ts', '**/__tests-browser__/**/*.test.ts'],
     moduleNameMapper: {

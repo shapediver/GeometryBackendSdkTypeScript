@@ -24,7 +24,7 @@ tokens**, which are handled by the [ShapeDiver Platform](https://www.shapediver.
 obtain **tickets** and **JWT tokens** by:
 
 - using your account on the [ShapeDiver Platform](https://www.shapediver.com/app/) (tickets only),
-    or
+  or
 
 - you can obtain them programmatically using the [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) (both tickets and JWT tokens).
 
@@ -45,24 +45,20 @@ the _model view url_.
 ## Usage - Ticket only
 
 ```typescript
-import {
-  Configuration,
-  SessionApi
-} from '@shapediver/sdk.geometry-api-sdk-v2';
+import { Configuration, SessionApi } from '@shapediver/sdk.geometry-api-sdk-v2';
 
 (async function () {
     // Please see above on how to obtain a ticket
-    const ticket = '8b23fae66cf535719a9ec797e390208b2003e3cfc894b7624ada2f6894515f8836a4-66303337623538322d34386';
+    const ticket =
+        '8b23fae66cf535719a9ec797e390208b2003e3cfc894b7624ada2f6894515f8836a4-66303337623538322d34386';
 
     // Initialize the SDK configuration instance by providing the base URL
     const config = new Configuration({
-      basePath: 'https://sdeuc1.eu-central-1.shapediver.com'
+        basePath: 'https://sdeuc1.eu-central-1.shapediver.com',
     });
 
     // Initialize a new session using the ticket.
-    const res = (
-      await new SessionApi(config).createSessionByTicket(ticket)
-    ).data;
+    const res = (await new SessionApi(config).createSessionByTicket(ticket)).data;
 
     console.log(res);
 })();
@@ -76,15 +72,14 @@ with them, which provides a strong authorisation mechanism. In this case you wil
 your model on demand:
 
 ```typescript
-import {
-  Configuration,
-  SessionApi
-} from '@shapediver/sdk.geometry-api-sdk-v2';
+import { Configuration, SessionApi } from '@shapediver/sdk.geometry-api-sdk-v2';
 
 (async function () {
     // Please see above on how to obtain a ticket and a JWT.
-    const jwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikp1c3QgYSB0ZXN0IiwiaWF0IjoxNjE4OTExMjcxLCJleHAiOjE2MTg5MTQ4OTcsImp0aSI6IjYzMjA3ODE3LWJiNWQtNDY3Zi04NzRkLWM4N2EyYzAxYmZlZCJ9.S5Ps_Fx5p6aJxdBOJMBKgpf2SIlp--6kkIZU55tiqEg';
-    const ticket = '8b23fae66cf535719a9ec797e390208b2003e3cfc894b7624ada2f6894515f8836a4-66303337623538322d34386';
+    const jwt =
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikp1c3QgYSB0ZXN0IiwiaWF0IjoxNjE4OTExMjcxLCJleHAiOjE2MTg5MTQ4OTcsImp0aSI6IjYzMjA3ODE3LWJiNWQtNDY3Zi04NzRkLWM4N2EyYzAxYmZlZCJ9.S5Ps_Fx5p6aJxdBOJMBKgpf2SIlp--6kkIZU55tiqEg';
+    const ticket =
+        '8b23fae66cf535719a9ec797e390208b2003e3cfc894b7624ada2f6894515f8836a4-66303337623538322d34386';
 
     // Initialize the SDK client instance by providing the base URL
     const config = new Configuration({
@@ -93,9 +88,7 @@ import {
     });
 
     // Initialize a new session using the ticket.
-    const res = (
-      await new SessionApi(config).createSessionByTicket(ticket)
-    ).data;
+    const res = (await new SessionApi(config).createSessionByTicket(ticket)).data;
 
     console.log(res);
 })();
@@ -107,66 +100,66 @@ The SDK provides a helper function to extract ShapeDiver error information from 
 
 ```typescript
 import {
-  processError,
-  SdGeometryError,
-  RequestError,
-  ResponseError,
-} from "@shapediver/sdk.geometry-api-sdk-v2"
+    processError,
+    SdGeometryError,
+    RequestError,
+    ResponseError,
+} from '@shapediver/sdk.geometry-api-sdk-v2';
 
 try {
-  sdk.model.get("be5d4ce5-f76d-417d-8496-1f038e6f0cab")
+    sdk.model.get('be5d4ce5-f76d-417d-8496-1f038e6f0cab');
 } catch (err) {
-  const e = processError(err);
+    const e = await processError(err);
 
-  if (e instanceof SdGeometryError) {
-    /*
-     * Generic ShapeDiver error.
-     *
-     * Generic errors are the base class of all custom ShapeDiver errors, like RequestError,
-     * ResponseError, IllegalArgumentError, TimeoutError, etc.
-     *
-     * Warning:
-     *  Generic Axios errors (non-request/response errors) that are thrown when setting up the
-     *  request are not converted into a SdGeometryError!
-     */
-  }
+    if (e instanceof SdGeometryError) {
+        /*
+         * Generic ShapeDiver error.
+         *
+         * Generic errors are the base class of all custom ShapeDiver errors, like RequestError,
+         * ResponseError, IllegalArgumentError, TimeoutError, etc.
+         *
+         * Warning:
+         *  Generic Axios errors (non-request/response errors) that are thrown when setting up the
+         *  request are not converted into a SdGeometryError!
+         */
+    }
 
-  if (e instanceof RequestError) {
-    /*
-     * Wrapper around an Axios request error.
-     *
-     * In this case, the request was made but no response was received.
-     */
-  }
+    if (e instanceof RequestError) {
+        /*
+         * Wrapper around an Axios request error.
+         *
+         * In this case, the request was made but no response was received.
+         */
+    }
 
-  if (e instanceof ResponseError) {
-    /*
-     * Wrapper around an Axios response error.
-     *
-     * In this case, the request was made and the server responded with a status code that falls
-     * out of the range of 2xx.
-     */
-  }
+    if (e instanceof ResponseError) {
+        /*
+         * Wrapper around an Axios response error.
+         *
+         * In this case, the request was made and the server responded with a status code that falls
+         * out of the range of 2xx.
+         */
+    }
 }
 ```
 
 ## Examples
 
 - For examples of interacting with SDK endpoints, refer to the [tests
-    directory](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/master/packages/sdk.geometry-api-sdk-v2/__tests__),
-    which provides detailed usage scenarios for each endpoint.
+  directory](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/master/packages/sdk.geometry-api-sdk-v2/__tests__),
+  which provides detailed usage scenarios for each endpoint.
 
 - [ShapeDiver CAD to sdTF and sdTF to glTF
-    Conversion](https://github.com/shapediver/TypeScriptSdkExample-sdTF-in-out): An example of using
-    the ShapeDiver backend to convert _CAD files to sdTF_ and _sdTF files to glTF_.
+  Conversion](https://github.com/shapediver/TypeScriptSdkExample-sdTF-in-out): An example of using
+  the ShapeDiver backend to convert _CAD files to sdTF_ and _sdTF files to glTF_.
 
 - [ShapeDiver CAD to glTF
-    Conversion](https://github.com/shapediver/TypeScriptSdkExample-glTF-Converter): An example of
-    using the ShapeDiver backend to convert _CAD files to glTF format_.
+  Conversion](https://github.com/shapediver/TypeScriptSdkExample-glTF-Converter): An example of
+  using the ShapeDiver backend to convert _CAD files to glTF format_.
 
 - [Command-Line Interface Example](https://github.com/shapediver/TypeScriptSdkExample-CLI): A simple
-    example demonstrating how to use the ShapeDiver TypeScript SDKs (_Platform SDK_ and _Geometry
-    Backend SDK_) within a CLI tool.
+  example demonstrating how to use the ShapeDiver TypeScript SDKs (_Platform SDK_ and _Geometry
+  Backend SDK_) within a CLI tool.
 
 ## Making Changes & Contributing
 

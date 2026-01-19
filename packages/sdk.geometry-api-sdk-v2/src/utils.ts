@@ -1,6 +1,13 @@
 import { AxiosError, AxiosPromise } from 'axios';
 import { RequestError, ResponseError } from './error';
 
+/** ShapeDiver error object structure. */
+type SdErrorObject = {
+    error: string;
+    desc: string;
+    message: string;
+};
+
 /** Delays the response for the given number of milliseconds */
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -92,28 +99,81 @@ export async function exists(apiCall: () => AxiosPromise<unknown>): Promise<bool
         });
 }
 
+/** Type Guard for the ShapeDiver error data object. */
+function isErrorObject(value: unknown): value is SdErrorObject {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
+    const obj = value as Record<string, unknown>;
+    return (
+        typeof obj.error === 'string' &&
+        typeof obj.desc === 'string' &&
+        typeof obj.message === 'string'
+    );
+}
+
+/** Helper function that wraps JSON.parse and returns undefined on failure. */
+async function tryParseJson(
+    input: string | (() => string) | (() => Promise<string>)
+): Promise<unknown | undefined> {
+    try {
+        const text = typeof input === 'function' ? await input() : input;
+        return JSON.parse(text);
+    } catch {
+        return undefined;
+    }
+}
+
+function isArrayBuffer(value: unknown): value is ArrayBuffer {
+    return Object.prototype.toString.call(value) === '[object ArrayBuffer]';
+}
+
+function isArrayBufferView(value: unknown): value is ArrayBufferView {
+    return ArrayBuffer.isView(value);
+}
+
+/**
+ * Tries to extract an error object from various Axios response data types.
+ * @param data The data to extract from.
+ * @returns The extracted error object, or undefined if none could be found.
+ */
+export async function tryExtractErrorObject(data: unknown): Promise<SdErrorObject | undefined> {
+    let candidate: unknown;
+
+    if (typeof data === 'string') {
+        candidate = await tryParseJson(data);
+    } else if (isArrayBufferView(data)) {
+        candidate = await tryParseJson(() =>
+            new TextDecoder().decode(new Uint8Array(data.buffer, data.byteOffset, data.byteLength))
+        );
+    } else if (isArrayBuffer(data)) {
+        candidate = await tryParseJson(() => new TextDecoder().decode(new Uint8Array(data)));
+    } else if (typeof Blob !== 'undefined' && data instanceof Blob) {
+        candidate = await tryParseJson(async () => await data.text());
+    } else {
+        candidate = data;
+    }
+
+    return isErrorObject(candidate)
+        ? { error: candidate.error, desc: candidate.desc, message: candidate.message }
+        : undefined;
+}
+
 /**
  * Tries to convert a generic Axios error into a more specific ShapeDiver error. When no match is
  * found, the original error is returned instead.
  * @param error The Axios error to convert.
  */
-export function processError(error: AxiosError | Error): Error | RequestError | ResponseError {
+export async function processError(
+    error: AxiosError | Error
+): Promise<Error | RequestError | ResponseError> {
     if ('response' in error) {
         const err = error as AxiosError,
             status = err.response!.status,
             data = err.response!.data;
 
-        if (
-            data &&
-            typeof data === 'object' &&
-            'desc' in data &&
-            typeof data.desc === 'string' &&
-            'error' in data &&
-            typeof data.error === 'string' &&
-            'message' in data &&
-            typeof data.message === 'string'
-        ) {
-            return new ResponseError(status, data.message, data.desc, data.error);
+        const errorObj = await tryExtractErrorObject(data);
+        if (errorObj) {
+            return new ResponseError(status, errorObj.message, errorObj.desc, errorObj.error);
         } else {
             return new ResponseError(status, err.message, 'No error description provided');
         }
