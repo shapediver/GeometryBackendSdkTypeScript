@@ -19,4 +19,9 @@ __pycache__/
 # JetBrains products are ignored by default - remove where needed
 .idea/
 
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+
 **/.DS_Store

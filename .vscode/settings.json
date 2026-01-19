@@ -8,10 +8,8 @@
     },
     "terminal.integrated.defaultProfile.osx": "zsh - work",
     "jest.disabledWorkspaceFolders": [],
-    "jest.jestCommandLine": "npx jest --config jest.config.js",
-    "jest.rootPath": ".",
-    "jest.runMode": {
-        "type": "on-demand"
-    },
+    "jest.jestCommandLine": "npx jest",
+    "jest.rootPath": "packages/sdk.geometry-api-sdk-v2",
+    "jest.runMode": "on-demand",
     "typescript.preferences.includePackageJsonAutoImports": "on"
 }
