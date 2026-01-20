@@ -74,6 +74,7 @@ export default tseslint.config(
     {
         // enable jest rules on test files
         files: ['**/*.test.ts'],
+        languageOptions: buildLanguageOptions('./tsconfig.json'),
         ...jestPlugin.configs['flat/recommended'],
         rules: {
             ...jestPlugin.configs['flat/recommended'].rules,
@@ -87,6 +88,7 @@ export default tseslint.config(
             'jest/prefer-to-have-length': 'warn',
             'jest/valid-expect': 'error',
 
+            '@typescript-eslint/no-floating-promises': 'error',
             '@typescript-eslint/ban-ts-comment': 'off',
             '@typescript-eslint/no-empty-function': 'off',
             '@typescript-eslint/no-unsafe-member-access': 'off',

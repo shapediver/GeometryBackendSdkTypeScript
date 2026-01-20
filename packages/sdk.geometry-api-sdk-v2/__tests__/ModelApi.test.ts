@@ -131,7 +131,7 @@ test('model blocking', async () => {
 
     // Block the model.
     let reqModel: ReqModel = { blockingReasons: { owner: true } };
-    new ModelApi(backendConfig).updateModel(modelId, reqModel);
+    await new ModelApi(backendConfig).updateModel(modelId, reqModel);
 
     // Fetch a model.
     resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
@@ -140,7 +140,7 @@ test('model blocking', async () => {
     expect(resModel.setting.model?.blockingReasons?.pluginPermission).toBeFalsy();
 
     // Init session should not work anymore.
-    expect(new SessionApi(modelConfig).createSessionByModel(modelId)).rejects.toThrow();
+    await expect(new SessionApi(modelConfig).createSessionByModel(modelId)).rejects.toThrow();
 
     // Unblock the model.
     reqModel = { blockingReasons: { owner: false } };
@@ -166,7 +166,7 @@ test('soft delete and restore', async () => {
     await new ModelApi(backendConfig).deleteModel(modelId);
 
     // Fetch the model should not work anymore.
-    expect(new ModelApi(modelConfig).getModel(modelId)).rejects.toThrow();
+    await expect(new ModelApi(modelConfig).getModel(modelId)).rejects.toThrow();
 
     // Restore the model.
     await new ModelApi(backendConfig).restoreModel(modelId);

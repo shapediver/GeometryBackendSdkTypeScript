@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 1.13.0
+  version: 2.0.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -155,11 +155,6 @@ components:
     OctetStream:
       type: string
       format: binary
-    Uuid:
-      description: A UUID v4.
-      type: string
-      format: uuid
-      example: "bd725508-176a-11ef-9196-bf06f0e99bb4"
     Year:
       description: |-
         An ISO-8601 year.
@@ -443,17 +438,17 @@ components:
           description: The model IDs that should form the new authorization group.
           type: array
           items:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         users:
           description: The user IDs that should form the new authorization group.
           type: array
           items:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         organizations:
           description: The organization IDs that should form the new authorization group.
           type: array
           items:
-            $ref: "#/components/schemas/Uuid"
+            type: string
     ReqModelStatistics:
       description: >-
         Body of a model statistics request. Every request-item results in exactly one
@@ -474,7 +469,7 @@ components:
               modelid:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Uuid"
+                  type: string
               timestamp:
                 description: >-
                   Either a single extended date or an array of extended dates.
@@ -511,7 +506,7 @@ components:
             modelIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
           required:
             - modelIds
         - title: ReqUserCreditMetricId
@@ -521,7 +516,7 @@ components:
             userIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
           required:
             - userIds
         - title: ReqOrganizationCreditMetricId
@@ -531,7 +526,7 @@ components:
             orgIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
           required:
             - orgIds
         - title: ReqSystemCreditMetricId
@@ -549,11 +544,11 @@ components:
             modelIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
             userIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
           required:
             - modelIds
             - userIds
@@ -564,11 +559,11 @@ components:
             modelIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
             orgIds:
               type: array
               items:
-                $ref: "#/components/schemas/Uuid"
+                type: string
           required:
             - modelIds
             - orgIds
@@ -818,7 +813,7 @@ components:
           description: List of allowed auth-groups.
           type: array
           items:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         backendaccess:
           description: Should backend access to the model be allowed.
           type: boolean
@@ -840,8 +835,7 @@ components:
           type: boolean
         id2:
           description: Optional second model ID.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         max_comp_time:
           description: Maximum number of milliseconds allowed for computations of this model.
           type: integer
@@ -905,16 +899,14 @@ components:
           minimum: 0
         org_id:
           description: Optional organization ID.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         prev_id:
           description: >-
             The Model ID of the previous version of this model.
 
             This property is applicable only when creating a new model and cannot be used in
             conjunction with `prev_id`.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         with_repo:
           description: >-
             If set to `true`, a new repository will be created for the model.
@@ -946,8 +938,7 @@ components:
           type: boolean
         user_id:
           description: Optional user ID.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         webhook_url:
           description: >-
             The webhook-url for updating the platform backend about model status changes.
@@ -1680,6 +1671,23 @@ components:
       required:
         - system
         - version
+    ResGetScaleInCandidate:
+      allOf:
+        - title: ResPartSystem
+          type: object
+          properties:
+            system:
+              title: ResScaleInCandidate
+              description: Scale-in candidate system information.
+              allOf:
+                - $ref: "#/components/schemas/ResSystem"
+                - type: object
+                  required:
+                    - scaleInCandidate
+        - $ref: "#/components/schemas/ResPartVersion"
+      required:
+        - system
+        - version
     ResListTextures:
       allOf:
         - title: ResPartList
@@ -1736,8 +1744,7 @@ components:
       properties:
         sessionId:
           description: The ID of the created session.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
     ResPartViewerSettingsVersion:
       type: object
       properties:
@@ -1756,8 +1763,7 @@ components:
       properties:
         auth_group:
           description: The auth-group to use for ticked-based authentication.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
     ResPartActions:
       type: object
       properties:
@@ -1936,8 +1942,7 @@ components:
       properties:
         modelid:
           description: Requested model ID.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         timestamp:
           description: Either an extended date-time or a 'merged'-specifier.
           type: string
@@ -2116,8 +2121,7 @@ components:
               properties:
                 modelId:
                   description: Requested model ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
                 userId:
                   description: This property is never set.
                   # FIXME: Workaround until OAS 3.1 - use `null` instead!
@@ -2146,8 +2150,7 @@ components:
                   deprecated: true
                 userId:
                   description: Requested user ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
               required:
                 - userId
         - title: ResOrganizationCreditMetric
@@ -2164,8 +2167,7 @@ components:
                   deprecated: true
                 orgId:
                   description: Requested organization ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
               required:
                 - orgId
         - title: ResSystemCreditMetric
@@ -2187,12 +2189,10 @@ components:
               properties:
                 modelId:
                   description: Requested model ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
                 userId:
                   description: Requested user ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
               required:
                 - modelId
                 - userId
@@ -2204,12 +2204,10 @@ components:
               properties:
                 modelId:
                   description: Requested model ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
                 orgId:
                   description: Requested organization ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
               required:
                 - modelId
                 - orgId
@@ -2463,9 +2461,9 @@ components:
       type: object
       properties:
         id:
-          description: ID of the file to be uploaded.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          description: >-
+            ID of the file to be uploaded ('' in case the asset is not linked to any specific ID).
+          type: string
         href:
           description: >-
             href the file should be uploaded to (typically a time-limited pre-signed url).
@@ -2514,8 +2512,7 @@ components:
             Constant ID of the export, not dependent on model ID, and therefore NOT changing each
             time a model gets uploaded. Might be undefined because this property was introduced in
             summer 2020 and does not exist for exports of older models.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         name:
           description: Name of the export.
           type: string
@@ -2607,8 +2604,7 @@ components:
                   type: string
                 modelId:
                   description: Optional shapeways model ID.
-                  allOf:
-                    - $ref: "#/components/schemas/Uuid"
+                  type: string
             status_computation:
               description: Status of the computation which resulted in the export version.
               allOf:
@@ -2689,12 +2685,10 @@ components:
       properties:
         id:
           description: ID of the file.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         parameterId:
           description: ID of the parameter that the file is assigned to.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         size:
           description: The size of the file in bytes.
           type: integer
@@ -2712,8 +2706,7 @@ components:
       properties:
         id:
           description: ID of the sdTF.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         namespace:
           description: The namespace of the sdTF.
           type: string
@@ -2791,20 +2784,17 @@ components:
             - $ref: "#/components/schemas/DateTimeIso"
         documentid:
           description: ID of the Grasshopper document.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         filename:
           description: Original name of the model's grasshopper file.
           type: string
         id:
           description: ID of the model.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         id2:
           description: >-
             Optional second ID of the model. This value can be unset via an empty string.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         msg:
           description: Optional message, used in case the model was denied.
           type: string
@@ -2813,14 +2803,12 @@ components:
           type: string
         org_id:
           description: Organization ID of the user that owns the model.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         stat:
           $ref: "#/components/schemas/ResModelStatus"
         user_id:
           description: ShapeDiver User ID of the model owner.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         webhook_url:
           description: >-
             The webhook-url for updating the platform backend about model status changes.
@@ -2926,8 +2914,7 @@ components:
       properties:
         id:
           description: Unique ID of parameter, stays constant each time a model gets uploaded.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         choices:
           description: Choice of parameter values for types `STRINGLIST`.
           type: array
@@ -3161,8 +3148,7 @@ components:
               description: >-
                 Either the model's `id` or `id2` property, depending on the ticket property
                 `use_id2`.
-              allOf:
-                - $ref: "#/components/schemas/Uuid"
+              type: string
           required:
             - type
             - model_id
@@ -3223,8 +3209,7 @@ components:
       properties:
         modelId:
           description: The ID of the ShapeDiver model.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         textureId:
           description: The texture ID.
           type: string
@@ -3252,8 +3237,7 @@ components:
       properties:
         id:
           description: ID of the model.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         timestamp:
           description: |-
             Numeric timestamp in format `YYYYMMDDHHMMSSMMM`.
@@ -3340,8 +3324,7 @@ components:
               type: string
             modelId:
               description: ID of the ShapeDiver model.
-              allOf:
-                - $ref: "#/components/schemas/Uuid"
+              type: string
             createdate:
               description: Timestamp of creation of the Model-State.
               allOf:
@@ -3712,8 +3695,7 @@ components:
             Lists the ids of the parameters whose values were changed before the computation.
           type: array
           items:
-            allOf:
-              - $ref: "#/components/schemas/Uuid"
+            type: string
       required:
         - components
     ResComputationStatus: *CommonsComputationStatus
@@ -3751,8 +3733,7 @@ components:
             Constant ID of the output, not dependent on model ID, and therefore NOT changing each
             time a model gets uploaded. Might be undefined because this property was introduced in
             summer 2020 and does not exist for outputs of older models.
-          allOf:
-            - $ref: "#/components/schemas/Uuid"
+          type: string
         name:
           description: Name of the output.
           type: string
@@ -3975,7 +3956,7 @@ components:
           description: List of allowed auth-groups.
           type: array
           items:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         require_iframe:
           description: Enforces iframe embedding instead of direct embedding.
           type: boolean
@@ -4111,6 +4092,10 @@ components:
           description: System information about the Geometry Workers.
           allOf:
             - $ref: "#/components/schemas/ResWorkerInfo"
+        scaleInCandidate:
+          description: Scale-in candidate information for worker instances.
+          allOf:
+            - $ref: "#/components/schemas/ResWorkerScaleInCandidate"
     ResMinionInfo:
       description: Holds system information of all currently running Geometry Minion services.
       type: object
@@ -4228,6 +4213,18 @@ components:
         - installed
         - allowed
         - inconsistent
+    ResWorkerScaleInCandidate:
+      description: Information about a recommended scale-in candidate.
+      type: object
+      properties:
+        success:
+          description: Indicates whether a scale-in candidate was successfully identified.
+          type: boolean
+        instanceId:
+          description: EC2 instance ID of the recommended scale-in candidate.
+          type: string
+      required:
+        - success
     ResInstalledWorkerPlugin:
       description: Contains information about all installed Grasshopper plugins.
       type: object
@@ -4795,7 +4792,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: assetDataEncrypted
           in: path
           description: Encrypted asset data information.
@@ -4829,7 +4826,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: assetDataEncrypted
           in: path
           description: Encrypted asset data information.
@@ -4863,7 +4860,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: assetDataEncrypted
           in: path
           description: Encrypted asset data information.
@@ -4897,7 +4894,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: assetDataEncrypted
           in: path
           description: Encrypted asset data information.
@@ -4931,7 +4928,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: assetDataEncrypted
           in: path
           description: Encrypted asset data information.
@@ -4961,7 +4958,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: url
           in: query
           description: Specify the Base64-encoded image URL.
@@ -5092,7 +5089,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: ignoreUnknownParams
           in: query
           description: |-
@@ -5140,7 +5137,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5177,7 +5174,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5214,7 +5211,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: exportId
           in: path
           description: Export ID.
@@ -5273,13 +5270,13 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: paramId
           in: path
           description: Parameter ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: offset
           in: query
           description: Continuation token for pagination.
@@ -5313,19 +5310,19 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: paramId
           in: path
           description: Parameter ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: fileId
           in: path
           description: ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: The file-asset with the given ID was found.
@@ -5353,19 +5350,19 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: paramId
           in: path
           description: Parameter ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: fileId
           in: path
           description: ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5395,19 +5392,19 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: paramId
           in: path
           description: Parameter ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: fileId
           in: path
           description: ID of the file asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5438,7 +5435,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5476,7 +5473,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: conversion
           in: query
           description: Specify to convert the uploaded glTF.
@@ -5520,7 +5517,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5561,7 +5558,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5591,7 +5588,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5629,7 +5626,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5711,7 +5708,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5746,7 +5743,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -5784,7 +5781,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5852,7 +5849,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5883,7 +5880,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -5914,7 +5911,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: order
           in: query
           description: |-
@@ -6016,7 +6013,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: untilLastSeen
           in: query
           description: Delete all components that have been used last at or before this timestamp.
@@ -6059,7 +6056,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: untilLastSeen
           in: query
           description: Delete all components that have been used last at or before this timestamp.
@@ -6102,7 +6099,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: untilLastSeen
           in: query
           description: Delete all components that have been used last at or before this timestamp.
@@ -6143,7 +6140,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -6176,7 +6173,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: ignoreUnknownParams
           in: query
           description: |-
@@ -6223,7 +6220,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -6285,7 +6282,7 @@ paths:
           description: Model-State ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -6506,7 +6503,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: ignoreUnknownParams
           in: query
           description: |-
@@ -6553,7 +6550,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -6590,7 +6587,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -6627,7 +6624,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: outputId
           in: path
           description: Output ID.
@@ -6686,7 +6683,7 @@ paths:
           description: Script ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -6717,7 +6714,7 @@ paths:
           description: Script ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -6752,7 +6749,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: namespace
           in: path
           description: Namespace of the sdTF asset.
@@ -6795,7 +6792,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: namespace
           in: path
           description: Namespace of the sdTF asset.
@@ -6807,7 +6804,7 @@ paths:
           description: ID of the sdTF asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -6837,7 +6834,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: namespace
           in: path
           description: Namespace of the sdTF asset.
@@ -6849,7 +6846,7 @@ paths:
           description: ID of the sdTF asset.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -6880,7 +6877,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -6934,7 +6931,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: modelStateId
           in: query
           description: ID of the Model-State to apply.
@@ -7074,7 +7071,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -7102,7 +7099,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         200:
           description: Success.
@@ -7141,7 +7138,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       requestBody:
         required: true
         content:
@@ -7217,7 +7214,7 @@ paths:
           description: Model ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
       responses:
         202:
           description: Success.
@@ -7279,6 +7276,27 @@ paths:
       security:
         - JwtAuth: []
           CredentialsAuth: []
+  "/api/v2/system/workers/scale-in-candidate":
+    get:
+      operationId: GetScaleInCandidate
+      tags:
+        - system
+      summary: Get a Geometry Worker that is a candidate for scaling in.
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResGetScaleInCandidate"
+        default:
+          description: Unexpected error. See `message` for more details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResError"
+      security:
+        - CredentialsAuth: []
   "/api/v2/system/sign/cdn/{endpoint}/{encodedUri}":
     get:
       operationId: CreateSignedUrl
@@ -7333,7 +7351,7 @@ paths:
           description: Session ID.
           required: true
           schema:
-            $ref: "#/components/schemas/Uuid"
+            type: string
         - name: offset
           in: query
           description: Continuation token for pagination.
