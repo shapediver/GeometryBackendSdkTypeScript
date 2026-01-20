@@ -34,7 +34,7 @@ export interface ConfigurationParameters
 }
 
 export class Configuration extends ClientConfig {
-    protected readonly sdkVersion = '2.10.0'; // WARNING: This value is updated automatically!
+    protected readonly sdkVersion = '3.0.0'; // WARNING: This value is updated automatically!
 
     public readonly useCustomAxios: boolean;
     public readonly maxRetries: number;
