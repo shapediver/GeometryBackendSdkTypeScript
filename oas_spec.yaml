@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 2.0.0
+  version: 2.1.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -248,6 +248,9 @@ components:
           type: boolean
         owner:
           description: The model has been blocked explicitly by its owner.
+          type: boolean
+        backendPermission:
+          description: The model owner has been restricted from accessing this backend system
           type: boolean
     CommonsModelStatus: &CommonsModelStatus
       description: Status of a model.
@@ -4079,6 +4082,7 @@ components:
               required:
                 - creditLimit
                 - owner
+                - backendPermission
                 - pluginPermission
     ResSystem:
       description: ShapeDiver API response of system-request.
