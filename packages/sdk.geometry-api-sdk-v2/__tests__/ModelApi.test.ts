@@ -127,6 +127,7 @@ test('model blocking', async () => {
     let resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
     expect(resModel.setting.model?.blockingReasons?.owner).toBeFalsy();
     expect(resModel.setting.model?.blockingReasons?.creditLimit).toBeFalsy();
+    expect(resModel.setting.model?.blockingReasons?.backendPermission).toBeFalsy();
     expect(resModel.setting.model?.blockingReasons?.pluginPermission).toBeFalsy();
 
     // Block the model.
@@ -137,6 +138,7 @@ test('model blocking', async () => {
     resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
     expect(resModel.setting.model?.blockingReasons?.owner).toBeTruthy();
     expect(resModel.setting.model?.blockingReasons?.creditLimit).toBeFalsy();
+    expect(resModel.setting.model?.blockingReasons?.backendPermission).toBeFalsy();
     expect(resModel.setting.model?.blockingReasons?.pluginPermission).toBeFalsy();
 
     // Init session should not work anymore.
