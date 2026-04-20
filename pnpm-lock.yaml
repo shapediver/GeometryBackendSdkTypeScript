@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  axios: ^1.15.0
-
 importers:
 
   .:
@@ -69,7 +66,7 @@ importers:
   packages/sdk.geometry-api-sdk-v2:
     dependencies:
       axios:
-        specifier: ^1.15.0
+        specifier: 1.15.0
         version: 1.15.0
     devDependencies:
       '@types/uuid':
@@ -1373,7 +1370,7 @@ packages:
   axios-mock-adapter@2.1.0:
     resolution: {integrity: sha512-AZUe4OjECGCNNssH8SOdtneiQELsqTsat3SQQCWLPjN436/H+L9AjWfV7bF+Zg/YL9cgbhrz5671hoh+Tbn98w==}
     peerDependencies:
-      axios: ^1.15.0
+      axios: '>= 0.17.0'
 
   axios@1.15.0:
     resolution: {integrity: sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==}

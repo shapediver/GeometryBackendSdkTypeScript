@@ -37,15 +37,5 @@
         "webpack-cli": "5.1.4",
         "webpack-dev-server": "5.2.3",
         "webpack-merge": "5.10.0"
-    },
-    "pnpm": {
-        "overrides": {
-            "axios": "^1.15.0"
-        }
-    },
-    "//": {
-        "overrides": {
-            "axios": "Remove override when typescript-axios generator don't depend on <1.13.5 anymore."
-        }
     }
 }
