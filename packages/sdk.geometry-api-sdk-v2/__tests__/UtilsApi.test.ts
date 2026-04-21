@@ -1,5 +1,6 @@
-import axios, { AxiosHeaders } from 'axios';
+import axios, { AxiosHeaders, RawAxiosRequestConfig } from 'axios';
 import {
+    Configuration,
     ExportApi,
     OutputApi,
     ResComputeExports,
@@ -11,6 +12,7 @@ import {
     TimeoutError,
     UtilsApi,
 } from '../src';
+import * as common from '../src/client/common';
 
 describe('Axios Response Types in Node.js', () => {
     const httpbin = 'https://httpbin.dev',
@@ -666,5 +668,254 @@ describe('getMaxExportDelay', function () {
             }
         );
         expect(res).toBe(-1);
+    });
+});
+
+describe('buildRequestOptions', function () {
+    const authHeader = 'Bearer mock-token',
+        url = 'https://example.com',
+        basePath = url;
+
+    // Wrapper around private utils function
+    function buildRequestOptions(utilsApi: UtilsApi, url: string, options: RawAxiosRequestConfig) {
+        return (utilsApi as any).buildRequestOptions(url, options);
+    }
+
+    // Helper to control whether isTargetingInternalOrNoCdnServer returns true or false
+    function mockIsTargeting(utilsApi: UtilsApi, returnValue: boolean) {
+        jest.spyOn(utilsApi as any, 'isTargetingInternalOrNoCdnServer').mockReturnValue(
+            returnValue
+        );
+    }
+
+    beforeEach(() => {
+        // Always sets the Authorization header when called
+        jest.spyOn(common, 'setBearerAuthToObject').mockImplementation(async (object: any) => {
+            object['Authorization'] = authHeader;
+        });
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test('options, no auth; should merge them into result', async () => {
+        const utilsApi = new UtilsApi();
+        mockIsTargeting(utilsApi, false);
+
+        const result = await buildRequestOptions(utilsApi, url, {
+            timeout: 5000,
+        });
+        expect(result.timeout).toBe(5000);
+        expect(result.headers?.Authorization).toBeUndefined();
+    });
+
+    test('baseOptions, no auth; should merge them into result', async () => {
+        const utilsApi = new UtilsApi(
+            new Configuration({
+                basePath,
+                baseOptions: { timeout: 9999, headers: { 'X-Custom': 'base-value' } },
+            })
+        );
+        mockIsTargeting(utilsApi, false);
+
+        const result = await buildRequestOptions(utilsApi, url, {});
+        expect(result.timeout).toBe(9999);
+        expect(result.headers?.['X-Custom']).toBe('base-value');
+    });
+
+    test('baseOptions and options, no auth; options should override baseOptions headers', async () => {
+        const config = new Configuration({
+            basePath,
+            baseOptions: { headers: { 'X-Custom': 'base-value' } },
+        });
+        const utilsApi = new UtilsApi(config);
+        mockIsTargeting(utilsApi, false);
+
+        const result = await buildRequestOptions(utilsApi, url, {
+            headers: { 'X-Custom': 'override-value' },
+        });
+        expect(result.headers?.['X-Custom']).toBe('override-value');
+    });
+
+    test('auth; should set bearer auth header', async () => {
+        const config = new Configuration({ basePath });
+        const utilsApi = new UtilsApi(config);
+        mockIsTargeting(utilsApi, true);
+
+        const result = await buildRequestOptions(utilsApi, url, {});
+        expect(result.headers?.Authorization).toBe(authHeader);
+    });
+
+    test('auth and options-auth; options should override bearer auth header', async () => {
+        const config = new Configuration({ basePath });
+        const utilsApi = new UtilsApi(config);
+        mockIsTargeting(utilsApi, true);
+
+        const result = await buildRequestOptions(utilsApi, url, {
+            headers: { Authorization: 'Bearer override-token' },
+        });
+        expect(result.headers?.Authorization).toBe('Bearer override-token');
+    });
+});
+
+describe('isTargetingInternalOrNoCdnServer', function () {
+    // Wrapper around private utils function
+    function isTargetingInternalOrNoCdnServer(utilsApi: UtilsApi, url: string) {
+        return (utilsApi as any).isTargetingInternalOrNoCdnServer(url);
+    }
+
+    test('returns false when no configuration is set', () => {
+        const utilsApi = new UtilsApi();
+        expect(isTargetingInternalOrNoCdnServer(utilsApi, 'https://example.com')).toBeFalsy();
+    });
+
+    test('returns false when configuration has no basePath', () => {
+        const utilsApi = new UtilsApi(new Configuration({}));
+        expect(isTargetingInternalOrNoCdnServer(utilsApi, 'https://example.com')).toBeFalsy();
+    });
+
+    test('returns true when URL origin matches basePath origin', () => {
+        const config = new Configuration({
+            basePath: 'https://sddev2.eu-central-1.shapediver.com',
+        });
+        const utilsApi = new UtilsApi(config);
+        expect(
+            isTargetingInternalOrNoCdnServer(
+                utilsApi,
+                'https://sddev2.eu-central-1.shapediver.com/api/v2/session'
+            )
+        ).toBeTruthy();
+    });
+
+    test('returns false when URL origin differs from basePath origin', () => {
+        const config = new Configuration({
+            basePath: 'https://sddev2.eu-central-1.shapediver.com',
+        });
+        const utilsApi = new UtilsApi(config);
+        expect(
+            isTargetingInternalOrNoCdnServer(utilsApi, 'https://other-server.com/api/v2/session')
+        ).toBeFalsy();
+    });
+
+    test('returns true for ShapeDiver no-CDN URL', () => {
+        const config = new Configuration({
+            basePath: 'https://sddev2.eu-central-1.shapediver.com',
+        });
+        const utilsApi = new UtilsApi(config);
+        expect(
+            isTargetingInternalOrNoCdnServer(
+                utilsApi,
+                'https://system-nocdn.eu-central-1.shapediver.com/session/abc'
+            )
+        ).toBeTruthy();
+    });
+
+    test('returns false for a URL that does not match no-CDN pattern', () => {
+        const config = new Configuration({
+            basePath: 'https://sddev2.eu-central-1.shapediver.com',
+        });
+        const utilsApi = new UtilsApi(config);
+        expect(
+            isTargetingInternalOrNoCdnServer(
+                utilsApi,
+                'https://system-cdn.eu-central-1.shapediver.com/session/abc'
+            )
+        ).toBeFalsy();
+    });
+
+    test('returns false for an invalid URL', () => {
+        const config = new Configuration({
+            basePath: 'https://sddev2.eu-central-1.shapediver.com',
+        });
+        const utilsApi = new UtilsApi(config);
+        expect(isTargetingInternalOrNoCdnServer(utilsApi, 'not-a-valid:::url')).toBeFalsy();
+    });
+
+    test('resolves relative URL against basePath and returns true for same origin', () => {
+        const config = new Configuration({
+            basePath: 'https://sddev2.eu-central-1.shapediver.com',
+        });
+        const utilsApi = new UtilsApi(config);
+        expect(isTargetingInternalOrNoCdnServer(utilsApi, '/api/v2/session/abc')).toBeTruthy();
+    });
+});
+
+describe('disableAuthHeaderForShapeDiverUris', function () {
+    const utilsApi = new UtilsApi();
+
+    // Wrapper around private utils function
+    function disableAuthHeaderForShapeDiverUris(url: string, options: RawAxiosRequestConfig) {
+        return (utilsApi as any).disableAuthHeaderForShapeDiverUris(url, options);
+    }
+
+    test('does nothing when Authorization header is already set', () => {
+        const options: RawAxiosRequestConfig = { headers: { Authorization: 'Bearer token123' } };
+        disableAuthHeaderForShapeDiverUris('https://viewer.shapediver.com/asset', options);
+        expect(options.headers!.Authorization).toBe('Bearer token123');
+    });
+
+    test('does nothing for an invalid URL', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris('not-a-valid:::url', options);
+        expect('Authorization' in options.headers!).toBe(false);
+    });
+
+    test('sets Authorization to undefined for viewer.shapediver.com', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris('https://viewer.shapediver.com/asset', options);
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+    });
+
+    test('sets Authorization to undefined for textures.shapediver.com', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris('https://textures.shapediver.com/asset', options);
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+    });
+
+    test('sets Authorization to undefined for downloads.shapediver.com', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris('https://downloads.shapediver.com/asset', options);
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+    });
+
+    test('sets Authorization to undefined for CDN output URL', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris(
+            'https://cdn.shapediver.com/cdn-asset-outputs/abc123',
+            options
+        );
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+    });
+
+    test('sets Authorization to undefined for CDN export URL', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris(
+            'https://cdn.shapediver.com/cdn-asset-exports/abc123',
+            options
+        );
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+    });
+
+    test('sets Authorization to undefined for CDN texture URL', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris(
+            'https://cdn.shapediver.com/cdn-asset-textures/abc123',
+            options
+        );
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+    });
+
+    test('does nothing for non-ShapeDiver URL', () => {
+        const options: RawAxiosRequestConfig = { headers: {} };
+        disableAuthHeaderForShapeDiverUris('https://example.com/some/path', options);
+        expect('Authorization' in options.headers!).toBe(false);
+    });
+
+    test('preserves existing headers when disabling Authorization', () => {
+        const options: RawAxiosRequestConfig = { headers: { 'Content-Type': 'application/json' } };
+        disableAuthHeaderForShapeDiverUris('https://viewer.shapediver.com/asset', options);
+        expect(options.headers).toHaveProperty('Authorization', undefined);
+        expect(options.headers).toHaveProperty('Content-Type', 'application/json');
     });
 });

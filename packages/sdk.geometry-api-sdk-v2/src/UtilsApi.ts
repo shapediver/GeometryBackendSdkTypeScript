@@ -16,7 +16,11 @@ import {
     ResOutput,
 } from './client';
 import { BaseAPI, RequestArgs } from './client/base';
-import { createRequestFunction, serializeDataIfNeeded } from './client/common';
+import {
+    createRequestFunction,
+    serializeDataIfNeeded,
+    setBearerAuthToObject,
+} from './client/common';
 import { IllegalArgumentError, ResponseError, TimeoutError } from './error';
 import { contentDispositionFromFilename, sleep } from './utils';
 
@@ -34,6 +38,9 @@ const cdnAssetTextureUri = /.+\/cdn-asset-textures\/.+/;
 /* Regex patterns for direct download URIs. */
 const directDownloadUri = /^(http[s]?:\/\/)?(viewer|textures|downloads)\.shapediver\.com(\/.*)?$/;
 
+/* Regex pattern for ShapeDiver no-CDN servers. */
+const sdNoCdnOrigin = /-nocdn.[\w-]+.shapediver.com$/;
+
 export class UtilsApi extends BaseAPI {
     constructor(configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
         super(configuration, basePath, axios);
@@ -41,6 +48,8 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Upload the given file to the specified URL.
+     *
+     * _Note: This method does not use the `UtilsApi`'s base configuration._
      * @param {string} url The target URL of the upload request.
      * @param {*} data The data that should be uploaded.
      * @param {string} contentType Indicate the original media type of the resource.
@@ -76,6 +85,8 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Upload the given asset to the specified ShapeDiver URL.
+     *
+     * _Note: This method does not use the `UtilsApi`'s base configuration._
      * @param {string} url The target URL of the upload request.
      * @param {*} data The data that should be uploaded.
      * @param {ResAssetUploadHeaders} headers The headers object that was returned from the request-upload call.
@@ -130,8 +141,11 @@ export class UtilsApi extends BaseAPI {
         options: { responseType: 'text' } & RawAxiosRequestConfig
     ): AxiosPromise<string>;
     public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any>;
-    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
-        const request = this.buildRequest('GET', url, undefined, options)();
+    public async download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        const localRequestOptions = await this.buildRequestOptions(url, options ?? {});
+        this.disableAuthHeaderForShapeDiverUris(url, localRequestOptions);
+
+        const request = this.buildRequest('GET', url, undefined, localRequestOptions)();
         const res = request();
 
         // Convert Buffer to ArrayBuffer in Node.js when responseType is 'arraybuffer'
@@ -201,7 +215,6 @@ export class UtilsApi extends BaseAPI {
         options?: RawAxiosRequestConfig
     ): [AxiosPromise<any>, 'export' | 'output' | 'texture'] {
         let type: 'output' | 'export' | 'texture';
-        this.disableAuthHeaderForShapeDiverUris(url, options);
 
         // Check if the given URL is a valid API or CDN asset URL
         if (apiAssetExportUri.test(url) || cdnAssetExportUri.test(url)) type = 'export';
@@ -240,8 +253,6 @@ export class UtilsApi extends BaseAPI {
         url: string,
         options?: RawAxiosRequestConfig
     ): AxiosPromise<any> {
-        this.disableAuthHeaderForShapeDiverUris(url, options);
-
         if (
             apiAssetTextureUri.test(url) ||
             cdnAssetTextureUri.test(url) ||
@@ -250,7 +261,10 @@ export class UtilsApi extends BaseAPI {
             // Call ShapeDiver texture-asset URLs directly
             return this.download(url, options) as any;
         } else {
-            // All other source URLs are called via the download-image endpoint
+            /* All other source URLs are called via the download-image endpoint */
+
+            const localOptions: RawAxiosRequestConfig = options ?? {};
+            this.disableAuthHeaderForShapeDiverUris(url, localOptions);
 
             // Use a universal base64 encoder for browser and Node.js environments
             const encodedUrl =
@@ -262,7 +276,11 @@ export class UtilsApi extends BaseAPI {
                       )
                     : Buffer.from(url, 'utf-8').toString('base64');
 
-            return new AssetsApi(this.configuration).downloadImage(sessionId, encodedUrl, options);
+            return new AssetsApi(this.configuration).downloadImage(
+                sessionId,
+                encodedUrl,
+                localOptions
+            );
         }
     }
 
@@ -509,6 +527,58 @@ export class UtilsApi extends BaseAPI {
     }
 
     /**
+     * Builds the Axios request options by merging the API's base configuration with the given
+     * options, and conditionally setting or overrides the Authorization header.
+     *
+     * The authorization header is set, when the URL is targeting the same server as the one
+     * specified in the API's base path configuration, or if it is a ShapeDiver no-CDN server. In
+     * this case, the Bearer token from the API configuration will be used.
+     * @param url The URL to send the request to.
+     * @param options The Axios request options.
+     * @returns The merged Axios request options.
+     */
+    private async buildRequestOptions(
+        url: string,
+        options: RawAxiosRequestConfig
+    ): Promise<RawAxiosRequestConfig> {
+        let baseOptions;
+        if (this.configuration) baseOptions = this.configuration.baseOptions;
+
+        const localRequestOptions = { ...baseOptions, ...options },
+            localHeaderParameter = {} as any;
+
+        if (this.isTargetingInternalOrNoCdnServer(url))
+            await setBearerAuthToObject(localHeaderParameter, this.configuration);
+
+        let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+        localRequestOptions.headers = {
+            ...localHeaderParameter,
+            ...headersFromBaseOptions,
+            ...options.headers,
+        };
+
+        return localRequestOptions;
+    }
+
+    /**
+     * Checks whether the given URL is targeting the same server as the one specified in the API's
+     * base path configuration or if it is a ShapeDiver no-CDN server.
+     */
+    private isTargetingInternalOrNoCdnServer(url: string): boolean {
+        const basePath = this.configuration?.basePath;
+        if (!basePath) return false;
+
+        try {
+            const targetUrl = new URL(url, basePath);
+            const baseUrl = new URL(basePath);
+
+            return targetUrl.origin === baseUrl.origin || sdNoCdnOrigin.test(targetUrl.origin);
+        } catch {
+            return false;
+        }
+    }
+
+    /**
      * A wrapper around the auto-generated `serializeDataIfNeeded` that safely serializes data for
      * Axios. The idea of the base function is to stringify objects for application-json requests.
      * However, this does not work on all data types. Thus, this wrapper passes through all data
@@ -547,15 +617,18 @@ export class UtilsApi extends BaseAPI {
     }
 
     /** Disable the Authorization header for ShapeDiver URIs if not explicitly set. */
-    private disableAuthHeaderForShapeDiverUris(
-        url: string,
-        options?: RawAxiosRequestConfig
-    ): void {
-        options = { ...options };
-        if (
-            !options.headers?.Authorization &&
-            (cdnAssetUri.test(url) || directDownloadUri.test(url))
-        )
+    private disableAuthHeaderForShapeDiverUris(url: string, options: RawAxiosRequestConfig): void {
+        // When an authorization header is set, it will override anything that is set later
+        if (options.headers?.Authorization) return;
+
+        let targetUrl: URL;
+        try {
+            targetUrl = new URL(url);
+        } catch {
+            return;
+        }
+
+        if (directDownloadUri.test(targetUrl.origin) || cdnAssetUri.test(url))
             options.headers = { Authorization: undefined, ...options.headers };
     }
 }
