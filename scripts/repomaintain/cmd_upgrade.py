@@ -49,7 +49,10 @@ def run_upgrade(
     reject = reject.strip(",")
 
     # Build command to upgrade dependencies.
-    cmd = f"npx ncu --upgrade --packageManager pnpm --target {shlex.quote(target)} --filter {shlex.quote(dep_filter)}"
+    cmd = (
+        "npx ncu --upgrade --packageManager pnpm --dep prod,dev,optional,peer "
+        f"--target {shlex.quote(target)} --filter {shlex.quote(dep_filter)}"
+    )
     if reject:
         cmd += f" --reject {shlex.quote(reject)}"
 
@@ -73,7 +76,7 @@ Please complete the following steps next:
   1. Test the application(s) and make sure that the new versions do not cause problems. When you
     encounter issues and cannot fix them, downgrade the version of the problematic dependencies.
     (Do not forget to run `pnpm install` after downgrading versions to apply the changes).
-  
+
   2. Persist your changes by running `npm run apply-upgrade`.
 """,
         "wrn",
