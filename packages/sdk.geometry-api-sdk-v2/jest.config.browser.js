@@ -12,14 +12,16 @@ module.exports = {
         '^axios$': require.resolve('axios'),
     },
     transform: {
-        '^.+\\.tsx?$': [
+        '^.+\\.[tj]sx?$': [
             'ts-jest',
             {
                 tsconfig: {
+                    allowJs: true,
                     esModuleInterop: true,
                     allowSyntheticDefaultImports: true,
                 },
             },
         ],
     },
+    transformIgnorePatterns: ['/node_modules/(?!.*uuid/)'],
 };
