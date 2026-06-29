@@ -11,10 +11,22 @@ sdk_client_dir := "./packages/sdk.geometry-api-sdk-v2/src/client/"
 # Path of the local OAS repository.
 oas_repo := "../OpenApiSpecifications/"
 
+# Resolve the installed OpenAPI generator command at runtime.
+_openapi-generator-command:
+    #!/usr/bin/env bash
+    if command -v openapi-generator-cli >/dev/null 2>&1; then
+        echo openapi-generator-cli
+    elif command -v openapi-generator >/dev/null 2>&1; then
+        echo openapi-generator
+    else
+        echo "Neither openapi-generator-cli (npm) nor openapi-generator (brew) is installed." >&2
+        exit 1
+    fi
+
 # Generate the TypeScript client from the OpenAPI specification.
 generate version:
     # Ensure that the generator is installed.
-    command -v openapi-generator-cli
+    just --quiet _openapi-generator-command >/dev/null
 
     # Stop when repo is dirty
     test -z "$(git diff --shortstat)"
@@ -30,7 +42,7 @@ generate version:
 
     # Generate the TypeScript client.
     mkdir -p "{{target_dir}}"
-    openapi-generator-cli generate \
+    "$(just --quiet _openapi-generator-command)" generate \
         --generate-alias-as-model \
         --additional-properties=\
           disallowAdditionalPropertiesIfNotPresent=false,\
@@ -67,7 +79,7 @@ generate version:
 
 # Tests the TypeScript client generation with the current version of the checked out OAS repo.
 test-generator:
-    openapi-generator-cli generate \
+    "$(just --quiet _openapi-generator-command)" generate \
         --generate-alias-as-model \
         --additional-properties=\
           disallowAdditionalPropertiesIfNotPresent=false,\
@@ -86,7 +98,7 @@ _post-generation:
     replacement="import \{\1\2\} from '.\/base';"
     added_line="import \{ BaseAPI \} from '..\/base';"
     case $(uname -s) in
-    Linux) 
+    Linux)
         sed -ri "s/${pattern}/${replacement}\n${added_line}/g" \
             "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
         ;;
