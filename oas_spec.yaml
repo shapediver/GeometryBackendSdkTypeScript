@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 2.3.0
+  version: 2.4.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -452,51 +452,6 @@ components:
           type: array
           items:
             type: string
-    ReqModelStatistics:
-      description: >-
-        Body of a model statistics request. Every request-item results in exactly one
-        response-item, whereby the order of response-items corresponds to the order of the
-        request-items.
-      type: object
-      properties:
-        parameters:
-          type: array
-          items:
-            title: ReqModelStatistic
-            description: >-
-              Parameters of a single model-session analytics request. When multiple model IDs or
-              timestamps are requested, the resulting response-item represents an aggregation of
-              the requested data.
-            type: object
-            properties:
-              modelid:
-                type: array
-                items:
-                  type: string
-              timestamp:
-                description: >-
-                  Either a single extended date or an array of extended dates.
-
-                  Multiple timestamps are aggregated and result in a single statistic object.
-                type: array
-                items:
-                  $ref: "#/components/schemas/AnyDateExtended"
-              timestamp_from:
-                description: >-
-                  Allows to define the beginning of a time range, instead of specifying individual
-                  timestamps.
-                allOf:
-                  - $ref: "#/components/schemas/AnyDateExtended"
-              timestamp_to:
-                description: >-
-                  Allows to define the ending of a time range, instead of specifying individual
-                  timestamps.
-                allOf:
-                  - $ref: "#/components/schemas/AnyDateExtended"
-            required:
-              - modelid
-      required:
-        - parameters
     ReqAnyCreditMetricId:
       description: >-
         Either a single or multiple IDs. Multiple IDs are aggregated and result in a single credit
@@ -1115,14 +1070,6 @@ components:
     #-------------------------------------------------------------------------#
     #- Main response data structures                                         -#
     #-------------------------------------------------------------------------#
-    ResGetModelStatistics:
-      allOf:
-        - $ref: "#/components/schemas/ResPartAnalytics"
-        - $ref: "#/components/schemas/ResPartMessage"
-        - $ref: "#/components/schemas/ResPartVersion"
-      required:
-        - analytics
-        - version
     ResGetCreditMetrics:
       allOf:
         - $ref: "#/components/schemas/ResPartAnalytics"
@@ -4513,36 +4460,6 @@ paths:
   #---------------------------------------------------------------------------#
   #- Analytics                                                               -#
   #---------------------------------------------------------------------------#
-  "/api/v2/analytics/session/model":
-    put:
-      operationId: GetModelStatistics
-      tags:
-        - analytics
-      summary: Get model session analytics.
-      description: |-
-        Permissions:
-        * `analytics.model.get.*` - __required__.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ReqModelStatistics"
-      responses:
-        200:
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ResGetModelStatistics"
-        default:
-          description: Unexpected error. See `message` for more details.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ResError"
-      security:
-        - JwtAuth: []
   "/api/v2/analytics/credit-metrics":
     put:
       operationId: GetCreditMetrics

@@ -1,39 +1,5 @@
-import {
-    AnalyticsApi,
-    Configuration,
-    ReqCreditMetrics,
-    ReqModelStatistics,
-    SessionApi,
-} from '../src';
-import { basePath, jwtModel, modelId, createTicket, jwtBackend } from './config';
-
-test('model session statistics', async () => {
-    const modelConfig = new Configuration({
-        basePath,
-        accessToken: jwtModel,
-    });
-
-    // Initialize a new session.
-    const ticket = await createTicket();
-    const sessionId = (await new SessionApi(modelConfig).createSessionByTicket(ticket)).data
-        .sessionId;
-
-    // Fetch model statistics within a specific time range.
-    const reqStats: ReqModelStatistics = {
-        parameters: [
-            {
-                modelid: [modelId],
-                timestamp_from: '2024',
-                timestamp_to: '2025',
-            },
-        ],
-    };
-    const resStats = (await new AnalyticsApi(modelConfig).getModelStatistics(reqStats)).data;
-    expect(resStats.analytics.models.length).toBeGreaterThan(0);
-
-    // Close the session.
-    await new SessionApi(modelConfig).closeSession(sessionId);
-});
+import { AnalyticsApi, Configuration, ReqCreditMetrics, SessionApi } from '../src';
+import { basePath, createTicket, jwtBackend, jwtModel, modelId } from './config';
 
 test('credit metrics', async () => {
     const modelConfig = new Configuration({
