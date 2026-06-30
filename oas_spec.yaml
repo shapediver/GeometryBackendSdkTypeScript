@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 2.4.0
+  version: 2.4.1
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -1804,7 +1804,7 @@ components:
       type: object
       properties:
         analytics:
-          description: Statistics of the model for the given timespan.
+          description: Analytics information.
           allOf:
             - $ref: "#/components/schemas/ResAnalytics"
     ResPartGltfUpload:
@@ -1875,191 +1875,12 @@ components:
       description: Analytics components.
       type: object
       properties:
-        models:
-          type: array
-          items:
-            $ref: "#/components/schemas/ResModelStatistic"
         creditMetrics:
           type: array
           items:
             $ref: "#/components/schemas/ResAnyCreditMetric"
       required:
-        - models
         - creditMetrics
-    ResModelStatistic:
-      description: Aggregated model session statistics.
-      type: object
-      properties:
-        modelid:
-          description: Requested model ID.
-          type: string
-        timestamp:
-          description: Either an extended date-time or a 'merged'-specifier.
-          type: string
-        isCompilationDone:
-          description: Aggregation for this timestamp has finished.
-          type: boolean
-        count:
-          description: |-
-            Number of (technical) sessions for the given model and timestamp. A technical session
-            may last up to two hours, after which it will get cancelled by the backend.
-
-            CAUTION: Not to be confused with credits!
-          type: integer
-          minimum: 0
-        billableCount:
-          description: >-
-            Billable duration-based credit count, based on maximum duration of 10 minutes per
-            credit.
-          type: integer
-          minimum: 0
-        duration:
-          description: Statistics on the duration of all sessions.
-          allOf:
-            - $ref: "#/components/schemas/ResOnDurationStatistic"
-        app:
-          description: Statistics on the duration of app sessions.
-          allOf:
-            - $ref: "#/components/schemas/ResOnDurationStatistic"
-        backend:
-          description: Statistics on the duration of backend sessions.
-          allOf:
-            - $ref: "#/components/schemas/ResOnDurationStatistic"
-        embedded:
-          description: Statistics on the duration of embedded sessions.
-          allOf:
-            - $ref: "#/components/schemas/ResOnDurationStatistic"
-        desktop:
-          description: Statistics on the duration of desktop sessions.
-          allOf:
-            - $ref: "#/components/schemas/ResOnDurationStatistic"
-        customize:
-          description: Statistics on customization requests per session.
-          allOf:
-            - $ref: "#/components/schemas/ResOnActionStatistic"
-        export:
-          description: Statistics on export requests per session.
-          allOf:
-            - $ref: "#/components/schemas/ResOnActionStatistic"
-      required:
-        - modelid
-        - timestamp
-        - isCompilationDone
-        - count
-        - billableCount
-        - duration
-        - app
-        - backend
-        - embedded
-        - desktop
-        - customize
-        - export
-    ResOnDurationStatistic:
-      type: object
-      properties:
-        count:
-          description: |-
-            * `duration`, `app`, `embedded`, `backend`, `desktop`: Number of (technical) sessions
-              from all sources (duration) or from one specific source (app, embedded, backend,
-              desktop), for the given model and timestamp.
-            * `export`, `customize`: Number of sessions which have export requests.
-          type: integer
-          minimum: 0
-        billableCount:
-          description: |-
-            * `duration`, `app`, `embedded`, `backend`, `desktop`: Billable duration-based credit
-              count for all sessions, based on maximum duration of 10 minutes per credit.
-            * `export`, `customize`: Billable duration-based credit count for sessions which have
-              export requests, based on maximum duration of 10 minutes per credit.
-          type: integer
-          minimum: 0
-        min:
-          description: |-
-            * `duration`, `app`, `embedded`, `backend`, `desktop`: Cumulative distribution function
-              of the duration, for all sessions for the given model and timestamp.
-            * `export`, `customize`: Cumulative distribution function of the number of export
-              requests per session, for sessions which have export requests.
-          type: integer
-          minimum: 0
-        max:
-          description: |-
-            * `duration`, `app`, `embedded`, `backend`, `desktop`: Cumulative distribution function
-              of the duration, for all sessions for the given model and timestamp.
-            * `export`, `customize`: Cumulative distribution function of the number of export
-              requests per session, for sessions which have export requests.
-          type: integer
-          minimum: 0
-        avg:
-          description: |-
-            * `duration`, `app`, `embedded`, `backend`, `desktop`: Average duration of all sessions
-              for the given model and timestamp.
-            * `export`, `customize`: Average number of export requests per session, for sessions
-              which have export requests.
-          type: integer
-          minimum: 0
-        sum:
-          description: |-
-            * `duration`, `app`, `embedded`, `backend`, `desktop`: Total duration of all sessions
-              for the given model and timestamp.
-            * `export`, `customize`: Total number of export requests for all sessions which have
-              export requests.
-          type: integer
-          minimum: 0
-      required:
-        - count
-        - billableCount
-        - min
-        - max
-        - avg
-        - sum
-    ResOnActionStatistic:
-      allOf:
-        - $ref: "#/components/schemas/ResOnDurationStatistic"
-        - type: object
-          properties:
-            sumApp:
-              description: |-
-                `customize`: Total number of actions, for ShapeDiver Platform sessions for which
-                the type of action happened.
-
-                Note: New property - will contain `0` for entries before November 2019.
-              type: integer
-              minimum: 0
-            sumBackend:
-              description: |-
-                `customize`: Total number of customization requests for backend sessions which have
-                customization requests.
-
-                `export`: Total number of export requests for backend sessions which have export
-                requests.
-
-                Note: New property - will contain `0` for entries before November 2019.
-              type: integer
-              minimum: 0
-            sumEmbedded:
-              description: |-
-                `customize`: Total number of customization requests for embedded sessions which
-                have customization requests.
-
-                `export`: Total number of export requests for embedded sessions which have export
-                requests.
-
-                Note: New property - will contain `0` for entries before November 2019.
-              type: integer
-              minimum: 0
-            sumDesktop:
-              description: |-
-                `customize`: Total number of actions, for desktop client sessions for which the
-                type of action happened.
-
-                Note: New property - will contain `0` for entries before January 2021.
-              type: integer
-              minimum: 0
-          required:
-            - sumApp
-            - sumBackend
-            - sumEmbedded
-            - sumDesktop
     ResAnyCreditMetric:
       description: The ID of any type of credit metric.
       oneOf:
