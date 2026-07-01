@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 2.4.1
+  version: 2.5.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -4176,6 +4176,9 @@ components:
         name:
           description: Name of the plugin component.
           type: string
+        isScriptComponent:
+          description: Indicates whether the component is a script component.
+          type: boolean
       required:
         - id
         - name
