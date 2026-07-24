@@ -21,7 +21,7 @@ export async function createTicket(): Promise<string> {
     });
     const sessionApi = new SessionApi(backendConfig);
 
-    return (await sessionApi.createTicket(modelId, reqTicket)).data.ticket;
+    return (await sessionApi.createTicket(modelId, reqTicket)).ticket;
 }
 
 /**

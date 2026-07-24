@@ -16,7 +16,7 @@ export class SdGeometryError extends Error {
 }
 
 /**
- * This error builds on top of an Axios request error.
+ * This error builds on top of an Fetch request error.
  *
  * The request was made but no response was received.
  * @export
@@ -31,7 +31,7 @@ export class RequestError extends SdGeometryError {
 }
 
 /**
- * This error builds on top of an Axios response error.
+ * This error builds on top of an Fetch response error.
  *
  * The request was made and the server responded with a status code that falls out of the range of
  * 2xx.

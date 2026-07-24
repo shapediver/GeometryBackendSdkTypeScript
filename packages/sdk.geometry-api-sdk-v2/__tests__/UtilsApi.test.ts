@@ -1,6 +1,5 @@
-import axios, { AxiosHeaders, RawAxiosRequestConfig } from 'axios';
+import { Configuration as ClientConfig } from '../src/client/runtime';
 import {
-    Configuration,
     ExportApi,
     OutputApi,
     ResComputeExports,
@@ -8,130 +7,209 @@ import {
     ResExportDefinitionType,
     ResGetCachedExports,
     ResGetCachedOutputs,
-    sleep,
+    Configuration,
     TimeoutError,
     UtilsApi,
 } from '../src';
-import * as common from '../src/client/common';
 
-describe('Axios Response Types in Node.js', () => {
-    const httpbin = 'https://httpbin.dev',
-        utilsApi = new UtilsApi();
+describe('Fetch response types in Node.js', () => {
+    const url = 'https://example.com/resource';
 
-    afterEach(async () => {
-        await sleep(100); // Be polite to the httpbin-server
-    });
-
-    /** Helper function to test that both axios and utilsApi return the same response type. */
-    async function expectBothToMatch(
-        url: string,
-        responseType: any,
-        validator: (data: any) => void
-    ): Promise<void> {
-        const axiosRes = await axios.get(url, { responseType });
-        validator(axiosRes.data);
-
-        const sdRes = await utilsApi.download(url, { responseType });
-        validator(sdRes.data);
-    }
-
-    /** Helper to validate ArrayBuffer responses. */
     function expectArrayBuffer(data: any) {
         expect(data).toBeInstanceOf(ArrayBuffer);
         expect(data.byteLength).toBeGreaterThan(0);
     }
-
-    /** Helper to validate JSON object responses. */
     function expectJsonObject(data: any) {
         expect(typeof data).toBe('object');
-        expect(data).not.toBeInstanceOf(ArrayBuffer);
-        expect(data).not.toBeInstanceOf(Blob);
         expect(data).not.toBeNull();
     }
-
-    /** Helper to validate string responses. */
     function expectString(data: any) {
         expect(typeof data).toBe('string');
         expect(data.length).toBeGreaterThan(0);
     }
-
-    /** Helper to validate Buffer responses. */
-    function expectBuffer(data: any) {
-        expect(data).toBeInstanceOf(Buffer);
-        expect(data.byteLength).toBeGreaterThan(0);
+    function expectBlob(data: any) {
+        expect(data).toBeInstanceOf(Blob);
+        expect(data.size).toBeGreaterThan(0);
+        expect(data.type).toBe('image/png');
     }
 
-    describe('arraybuffer response-type', () => {
-        const responseType = 'arraybuffer';
+    async function expectBody(
+        body: BodyInit,
+        read: (response: Response) => Promise<unknown>,
+        validator: (data: any) => void,
+        headers?: HeadersInit
+    ): Promise<void> {
+        const fetch = jest.fn().mockResolvedValue(new Response(body, { status: 200, headers }));
+        const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
 
-        test('should return ArrayBuffer for image endpoint', async () => {
-            const url = `${httpbin}/image/png`;
+        validator(await read(await utilsApi.download(url)));
+        expect(fetch).toHaveBeenCalledWith(url, expect.objectContaining({ method: 'GET' }));
+    }
 
-            const axiosRes = await axios.get(url, { responseType });
-            expectBuffer(axiosRes.data);
-
-            const sdRes = await utilsApi.download(url, { responseType });
-            expectArrayBuffer(sdRes.data);
-        });
-
-        test('should return ArrayBuffer for HTML endpoint', async () => {
-            const url = `${httpbin}/html`;
-
-            const axiosRes = await axios.get(url, { responseType });
-            expectBuffer(axiosRes.data);
-
-            const sdRes = await utilsApi.download(url, { responseType });
-            expectArrayBuffer(sdRes.data);
-        });
+    test('should return ArrayBuffer for binary responses', async () => {
+        await expectBody(new Uint8Array([1, 2, 3]), (r) => r.arrayBuffer(), expectArrayBuffer);
     });
 
-    describe('json response-type', () => {
-        const responseType = 'json';
-
-        test('should return parsed object for JSON endpoint', async () => {
-            await expectBothToMatch(`${httpbin}/json`, responseType, expectJsonObject);
-        });
-
-        test('should return string/error for image endpoint', async () => {
-            const url = `${httpbin}/image/png`;
-
-            // Axios returns the raw data as string
-            const axiosRes = await axios.get(url, { responseType });
-            expectString(axiosRes.data);
-
-            // SDK should throw since the response is not valid JSON
-            await expect(utilsApi.download(url, { responseType })).rejects.toThrow(
-                'Invalid JSON response: Could not parse response as JSON'
-            );
-        });
+    test('should return parsed JSON for JSON responses', async () => {
+        await expectBody(
+            JSON.stringify({ hello: 'world' }),
+            (r) => r.json(),
+            expectJsonObject,
+            { 'Content-Type': 'application/json' }
+        );
     });
 
-    describe('text response-type', () => {
-        const responseType = 'text';
-
-        test('should return string for HTML endpoint', async () => {
-            await expectBothToMatch(`${httpbin}/html`, responseType, expectString);
-        });
-
-        test('should return string for image endpoint', async () => {
-            await expectBothToMatch(`${httpbin}/image/png`, responseType, expectString);
-        });
+    test('should return text for text responses', async () => {
+        await expectBody('<html>content</html>', (r) => r.text(), expectString);
     });
 
-    describe('default response-type', () => {
-        test('should auto-parse JSON to object', async () => {
-            await expectBothToMatch(`${httpbin}/json`, undefined, expectJsonObject);
-        });
-
-        test('should auto-parse PDF to string', async () => {
-            await expectBothToMatch(`${httpbin}/pdf`, undefined, expectString);
-        });
+    test('should return a Blob for binary responses', async () => {
+        await expectBody(
+            new Uint8Array([1, 2, 3]),
+            (r) => r.blob(),
+            expectBlob,
+            { 'Content-Type': 'image/png' }
+        );
     });
 
-    describe('unsupported response-type', () => {
-        test('should return string for image endpoint and response-type blob', async () => {
-            await expectBothToMatch(`${httpbin}/image/png`, 'blob', expectString);
+    test('should reject when parsing invalid JSON', async () => {
+        const fetch = jest.fn().mockResolvedValue(new Response('not JSON', { status: 200 }));
+        const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
+
+        await expect((await utilsApi.download(url)).json()).rejects.toThrow();
+    });
+
+    test('should expose the Fetch response for default handling', async () => {
+        const fetch = jest.fn().mockResolvedValue(new Response('{"hello":"world"}', { status: 200 }));
+        const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
+
+        const response = await utilsApi.download(url);
+        expect(response).toBeInstanceOf(Response);
+        expect(await response.json()).toEqual({ hello: 'world' });
+    });
+});
+
+describe('Fetch request construction', () => {
+    function response(): Response {
+        return new Response('{}', { status: 200 });
+    }
+
+    test('resolves relative URLs and merges configured and request headers', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(
+            new ClientConfig({
+                basePath: 'https://api.example.com/',
+                headers: { 'X-Base': 'base', 'X-Override': 'base' },
+                fetchApi: fetch,
+            })
+        );
+
+        await utilsApi.download('/asset', {
+            headers: { 'X-Request': 'request', 'X-Override': 'request' },
         });
+
+        const [url, init] = fetch.mock.calls[0];
+        const headers = new Headers(init.headers);
+        expect(url).toBe('https://api.example.com/asset');
+        expect(init.method).toBe('GET');
+        expect(headers.get('X-Base')).toBe('base');
+        expect(headers.get('X-Request')).toBe('request');
+        expect(headers.get('X-Override')).toBe('request');
+    });
+
+    test('injects internal authorization and allows an explicit override', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(
+            new ClientConfig({
+                basePath: 'https://api.example.com',
+                accessToken: 'configured-token',
+                fetchApi: fetch,
+            })
+        );
+
+        await utilsApi.download('/asset', {
+            headers: { Authorization: 'Bearer request-token' },
+        });
+
+        expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe(
+            'Bearer request-token'
+        );
+    });
+
+    test('removes configured authorization for direct-download URLs', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(
+            new ClientConfig({
+                headers: { Authorization: 'Bearer configured-token' },
+                fetchApi: fetch,
+            })
+        );
+
+        await utilsApi.download('https://viewer.shapediver.com/asset');
+
+        expect(new Headers(fetch.mock.calls[0][1].headers).has('Authorization')).toBe(false);
+    });
+
+    test('preserves an explicit authorization header for direct-download URLs', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
+
+        await utilsApi.download('https://viewer.shapediver.com/asset', {
+            headers: { Authorization: 'Bearer explicit-token' },
+        });
+
+        expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe(
+            'Bearer explicit-token'
+        );
+    });
+
+    test('removes configured authorization for CDN asset URLs', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(
+            new ClientConfig({
+                headers: { Authorization: 'Bearer configured-token' },
+                fetchApi: fetch,
+            })
+        );
+
+        await utilsApi.download('https://cdn.shapediver.com/assets/cdn-asset-outputs/abc123');
+
+        expect(new Headers(fetch.mock.calls[0][1].headers).has('Authorization')).toBe(false);
+    });
+
+    test('uses Fetch method, body, and upload headers', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
+
+        await utilsApi.upload(
+            'https://upload.example.com/asset',
+            'payload',
+            'text/plain',
+            'asset.txt'
+        );
+
+        const [url, init] = fetch.mock.calls[0];
+        const headers = new Headers(init.headers);
+        expect(url).toBe('https://upload.example.com/asset');
+        expect(init.method).toBe('PUT');
+        expect(init.body).toBe('payload');
+        expect(headers.get('Content-Type')).toBe('text/plain');
+        expect(headers.get('Content-Disposition')).toContain('asset.txt');
+    });
+
+    test('uses the preformatted Content-Disposition from an asset upload response', async () => {
+        const fetch = jest.fn().mockResolvedValue(response());
+        const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
+        const contentDisposition = 'attachment; filename="asset.txt"';
+
+        await utilsApi.uploadAsset(
+            'https://upload.example.com/asset',
+            'payload',
+            { contentType: 'text/plain', contentDisposition }
+        );
+
+        const headers = new Headers(fetch.mock.calls[0][1].headers);
+        expect(headers.get('Content-Disposition')).toBe(contentDisposition);
     });
 });
 
@@ -206,13 +284,7 @@ describe('waitForOutputResult', function () {
         // Mock
         const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
         getCachedOutputs.mockReturnValue(
-            Promise.resolve({
-                data: resCache,
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: { headers: new AxiosHeaders() },
-            })
+            Promise.resolve(resCache)
         );
 
         // @ts-expect-error
@@ -277,13 +349,7 @@ describe('waitForOutputResult', function () {
         // Mock
         const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
         getCachedOutputs.mockReturnValue(
-            Promise.resolve({
-                data: resCache,
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: { headers: new AxiosHeaders() },
-            })
+            Promise.resolve(resCache)
         );
 
         await expect(
@@ -366,13 +432,7 @@ describe('waitForExportResult', function () {
         // Mock
         const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
         getCachedExports.mockReturnValue(
-            Promise.resolve({
-                data: resCache,
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: { headers: new AxiosHeaders() },
-            })
+            Promise.resolve(resCache)
         );
 
         // @ts-expect-error
@@ -419,13 +479,7 @@ describe('waitForExportResult', function () {
         // Mock
         const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
         getCachedExports.mockReturnValue(
-            Promise.resolve({
-                data: resCache,
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: { headers: new AxiosHeaders() },
-            })
+            Promise.resolve(resCache)
         );
 
         await expect(
@@ -671,94 +725,6 @@ describe('getMaxExportDelay', function () {
     });
 });
 
-describe('buildRequestOptions', function () {
-    const authHeader = 'Bearer mock-token',
-        url = 'https://example.com',
-        basePath = url;
-
-    // Wrapper around private utils function
-    function buildRequestOptions(utilsApi: UtilsApi, url: string, options: RawAxiosRequestConfig) {
-        return (utilsApi as any).buildRequestOptions(url, options);
-    }
-
-    // Helper to control whether isTargetingInternalOrNoCdnServer returns true or false
-    function mockIsTargeting(utilsApi: UtilsApi, returnValue: boolean) {
-        jest.spyOn(utilsApi as any, 'isTargetingInternalOrNoCdnServer').mockReturnValue(
-            returnValue
-        );
-    }
-
-    beforeEach(() => {
-        // Always sets the Authorization header when called
-        jest.spyOn(common, 'setBearerAuthToObject').mockImplementation(async (object: any) => {
-            object['Authorization'] = authHeader;
-        });
-    });
-
-    afterEach(() => {
-        jest.restoreAllMocks();
-    });
-
-    test('options, no auth; should merge them into result', async () => {
-        const utilsApi = new UtilsApi();
-        mockIsTargeting(utilsApi, false);
-
-        const result = await buildRequestOptions(utilsApi, url, {
-            timeout: 5000,
-        });
-        expect(result.timeout).toBe(5000);
-        expect(result.headers?.Authorization).toBeUndefined();
-    });
-
-    test('baseOptions, no auth; should merge them into result', async () => {
-        const utilsApi = new UtilsApi(
-            new Configuration({
-                basePath,
-                baseOptions: { timeout: 9999, headers: { 'X-Custom': 'base-value' } },
-            })
-        );
-        mockIsTargeting(utilsApi, false);
-
-        const result = await buildRequestOptions(utilsApi, url, {});
-        expect(result.timeout).toBe(9999);
-        expect(result.headers?.['X-Custom']).toBe('base-value');
-    });
-
-    test('baseOptions and options, no auth; options should override baseOptions headers', async () => {
-        const config = new Configuration({
-            basePath,
-            baseOptions: { headers: { 'X-Custom': 'base-value' } },
-        });
-        const utilsApi = new UtilsApi(config);
-        mockIsTargeting(utilsApi, false);
-
-        const result = await buildRequestOptions(utilsApi, url, {
-            headers: { 'X-Custom': 'override-value' },
-        });
-        expect(result.headers?.['X-Custom']).toBe('override-value');
-    });
-
-    test('auth; should set bearer auth header', async () => {
-        const config = new Configuration({ basePath });
-        const utilsApi = new UtilsApi(config);
-        mockIsTargeting(utilsApi, true);
-
-        const result = await buildRequestOptions(utilsApi, url, {});
-        expect(result.headers?.Authorization).toBe(authHeader);
-    });
-
-    test('auth and options-auth; options should override bearer auth header', async () => {
-        const config = new Configuration({ basePath });
-        const utilsApi = new UtilsApi(config);
-        mockIsTargeting(utilsApi, true);
-
-        const result = await buildRequestOptions(utilsApi, url, {
-            headers: { Authorization: 'Bearer override-token' },
-        });
-        expect(result.headers?.Authorization).toBe('Bearer override-token');
-    });
-});
-
 describe('isTargetingInternalOrNoCdnServer', function () {
     // Wrapper around private utils function
     function isTargetingInternalOrNoCdnServer(utilsApi: UtilsApi, url: string) {
@@ -841,81 +807,27 @@ describe('isTargetingInternalOrNoCdnServer', function () {
     });
 });
 
-describe('disableAuthHeaderForShapeDiverUris', function () {
+describe('disableAuthHeaderForShapeDiverUris', () => {
     const utilsApi = new UtilsApi();
 
-    // Wrapper around private utils function
-    function disableAuthHeaderForShapeDiverUris(url: string, options: RawAxiosRequestConfig) {
-        return (utilsApi as any).disableAuthHeaderForShapeDiverUris(url, options);
+    function disabledHeaders(url: string): string[] {
+        const headers: string[] = [];
+        (utilsApi as any).disableAuthHeaderForShapeDiverUris(url, {}, headers);
+        return headers;
     }
 
-    test('does nothing when Authorization header is already set', () => {
-        const options: RawAxiosRequestConfig = { headers: { Authorization: 'Bearer token123' } };
-        disableAuthHeaderForShapeDiverUris('https://viewer.shapediver.com/asset', options);
-        expect(options.headers!.Authorization).toBe('Bearer token123');
+    test.each([
+        'https://viewer.shapediver.com/asset',
+        'https://textures.shapediver.com/asset',
+        'https://downloads.shapediver.com/asset',
+        'https://cdn.shapediver.com/assets/cdn-asset-outputs/abc123',
+        'https://cdn.shapediver.com/assets/cdn-asset-exports/abc123',
+        'https://cdn.shapediver.com/assets/cdn-asset-textures/abc123',
+    ])('disables Authorization for %s', (url) => {
+        expect(disabledHeaders(url)).toContain('Authorization');
     });
 
-    test('does nothing for an invalid URL', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris('not-a-valid:::url', options);
-        expect('Authorization' in options.headers!).toBe(false);
-    });
-
-    test('sets Authorization to undefined for viewer.shapediver.com', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris('https://viewer.shapediver.com/asset', options);
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-    });
-
-    test('sets Authorization to undefined for textures.shapediver.com', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris('https://textures.shapediver.com/asset', options);
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-    });
-
-    test('sets Authorization to undefined for downloads.shapediver.com', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris('https://downloads.shapediver.com/asset', options);
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-    });
-
-    test('sets Authorization to undefined for CDN output URL', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris(
-            'https://cdn.shapediver.com/cdn-asset-outputs/abc123',
-            options
-        );
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-    });
-
-    test('sets Authorization to undefined for CDN export URL', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris(
-            'https://cdn.shapediver.com/cdn-asset-exports/abc123',
-            options
-        );
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-    });
-
-    test('sets Authorization to undefined for CDN texture URL', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris(
-            'https://cdn.shapediver.com/cdn-asset-textures/abc123',
-            options
-        );
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-    });
-
-    test('does nothing for non-ShapeDiver URL', () => {
-        const options: RawAxiosRequestConfig = { headers: {} };
-        disableAuthHeaderForShapeDiverUris('https://example.com/some/path', options);
-        expect('Authorization' in options.headers!).toBe(false);
-    });
-
-    test('preserves existing headers when disabling Authorization', () => {
-        const options: RawAxiosRequestConfig = { headers: { 'Content-Type': 'application/json' } };
-        disableAuthHeaderForShapeDiverUris('https://viewer.shapediver.com/asset', options);
-        expect(options.headers).toHaveProperty('Authorization', undefined);
-        expect(options.headers).toHaveProperty('Content-Type', 'application/json');
+    test.each(['not-a-valid:::url', 'https://example.com/some/path'])('keeps Authorization for %s', (url) => {
+        expect(disabledHeaders(url)).not.toContain('Authorization');
     });
 });

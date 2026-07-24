@@ -18,7 +18,7 @@ test('model config', async () => {
     });
 
     // Fetch the model configuration.
-    const resConfig = (await new ModelApi(modelConfig).getModelConfig(modelId)).data;
+    const resConfig = await new ModelApi(modelConfig).getModelConfig(modelId);
     expect(Object.keys(resConfig.viewer.config).length).toBeGreaterThan(0);
 
     // Update the model configuration. However, for the sake of simplicity, we will re-use the
@@ -38,17 +38,17 @@ test('model', async () => {
     });
 
     // Fetch a model.
-    const resGet = (await new ModelApi(modelConfig).getModel(modelId)).data;
+    const resGet = await new ModelApi(modelConfig).getModel(modelId);
     expect(resGet.model.id).toBe(modelId);
 
     // Download the model's Grasshopper file.
-    const resGh = (
-        await new ModelApi(modelConfig).downloadModelFile(modelId, { responseType: 'arraybuffer' })
-    ).data as unknown as Buffer;
+    const resGh = await (
+        await new ModelApi(modelConfig).downloadModelFile(modelId)
+    ).arrayBuffer();
     expect(resGh.byteLength).toBeGreaterThan(0);
 
     // Get the model's computation statistics by status.
-    const resComp = (
+    const resComp =
         await new ModelApi(modelConfig).getModelComputations(
             modelId,
             undefined,
@@ -56,16 +56,15 @@ test('model', async () => {
             '20240627072220908',
             QueryComputationStatisticsStatus.SUCCESS
         )
-    ).data;
     expect(resComp.computations.length).toBeGreaterThanOrEqual(0);
 
     // Update a model.
     const reqUpdate: ReqModel = { pub: true, backendaccess: true, use_cdn: true };
-    const resUpdate = (await new ModelApi(backendConfig).updateModel(modelId, reqUpdate)).data;
+    const resUpdate = await new ModelApi(backendConfig).updateModel(modelId, reqUpdate);
     expect(resUpdate.model.id).toBe(modelId);
 
     // List all models with a specific status.
-    const resList = (await new ModelApi(backendConfig).listModels(QueryModelStatus.DENIED)).data;
+    const resList = await new ModelApi(backendConfig).listModels(QueryModelStatus.DENIED);
     expect(resList.list.model.length).toBeGreaterThan(0);
 });
 
@@ -85,7 +84,7 @@ test('cleanup', async () => {
     await new ModelApi(modelConfig).cleanupTextures(modelId, '2024');
 
     // Get the cleanup status.
-    const resCleanup = (await new ModelApi(modelConfig).getCleanupStatus(modelId)).data;
+    const resCleanup = await new ModelApi(modelConfig).getCleanupStatus(modelId);
     expect(resCleanup.cleanup.length).toBeGreaterThan(0);
 });
 
@@ -96,7 +95,7 @@ test('parameters', async () => {
     });
 
     // Fetch a model.
-    const resModel = (await new ModelApi(modelConfig).getModel(modelId)).data;
+    const resModel = await new ModelApi(modelConfig).getModel(modelId);
     expect(resModel.parameters).toBeDefined();
     expect(Object.keys(resModel.parameters!).length).toBeGreaterThan(0);
 
@@ -124,7 +123,7 @@ test('model blocking', async () => {
     });
 
     // Fetch a model.
-    let resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
+    let resModel = await new ModelApi(backendConfig).getModel(modelId);
     expect(resModel.setting.model?.blockingReasons?.owner).toBeFalsy();
     expect(resModel.setting.model?.blockingReasons?.creditLimit).toBeFalsy();
     expect(resModel.setting.model?.blockingReasons?.backendPermission).toBeFalsy();
@@ -135,7 +134,7 @@ test('model blocking', async () => {
     await new ModelApi(backendConfig).updateModel(modelId, reqModel);
 
     // Fetch a model.
-    resModel = (await new ModelApi(backendConfig).getModel(modelId)).data;
+    resModel = await new ModelApi(backendConfig).getModel(modelId);
     expect(resModel.setting.model?.blockingReasons?.owner).toBeTruthy();
     expect(resModel.setting.model?.blockingReasons?.creditLimit).toBeFalsy();
     expect(resModel.setting.model?.blockingReasons?.backendPermission).toBeFalsy();
@@ -149,7 +148,7 @@ test('model blocking', async () => {
     await new ModelApi(backendConfig).updateModel(modelId, reqModel);
 
     // Session init should work again.
-    const sessionId = (await new SessionApi(modelConfig).createSessionByModel(modelId)).data
+    const sessionId = (await new SessionApi(modelConfig).createSessionByModel(modelId))
         .sessionId;
     await new SessionApi(modelConfig).closeSession(sessionId);
 });

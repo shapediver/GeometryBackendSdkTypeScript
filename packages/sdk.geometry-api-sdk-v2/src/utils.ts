@@ -1,4 +1,7 @@
-import { AxiosError, AxiosPromise } from 'axios';
+import {
+    FetchError,
+    ResponseError as ClientResponseError,
+} from './client/runtime';
 import { RequestError, ResponseError } from './error';
 
 /** ShapeDiver error object structure. */
@@ -15,7 +18,7 @@ export function sleep(ms: number): Promise<void> {
 
 /**
  * Parse HTTP headers to extract size and filename information.
- * @param {Record<string, any>} headers The HTTP headers of a file-metadata response.
+ * @param headers The HTTP headers of a file-metadata response.
  * @return An object with 'size' and 'filename' properties.
  */
 export function extractFileInfo(headers: Record<string, any> | undefined): {
@@ -39,7 +42,7 @@ export function extractFileInfo(headers: Record<string, any> | undefined): {
 
 /**
  * Set content headers according to RFC 5987.
- * @param {string} filename The file name to use.
+ * @param filename The file name to use.
  * @return A content-disposition header string.
  */
 export function contentDispositionFromFilename(filename: string): string {
@@ -58,7 +61,7 @@ export function contentDispositionFromFilename(filename: string): string {
 /**
  * Extract and return the filename from a content-disposition HTTP header.
  * Decodes the `filename*` property if set.
- * @param {string} contentDisposition Content-Disposition header value.
+ * @param contentDisposition Content-Disposition header value.
  * @return The extracted filename.
  */
 export function filenameFromContentDisposition(contentDisposition: string): string | undefined {
@@ -90,7 +93,7 @@ export function filenameFromContentDisposition(contentDisposition: string): stri
  * @returns A promise that resolves to `true` if the API call resulted in a `200` HTTP status, and
  * `false` for a `404` HTTP error status. Any other error status will be propagated.
  */
-export async function exists(apiCall: () => AxiosPromise<unknown>): Promise<boolean> {
+export async function exists(apiCall: () => Promise<unknown>): Promise<boolean> {
     return apiCall()
         .then(() => true)
         .catch((error) => {
@@ -132,7 +135,7 @@ function isArrayBufferView(value: unknown): value is ArrayBufferView {
 }
 
 /**
- * Tries to extract an error object from various Axios response data types.
+ * Tries to extract an error object from various Fetch response data types.
  * @param data The data to extract from.
  * @returns The extracted error object, or undefined if none could be found.
  */
@@ -159,27 +162,52 @@ export async function tryExtractErrorObject(data: unknown): Promise<SdErrorObjec
 }
 
 /**
- * Tries to convert a generic Axios error into a more specific ShapeDiver error. When no match is
- * found, the original error is returned instead.
- * @param error The Axios error to convert.
+ * Converts a Fetch response or generated Fetch error into a ShapeDiver error.
+ *
+ * Fetch resolves HTTP failures as `Response` objects and rejects only when the
+ * request cannot be completed. The generated runtime wraps those rejections in
+ * `FetchError`, which lets ordinary setup errors remain unchanged.
+ *
+ * @param error The response or error to convert.
  */
 export async function processError(
-    error: AxiosError | Error
+    error: Response | Error
 ): Promise<Error | RequestError | ResponseError> {
-    if ('response' in error) {
-        const err = error as AxiosError,
-            status = err.response!.status,
-            data = err.response!.data;
-
-        const errorObj = await tryExtractErrorObject(data);
-        if (errorObj) {
-            return new ResponseError(status, errorObj.message, errorObj.desc, errorObj.error);
-        } else {
-            return new ResponseError(status, err.message, 'No error description provided');
-        }
-    } else if ('request' in error) {
-        return new RequestError(error.message);
-    } else {
-        return error;
+    if (error instanceof ClientResponseError) {
+        return processResponseError(error.response, error.message);
     }
+
+    if (typeof Response !== 'undefined' && error instanceof Response) {
+        return processResponseError(
+            error,
+            error.statusText || 'Response returned an error code'
+        );
+    }
+
+    if (error instanceof FetchError) {
+        return new RequestError(error.cause.message);
+    }
+
+    return error instanceof Error ? error : new Error(String(error));
+}
+
+/** Converts a non-success Fetch response into the SDK's public response error. */
+async function processResponseError(
+    response: Response,
+    fallbackMessage: string
+): Promise<ResponseError> {
+    const errorObj = await tryExtractErrorObject(await response.clone().text());
+
+    return errorObj
+        ? new ResponseError(
+              response.status,
+              errorObj.message,
+              errorObj.desc,
+              errorObj.error
+          )
+        : new ResponseError(
+              response.status,
+              fallbackMessage,
+              'No error description provided'
+          );
 }

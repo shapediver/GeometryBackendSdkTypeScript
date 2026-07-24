@@ -15,35 +15,33 @@ test('metadata and downloads', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).data.sessionId;
+    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
 
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Create AR scene from glTF file.
-    const resUpload = (
+    const resUpload =
         await new GltfApi(config).uploadGltf(sessionId, data as File, QueryGltfConversion.SCENE)
-    ).data;
     expect(resUpload.gltf.sceneId).toBeDefined();
 
     const sceneId = resUpload.gltf.sceneId!;
 
     // Get metadata of an existing AR scene.
-    const resMetadata = await new ArSceneApi(config).getArSceneMetadata(sceneId);
-    expect(resMetadata.status).toBe(200);
+    await new ArSceneApi(config).getArSceneMetadata(sceneId);
 
     // Or use the helper function to check if the AR scene exists.
     expect(await exists(() => new ArSceneApi(config).getArSceneMetadata(sceneId))).toBeTruthy();
 
     // Download the created AR scene as glTF.
-    const resGltf = (
-        await new ArSceneApi(config).downloadArSceneGltf(sceneId, { responseType: 'arraybuffer' })
-    ).data as unknown as Buffer;
+    const resGltf = await (
+        await new ArSceneApi(config).downloadArSceneGltf(sceneId)
+    ).arrayBuffer();
     expect(resGltf.byteLength).toBeGreaterThan(0);
 
     // Download the created AR scene as USDZ.
-    const resUsdz = (
-        await new ArSceneApi(config).downloadArSceneUsdz(sceneId, { responseType: 'arraybuffer' })
-    ).data as unknown as Buffer;
+    const resUsdz = await (
+        await new ArSceneApi(config).downloadArSceneUsdz(sceneId)
+    ).arrayBuffer();
     expect(resUsdz.byteLength).toBeGreaterThan(0);
 
     // Close the session.
@@ -59,15 +57,14 @@ test('model state from ar-scene', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const resSession = (await new SessionApi(config).createSessionByTicket(ticket));
     const sessionId = resSession.sessionId;
 
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Create AR scene from glTF file.
-    const resUpload = (
+    const resUpload =
         await new GltfApi(config).uploadGltf(sessionId, data as File, QueryGltfConversion.SCENE)
-    ).data;
     expect(resUpload.gltf.sceneId).toBeDefined();
 
     // Create minimal Model-State from AR scene.
@@ -75,14 +72,12 @@ test('model state from ar-scene', async () => {
         parameters: {},
         arSceneId: resUpload.gltf.sceneId,
     };
-    const resModelState = (
+    const resModelState =
         await new ModelStateApi(config).createModelState(sessionId, reqModelState)
-    ).data;
     const modelStateId = resModelState.modelState.id;
 
     // Get metadata of the Model-State's AR scene.
-    const resMetadata = await new ArSceneApi(config).getArSceneMetadata(modelStateId);
-    expect(resMetadata.status).toBe(200);
+    await new ArSceneApi(config).getArSceneMetadata(modelStateId);
 
     // Or use the helper function to check if the Model-State's AR scene exists.
     expect(
@@ -90,19 +85,15 @@ test('model state from ar-scene', async () => {
     ).toBeTruthy();
 
     // Download the created Model-State's AR scene as glTF.
-    const resGltf = (
-        await new ArSceneApi(config).downloadArSceneGltf(modelStateId, {
-            responseType: 'arraybuffer',
-        })
-    ).data as unknown as Buffer;
+    const resGltf = await (
+        await new ArSceneApi(config).downloadArSceneGltf(modelStateId)
+    ).arrayBuffer();
     expect(resGltf.byteLength).toBeGreaterThan(0);
 
     // Download the created Model-State's AR scene as USDZ.
-    const resUsdz = (
-        await new ArSceneApi(config).downloadArSceneUsdz(modelStateId, {
-            responseType: 'arraybuffer',
-        })
-    ).data as unknown as Buffer;
+    const resUsdz = await (
+        await new ArSceneApi(config).downloadArSceneUsdz(modelStateId)
+    ).arrayBuffer();
     expect(resUsdz.byteLength).toBeGreaterThan(0);
 
     // Delete the Model-State.

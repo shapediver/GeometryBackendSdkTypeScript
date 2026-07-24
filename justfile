@@ -47,10 +47,14 @@ generate version:
         --additional-properties=\
           disallowAdditionalPropertiesIfNotPresent=false,\
           enumPropertyNaming=UPPERCASE,\
+          modelPropertyNaming=original,\
           paramNaming=camelCase,\
-          supportsES6=false \
+          supportsES6=false,\
+          useSingleRequestParameter=false,\
+          withoutRuntimeChecks=true \
+        --reserved-words-mappings export=export \
         -i "{{spec_file}}" \
-        -g typescript-axios \
+        -g typescript-fetch \
         -o "{{target_dir}}" || { \
             rm -rf "{{target_dir}}"; \
             exit 1; \
@@ -59,10 +63,9 @@ generate version:
     # Replace old client with new one.
     rm -rf "{{sdk_client_dir}}" || :
     mkdir -p "{{sdk_client_dir}}"
-    mv "{{target_dir}}/api.ts" "{{sdk_client_dir}}"
-    mv "{{target_dir}}/base.ts" "{{sdk_client_dir}}"
-    mv "{{target_dir}}/common.ts" "{{sdk_client_dir}}"
-    mv "{{target_dir}}/configuration.ts" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/apis/" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/models/" "{{sdk_client_dir}}"
+    mv "{{target_dir}}/runtime.ts" "{{sdk_client_dir}}"
     mv "{{target_dir}}/index.ts" "{{sdk_client_dir}}"
 
     # Apply manual modifications to the generated DTO files.
@@ -84,27 +87,27 @@ test-generator:
         --additional-properties=\
           disallowAdditionalPropertiesIfNotPresent=false,\
           enumPropertyNaming=UPPERCASE,\
+          modelPropertyNaming=original,\
           paramNaming=camelCase,\
-          supportsES6=false \
+          supportsES6=false,\
+          useSingleRequestParameter=false,\
+          withoutRuntimeChecks=true \
+        --reserved-words-mappings export=export \
         --dry-run \
         -i "{{oas_repo}}/geometry_backend_v2.yaml" \
-        -g typescript-axios
+        -g typescript-fetch
 
 # Steps to be executed after the generation of the TypeScript client.
 _post-generation:
     #!/usr/bin/env bash
-    # Replace client BaseAPI import in api.ts with custom BaseAPI implementation.
-    pattern="^import \{(.*)BaseAPI,?\s?(.*)\} from '.\/base';$"
-    replacement="import \{\1\2\} from '.\/base';"
-    added_line="import \{ BaseAPI \} from '..\/base';"
-    case $(uname -s) in
-    Linux)
-        sed -ri "s/${pattern}/${replacement}\n${added_line}/g" \
-            "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
-        ;;
-    Darwin)
-        sed -ri '' "s/${pattern}/${replacement}\n${added_line}/g" \
-            "packages/sdk.geometry-api-sdk-v2/src/client/api.ts"
-        ;;
-    *) exit 1 ;;
-    esac
+    # Make generated APIs use the SDK's custom BaseAPI implementation.
+    api_dir="packages/sdk.geometry-api-sdk-v2/src/client/apis"
+    find "$api_dir" -type f -name '*.ts' -exec perl -0pi -e "
+        s{import \* as runtime from '../runtime';(?!\nimport \{ BaseAPI \} from '../../base';)}{import * as runtime from '../runtime';\nimport { BaseAPI } from '../../base';}g;
+        s{extends runtime\\.BaseAPI}{extends BaseAPI}g;
+    " {} +
+
+    # Allow the custom BaseAPI to wrap the generated fetch pipeline.
+    perl -0pi -e 's/private fetchApi =/protected fetchApi =/' \
+        "packages/sdk.geometry-api-sdk-v2/src/client/runtime.ts"
+

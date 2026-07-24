@@ -1,60 +1,53 @@
-import { RawAxiosRequestConfig } from 'axios';
 import {
     Configuration as ClientConfig,
     ConfigurationParameters as ClientConfigParams,
-} from './client/configuration';
+} from './client/runtime';
+
+const SDK_VERSION = '3.6.0'; // WARNING: This value is updated automatically!
 
 export interface ConfigurationParameters
-    extends Pick<ClientConfigParams, 'accessToken' | 'basePath'> {
-    /**
-     * Base options for Axios calls.
-     *
-     * @type {RawAxiosRequestConfig}
-     * @memberof ConfigurationParameters
-     */
-    baseOptions?: RawAxiosRequestConfig;
-
-    /**
-     * Enables the use of a custom Axios instance for all API requests by default, instead of the
-     * global Axios instance. This custom instance includes additional functionality to
-     * automatically retry requests on `429` and `502` status codes.
-     *
-     * Default: `true`.
-     */
-    useCustomAxios?: boolean;
-
+    extends Pick<ClientConfigParams, 'accessToken' | 'basePath' | 'fetchApi' | 'headers' | 'middleware' | 'queryParamsStringify'> {
     /**
      * Specifies the maximum number of automatic HTTP retries for failed requests.
      *
-     * **Note:** This setting is only applicable when using a custom Axios instance.
+     * **Note:** This setting is only applicable when using a custom Fetch API instance.
      *
      * Default: `5`
      */
     maxRetries?: number;
 }
 
-export class Configuration extends ClientConfig {
-    protected readonly sdkVersion = '3.6.0'; // WARNING: This value is updated automatically!
+function createHeaders(
+    headers?: ClientConfigParams['headers'],
+): Record<string, string> {
+    const result: Record<string, string> = {};
+    const normalizedHeaders = new Headers(headers);
+    const userAgent = `sd-sdk/typescript/${SDK_VERSION}`;
 
-    public readonly useCustomAxios: boolean;
-    public readonly maxRetries: number;
+    if (typeof process === 'object' && !normalizedHeaders.has('User-Agent')) {
+        // Overwrite User-Agent on Node.js applications.
+        normalizedHeaders.set('User-Agent', userAgent);
+    } else if (!normalizedHeaders.has('X-ShapeDiver-UserAgent')) {
+        // Set a custom User-Agent header on Browser applications.
+        normalizedHeaders.set('X-ShapeDiver-UserAgent', userAgent);
+    }
+
+    normalizedHeaders.forEach((value, key) => {
+        result[key] = value;
+    });
+
+    return result;
+}
+
+export class Configuration extends ClientConfig {
+    readonly maxRetries: number;
 
     constructor(param: ConfigurationParameters = {}) {
-        super(param);
-        this.useCustomAxios = param.useCustomAxios ?? true;
+        super({
+            ...param,
+            headers: createHeaders(param.headers),
+        });
+
         this.maxRetries = param.maxRetries ?? 5;
-
-        this.baseOptions = this.baseOptions ?? {};
-        this.baseOptions.headers = this.baseOptions.headers ?? {};
-
-        const userAgent = `sd-sdk/typescript/${this.sdkVersion}`;
-
-        if (typeof process === 'object' && !this.baseOptions.headers['User-Agent']) {
-            // Overwrite User-Agent on Node.js applications.
-            this.baseOptions.headers['User-Agent'] = userAgent;
-        } else if (!this.baseOptions.headers['X-ShapeDiver-UserAgent']) {
-            // Set a custom User-Agent header on Browser applications.
-            this.baseOptions.headers['X-ShapeDiver-UserAgent'] = userAgent;
-        }
     }
 }

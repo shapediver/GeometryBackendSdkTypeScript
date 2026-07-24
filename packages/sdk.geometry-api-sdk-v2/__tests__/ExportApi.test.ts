@@ -17,7 +17,7 @@ test('exports', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const resSession = (await new SessionApi(config).createSessionByTicket(ticket));
     const sessionId = resSession.sessionId;
     expect(resSession.exports).toBeDefined();
     expect(resSession.parameters).toBeDefined();
@@ -40,7 +40,7 @@ test('exports', async () => {
     expect(resComp.exports![export_.id]).toBeDefined();
 
     // Alternatively, we can trigger the export computation without waiting for the result.
-    resComp = (await new ExportApi(config).computeExports(sessionId, reqComp)).data;
+    resComp = (await new ExportApi(config).computeExports(sessionId, reqComp));
     expect(resComp.exports).toBeDefined();
     expect(resComp.exports![export_.id]).toBeDefined();
 
@@ -48,11 +48,10 @@ test('exports', async () => {
     expect(typeof exportComp.version).toBe('string');
 
     // Get the already computed export from cache.
-    const resCached = (
+    const resCached =
         await new ExportApi(config).getCachedExports(sessionId, {
             [export_.id]: exportComp.version as string,
         })
-    ).data;
     expect(resCached.exports).toBeDefined();
     expect(resCached.exports![export_.id]).toBeDefined();
 
@@ -62,8 +61,7 @@ test('exports', async () => {
     });
 
     // List versions of an export.
-    const resList = (await new ExportApi(modelConfig).listExportVersions(sessionId, export_.id))
-        .data;
+    const resList = (await new ExportApi(modelConfig).listExportVersions(sessionId, export_.id));
     expect(resList.list.export.length).toBeGreaterThan(0);
 
     // Close the session.

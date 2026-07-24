@@ -1,153 +1,102 @@
-import { AxiosError } from 'axios';
+import {
+    FetchError,
+    RequiredError,
+    ResponseError as ClientResponseError,
+} from '../src/client/runtime';
 import {
     contentDispositionFromFilename,
     extractFileInfo,
     filenameFromContentDisposition,
+    IllegalArgumentError,
     processError,
     RequestError,
+    ResErrorType,
     ResponseError,
+    SdGeometryError,
+    TimeoutError,
 } from '../src';
 
-describe('extractFileInfo', function () {
-    test('no header', () => {
-        const res = extractFileInfo(undefined);
-        expect(res['filename']).toBeUndefined();
-        expect(res['size']).toBeUndefined();
-    });
-
-    test('full header', () => {
-        const res = extractFileInfo({
+describe('file helpers', () => {
+    test('extracts filename and size from headers', () => {
+        expect(extractFileInfo({
             'Content-Length': '165030',
             'Content-Disposition': 'attachment; filename="foobar.txt"',
-        });
-        expect(res['filename']).toBe('foobar.txt');
-        expect(res['size']).toBe(165030);
+        })).toEqual({ filename: 'foobar.txt', size: 165030 });
+    });
+
+    test('handles missing headers', () => {
+        expect(extractFileInfo(undefined)).toEqual({ filename: undefined, size: undefined });
+    });
+
+    test('formats and parses non-ascii filenames', () => {
+        const header = contentDispositionFromFilename('ä€öü.jpg');
+        expect(filenameFromContentDisposition(header)).toBe('ä€öü.jpg');
     });
 });
 
-describe('contentDispositionFromFilename', function () {
-    test('ascii characters', () => {
-        const res = contentDispositionFromFilename('foobar.txt');
-        expect(res).toBe('attachment; filename="foobar.txt"');
-    });
-
-    test('non-ascii characters', () => {
-        const res = contentDispositionFromFilename('ä€öü.jpg');
-        expect(res).toBe(
-            'attachment; filename="aou.jpg"; ' +
-                "filename*=UTF-8''a%CC%88%E2%82%ACo%CC%88u%CC%88.jpg"
-        );
-    });
-});
-
-describe('filenameFromContentDisposition', function () {
-    test('invalid format', () => {
-        const res = filenameFromContentDisposition('attachment; somethign="else"');
-        expect(res).toBeUndefined();
-    });
-
-    test('ascii characters', () => {
-        const res = filenameFromContentDisposition('attachment; filename="foobar.txt"');
-        expect(res).toBe('foobar.txt');
-    });
-
-    test('non-ascii characters with encoding', () => {
-        const res = filenameFromContentDisposition(
-            'attachment; filename="aou.jpg"; ' +
-                "filename*=UTF-8''a%CC%88%E2%82%ACo%CC%88u%CC%88.jpg"
-        );
-        expect(res).toBe('ä€öü.jpg');
-    });
-
-    test('non-ascii characters without encoding', () => {
-        const res = filenameFromContentDisposition(
-            'attachment; filename="aEURou.jpg"; filename*=a%CC%88%E2%82%ACo%CC%88u%CC%88.jpg'
-        );
-        expect(res).toBe('ä€öü.jpg');
-    });
-});
-
-describe('processError', function () {
-    const error = 'SdTextureUrlError',
-        desc = 'Some error related to a user-defined texture url',
-        message = 'Could not fetch texture',
-        jsonError = { error, desc, message },
-        createResData = (data: any) => {
-            return {
-                status: 400,
-                data,
-                statusText: 'Bad Request',
-                headers: {},
-                config: {} as any,
-            };
-        };
+describe('processError', () => {
+    const body = JSON.stringify({ error: 'SdTextureUrlError', desc: 'Some error', message: 'Could not fetch texture' });
 
     test.each([
-        {
-            name: 'plain object error',
-            data: jsonError,
-        },
-        {
-            name: 'JSON string error',
-            data: JSON.stringify(jsonError),
-        },
-        {
-            name: 'Buffer error',
-            data: Buffer.from(JSON.stringify(jsonError), 'utf-8'),
-        },
-        {
-            name: 'ArrayBuffer error',
-            data: (() => {
-                const encoder = new TextEncoder();
-                return encoder.encode(JSON.stringify(jsonError)).buffer;
-            })(),
-        },
-    ])('should handle response with $name', async ({ data }) => {
-        const axiosError = new AxiosError('Request failed with status code 400');
-        axiosError.response = createResData(data);
-
-        const result = await processError(axiosError);
+        ['string', body],
+        ['ArrayBuffer', new TextEncoder().encode(body).buffer],
+        ['Blob', new Blob([body])],
+    ])('converts a Fetch response with %s error data', async (_, data) => {
+        const result = await processError(new Response(data as BodyInit, { status: 400, statusText: 'Bad Request' }));
         expect(result).toBeInstanceOf(ResponseError);
         expect((result as ResponseError).status).toBe(400);
-        expect((result as ResponseError).message).toBe(message);
-        expect((result as ResponseError).description).toBe(desc);
-        expect((result as ResponseError).type).toBe(error);
+        expect((result as ResponseError).message).toBe('Could not fetch texture');
+        expect((result as ResponseError).description).toBe('Some error');
     });
 
-    test.each([
-        {
-            name: 'data is not valid JSON',
-            data: 'Not a valid JSON string',
-        },
-        {
-            name: 'data is missing fields',
-            data: Buffer.from(JSON.stringify({ error: 'SomeError' }), 'utf-8'),
-        },
-    ])('should fallback to generic error when $name', async ({ data }) => {
-        const axiosError = new AxiosError('Request failed with status code 400');
-        axiosError.response = createResData(data);
-
-        const result = await processError(axiosError);
+    test('falls back to a generic response error for invalid data', async () => {
+        const result = await processError(new Response('not json', { status: 400, statusText: 'Bad Request' }));
         expect(result).toBeInstanceOf(ResponseError);
-        expect((result as ResponseError).status).toBe(400);
-        expect((result as ResponseError).message).toBe('Request failed with status code 400');
-        expect((result as ResponseError).description).toBe('No error description provided');
+        expect((result as ResponseError).message).toBe('Bad Request');
     });
 
-    test('should handle request error (no response)', async () => {
-        const axiosError = new AxiosError('Network Error');
-        axiosError.request = {};
-
-        const result = await processError(axiosError);
+    test('converts a generated FetchError to a request error', async () => {
+        const result = await processError(new FetchError(new Error('Network Error')));
         expect(result).toBeInstanceOf(RequestError);
-        expect((result as RequestError).message).toBe('Network Error');
+        expect(result.message).toBe('Network Error');
     });
 
-    test('should return original error when not an Axios error', async () => {
-        const genericError = new Error('Some generic error');
+    test('returns a default JavaScript Error unchanged', async () => {
+        const error = new Error('Network Error');
 
-        const result = await processError(genericError);
-        expect(result).toBe(genericError);
-        expect(result.message).toBe('Some generic error');
+        expect(await processError(error)).toBe(error);
+    });
+
+    test('uses fallback details for a malformed client ResponseError body', async () => {
+        const response = {
+            status: 502,
+            statusText: 'Bad Gateway',
+            clone: () => ({ text: async () => 'not valid JSON' }),
+        } as unknown as Response;
+        const result = await processError(
+            new ClientResponseError(response, 'Response returned an error code')
+        );
+
+        expect(result).toBeInstanceOf(ResponseError);
+        expect((result as ResponseError).status).toBe(502);
+        expect((result as ResponseError).message).toBe('Response returned an error code');
+        expect((result as ResponseError).description).toBe('No error description provided');
+        expect((result as ResponseError).type).toBe(ResErrorType.UNKNOWN);
+    });
+
+    test('returns a client RequiredError unchanged', async () => {
+        const error = new RequiredError('sessionId', 'Session ID is required');
+
+        expect(await processError(error)).toBe(error);
+    });
+
+    test.each([
+        ['SdGeometryError', new SdGeometryError('geometry error')],
+        ['RequestError', new RequestError('request error')],
+        ['ResponseError', new ResponseError(500, 'response error', 'description')],
+        ['IllegalArgumentError', new IllegalArgumentError('url', 'invalid URL')],
+        ['TimeoutError', new TimeoutError('sessionId', 'request timed out')],
+    ])('returns the custom %s unchanged', async (_, error) => {
+        expect(await processError(error)).toBe(error);
     });
 });

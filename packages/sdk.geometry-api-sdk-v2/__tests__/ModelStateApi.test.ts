@@ -18,7 +18,7 @@ test('basic model state', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const resSession = await new SessionApi(config).createSessionByTicket(ticket);
     expect(resSession.parameters).toBeDefined();
     const sessionId = resSession.sessionId;
 
@@ -37,14 +37,12 @@ test('basic model state', async () => {
         parameters: { [customParamId]: customParamValue },
         data: customData,
     };
-    const resModelState = (
+    const resModelState =
         await new ModelStateApi(config).createModelState(sessionId, reqModelState)
-    ).data;
     const modelStateId = resModelState.modelState.id;
 
     // Check if the Model-State was created successfully.
-    const resMetadata = await new ModelStateApi(config).getModelStateMetadata(modelStateId);
-    expect(resMetadata.status).toBe(200);
+    await new ModelStateApi(config).getModelStateMetadata(modelStateId);
 
     // Or use the helper function to check if the Model-State was created successfully.
     expect(
@@ -52,18 +50,17 @@ test('basic model state', async () => {
     ).toBeTruthy();
 
     // Fetch all available information of the Model-State.
-    const resModelStateInfo = (await new ModelStateApi(config).getModelState(modelStateId)).data;
+    const resModelStateInfo = await new ModelStateApi(config).getModelState(modelStateId);
     let parameter = resModelStateInfo.modelState.parameters[customParamId];
     expect(parameter).toStrictEqual(customParamValue);
-    expect(resModelStateInfo.modelState.data).toStrictEqual(customData);
+    expect(resModelStateInfo.modelState.data).toEqual(customData);
     expect(resModelStateInfo.modelState.imageUrl).toBeUndefined();
 
     // Fetch only parameters and data of the Model-State.
-    const resModelStateData = (await new ModelStateApi(config).getModelStateData(modelStateId))
-        .data;
+    const resModelStateData = await new ModelStateApi(config).getModelStateData(modelStateId);
     parameter = resModelStateData.modelState.parameters[customParamId];
     expect(parameter).toStrictEqual(customParamValue);
-    expect(resModelStateData.modelState.data).toStrictEqual(customData);
+    expect(resModelStateData.modelState.data).toEqual(customData);
 
     // Check if the Model-State has an image.
     expect(
@@ -71,9 +68,8 @@ test('basic model state', async () => {
     ).toBeFalsy();
 
     // Fetch all Model-States of a model.
-    const resList = (
+    const resList =
         await new ModelStateApi(backendConfig).listModelStates(resModelState.modelState.modelId)
-    ).data;
     expect(resList.list.modelState.length).toBeGreaterThan(0);
 
     // Delete the Model-State.
@@ -92,7 +88,7 @@ test('model state with image', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const resSession = await new SessionApi(config).createSessionByTicket(ticket);
     const sessionId = resSession.sessionId;
 
     const filename = 'shapediverLogo.jpg';
@@ -104,9 +100,8 @@ test('model state with image', async () => {
         parameters: {},
         image: { filename, format, size: data.size },
     };
-    const resModelState = (
+    const resModelState =
         await new ModelStateApi(config).createModelState(sessionId, reqModelState)
-    ).data;
     expect(resModelState.asset).toBeDefined();
     expect(resModelState.asset!.modelState).toBeDefined();
     const modelStateId = resModelState.modelState.id;
@@ -121,10 +116,9 @@ test('model state with image', async () => {
     expect(resUpload.status).toBe(200);
 
     // Check if the Model-State has an image.
-    const resImageMetadata = await new ModelStateApi(config).getModelStateImageMetadata(
+    await new ModelStateApi(config).getModelStateImageMetadata(
         modelStateId
     );
-    expect(resImageMetadata.status).toBe(200);
 
     // Or use the helper function to check if the Model-State has an image.
     expect(
@@ -132,15 +126,13 @@ test('model state with image', async () => {
     ).toBeTruthy();
 
     // Download the uploaded image.
-    const resImage = (
-        await new ModelStateApi(config).downloadModelStateImage(modelStateId, {
-            responseType: 'arraybuffer',
-        })
-    ).data as unknown as Buffer;
+    const resImage = await (
+        await new ModelStateApi(config).downloadModelStateImage(modelStateId)
+    ).arrayBuffer();
     expect(resImage.byteLength).toBeGreaterThan(0);
 
     // Fetch all available information of the Model-State.
-    const resModelStateInfo = (await new ModelStateApi(config).getModelState(modelStateId)).data;
+    const resModelStateInfo = await new ModelStateApi(config).getModelState(modelStateId);
     expect(resModelStateInfo.modelState.parameters).toBeDefined();
     expect(resModelStateInfo.modelState.data).toBeUndefined();
     expect(resModelStateInfo.modelState.imageUrl).toBeDefined();

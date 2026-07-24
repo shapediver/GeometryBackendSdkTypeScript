@@ -17,7 +17,7 @@ test('file parameter', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(modelConfig).createSessionByTicket(ticket)).data;
+    const resSession = (await new SessionApi(modelConfig).createSessionByTicket(ticket));
     const sessionId = resSession.sessionId;
     expect(resSession.parameters).toBeDefined();
 
@@ -32,7 +32,7 @@ test('file parameter', async () => {
     const data = readFile('__tests__/data/logo.jpg', format);
 
     // Request a file upload for a specific file-parameter.
-    const resUploadReq = (
+    const resUploadReq =
         await new FileApi(config).uploadFile(sessionId, {
             [fileParams[0].id]: {
                 filename,
@@ -40,7 +40,6 @@ test('file parameter', async () => {
                 size: data.size,
             },
         })
-    ).data;
     const file = resUploadReq.asset.file[fileParams[0].id];
     expect(file).toBeDefined();
 
@@ -53,26 +52,27 @@ test('file parameter', async () => {
     expect(resUpload.status).toBe(200);
 
     // Download the uploaded file.
-    const resData = (
-        await new FileApi(modelConfig).downloadFile(sessionId, fileParams[0].id, file.id, {
-            responseType: 'arraybuffer',
-        })
-    ).data as unknown as Buffer;
+    const resData = await (
+        await new FileApi(modelConfig).downloadFile(sessionId, fileParams[0].id, file.id)
+    ).arrayBuffer();
     expect(resData.byteLength).toBeGreaterThan(0);
 
     // Get metadata of an existing file.
-    const resMetadata = await new FileApi(config).getFileMetadata(
+    const resMetadata = await new FileApi(config).getFileMetadataRaw({
         sessionId,
-        fileParams[0].id,
-        file.id
-    );
-    expect(resMetadata.status).toBe(200);
-    const fileInfo = extractFileInfo(resMetadata.headers);
+        paramId: fileParams[0].id,
+        fileId: file.id,
+    });
+    expect(resMetadata.raw.status).toBe(200);
+    const fileInfo = extractFileInfo({
+        'Content-Length': resMetadata.raw.headers.get('Content-Length'),
+        'Content-Disposition': resMetadata.raw.headers.get('Content-Disposition'),
+    });
     expect(fileInfo.filename).toBe(filename);
     expect(fileInfo.size).toBe(data.size);
 
     // List all files of a specific file-parameter.
-    const resList = (await new FileApi(modelConfig).listFiles(sessionId, fileParams[0].id)).data;
+    const resList = (await new FileApi(modelConfig).listFiles(sessionId, fileParams[0].id));
     expect(resList.list.file.length).toBeGreaterThan(0);
 
     // Delete the uploaded file.

@@ -10,7 +10,7 @@ test('outputs', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket)).data;
+    const resSession = (await new SessionApi(config).createSessionByTicket(ticket));
     const sessionId = resSession.sessionId;
     expect(resSession.outputs).toBeDefined();
     expect(resSession.parameters).toBeDefined();
@@ -32,7 +32,7 @@ test('outputs', async () => {
     expect(resComp.outputs![output.id]).toBeDefined();
 
     // Alternatively, we can trigger the output computation without waiting for the result.
-    resComp = (await new OutputApi(config).computeOutputs(sessionId, reqComp)).data;
+    resComp = (await new OutputApi(config).computeOutputs(sessionId, reqComp));
     expect(resComp.outputs).toBeDefined();
     expect(resComp.outputs![output.id]).toBeDefined();
 
@@ -40,11 +40,10 @@ test('outputs', async () => {
     expect(typeof outputComp.version).toBe('string');
 
     // Get the already computed output from cache.
-    const resCached = (
+    const resCached =
         await new OutputApi(config).getCachedOutputs(sessionId, {
             [output.id]: outputComp.version!,
         })
-    ).data;
     expect(resCached.outputs).toBeDefined();
     expect(resCached.outputs![output.id]).toBeDefined();
 
@@ -54,8 +53,7 @@ test('outputs', async () => {
     });
 
     // List versions of an output.
-    const resList = (await new OutputApi(modelConfig).listOutputVersions(sessionId, output.id))
-        .data;
+    const resList = (await new OutputApi(modelConfig).listOutputVersions(sessionId, output.id));
     expect(resList.list.output.length).toBeGreaterThan(0);
 
     // Close the session.

@@ -217,10 +217,8 @@ commit the new version of the TypeScript package.
 
 ## Test
 
-Unit and integration tests can be executed via `npm run test`, which runs all tests (Node.js and
-browser). Node.js-specific tests can be executed via `npm run test:node`, while browser-based tests
-are run with `npm run test:browser`. If you want to run only a single test file, use
-`npx jest -i --forceExit <path>` within the package for Node.js tests.
+Unit and integration tests can be executed via `npm run test`. If you want to run only a single test
+file, use `npx jest -i --forceExit <path>` within the package.
 
 ## Versioning
 

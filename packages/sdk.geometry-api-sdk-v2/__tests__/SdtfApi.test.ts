@@ -11,12 +11,12 @@ test('sdtf', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).data.sessionId;
+    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
 
     const data = readFile('__tests__/data/test.sdtf', 'model/vnd.sdtf');
 
     // Request a sdTF upload for a specific namespace.
-    const resUpload = (
+    const resUpload =
         await new SdtfApi(config).uploadSdtf(sessionId, [
             {
                 content_length: data.size,
@@ -24,7 +24,6 @@ test('sdtf', async () => {
                 namespace: namespace,
             },
         ])
-    ).data;
     const sdtf = resUpload.asset.sdtf[0];
     expect(sdtf).toBeDefined();
 
@@ -37,15 +36,13 @@ test('sdtf', async () => {
     expect(upload.status).toBe(200);
 
     // Download the uploaded sdTF.
-    const resData = (
-        await new SdtfApi(modelConfig).downloadSdtf(sessionId, namespace, sdtf.id, {
-            responseType: 'arraybuffer',
-        })
-    ).data as unknown as Buffer;
+    const resData = await (
+        await new SdtfApi(modelConfig).downloadSdtf(sessionId, namespace, sdtf.id)
+    ).arrayBuffer();
     expect(resData.byteLength).toBeGreaterThan(0);
 
     // List all sdTFs of a specific namespace.
-    const resListNew = (await new SdtfApi(modelConfig).listSdtfs(sessionId, namespace)).data;
+    const resListNew = (await new SdtfApi(modelConfig).listSdtfs(sessionId, namespace));
     expect(resListNew.list.sdtf.length).toBeGreaterThan(0);
 
     // Delete the uploaded sdTF.

@@ -1,7 +1,6 @@
-import { AxiosInstance, AxiosPromise, RawAxiosRequestConfig, RawAxiosRequestHeaders } from 'axios';
+import { BaseAPI } from './base';
 import {
     AssetsApi,
-    Configuration,
     ExportApi,
     OutputApi,
     ReqCache,
@@ -14,14 +13,13 @@ import {
     ResGetCachedExports,
     ResGetCachedOutputs,
     ResOutput,
-} from './client';
-import { BaseAPI, RequestArgs } from './client/base';
+} from './client/index';
 import {
-    createRequestFunction,
-    serializeDataIfNeeded,
-    setBearerAuthToObject,
-} from './client/common';
-import { IllegalArgumentError, ResponseError, TimeoutError } from './error';
+    Configuration as ClientConfig,
+    ResponseError as ClientResponseError,
+} from './client/runtime';
+import { Configuration } from './configuration';
+import { IllegalArgumentError, TimeoutError } from './error';
 import { contentDispositionFromFilename, sleep } from './utils';
 
 /* Regex patterns for different asset types targeting the ShapeDiver API. */
@@ -41,156 +39,100 @@ const directDownloadUri = /^(http[s]?:\/\/)?(viewer|textures|downloads)\.shapedi
 /* Regex pattern for ShapeDiver no-CDN servers. */
 const sdNoCdnOrigin = /-nocdn.[\w-]+.shapediver.com$/;
 
+/** List of headers to remove before sending the request. */
+type DisableHeaders = string[];
+
 export class UtilsApi extends BaseAPI {
-    constructor(configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-        super(configuration, basePath, axios);
+    constructor(config?: Configuration | ClientConfig) {
+        super(config);
     }
 
     /**
      * Upload the given file to the specified URL.
      *
      * _Note: This method does not use the `UtilsApi`'s base configuration._
-     * @param {string} url The target URL of the upload request.
-     * @param {*} data The data that should be uploaded.
-     * @param {string} contentType Indicate the original media type of the resource.
-     * @param {string} [filename] The name of the file to be uploaded. When a filename has been specified in the request-upload call, then the same filename has to be specified for the upload as well.
-     * @param {*} [options] Override http request option.
+     * @param url The target URL of the upload request.
+     * @param data The data that should be uploaded.
+     * @param contentType Indicate the original media type of the resource.
+     * @param [filename] The name of the file to be uploaded. When a filename has been specified in the request-upload call, then the same filename has to be specified for the upload as well.
+     * @param [options] Override http request option.
      */
     public upload(
         url: string,
         data: any,
         contentType: string,
         filename?: string,
-        options?: RawAxiosRequestConfig
-    ): AxiosPromise<any> {
+        options: RequestInit = {}
+    ): Promise<Response> {
         // Prepare headers for the upload.
-        const reqHeaders: RawAxiosRequestHeaders = {
-            Authorization: undefined, // Disable by default to avoid accidental token exposure.
-            'Content-Type': contentType,
+        options.headers = new Headers(options.headers);
+        options.headers.set('Content-Type', contentType);
+        if (filename)
+            options.headers.set('Content-Disposition', contentDispositionFromFilename(filename));
+
+        const disableHeaders: DisableHeaders = [
+            'Authorization', // Disable by default to avoid accidental token exposure.
+
             /* Override custom ShapeDiver headers to avoid CORS issues. */
-            'X-ShapeDiver-Origin': undefined,
-            'X-ShapeDiver-SessionEngineId': undefined,
-            'X-ShapeDiver-BuildVersion': undefined,
-            'X-ShapeDiver-BuildDate': undefined,
-            'X-ShapeDiver-UserAgent': undefined,
-        };
-        if (filename) reqHeaders['Content-Disposition'] = contentDispositionFromFilename(filename);
+            'X-ShapeDiver-Origin',
+            'X-ShapeDiver-SessionEngineId',
+            'X-ShapeDiver-BuildVersion',
+            'X-ShapeDiver-BuildDate',
+            'X-ShapeDiver-UserAgent',
+        ];
 
-        const reqOptions: RawAxiosRequestConfig = { ...options };
-        reqOptions.headers = { ...reqHeaders, ...options?.headers };
-
-        const request = this.buildRequest('PUT', url, data, reqOptions)();
-        return request();
+        return this.fetchRequest("PUT", url, data, options, disableHeaders);
     }
 
     /**
      * Upload the given asset to the specified ShapeDiver URL.
      *
      * _Note: This method does not use the `UtilsApi`'s base configuration._
-     * @param {string} url The target URL of the upload request.
-     * @param {*} data The data that should be uploaded.
-     * @param {ResAssetUploadHeaders} headers The headers object that was returned from the request-upload call.
-     * @param {*} [options] Override http request option.
+     * @param url The target URL of the upload request.
+     * @param data The data that should be uploaded.
+     * @param headers The headers object that was returned from the request-upload call.
+     * @param [options] Override http request option.
      */
     public uploadAsset(
         url: string,
         data: any,
         headers: ResAssetUploadHeaders,
-        options?: RawAxiosRequestConfig
-    ): AxiosPromise<any> {
+        options: RequestInit = {}
+    ): Promise<Response> {
         // Prepare headers for the upload.
-        const reqHeaders: RawAxiosRequestHeaders = {
-            Authorization: undefined, // Disable by default to avoid accidental token exposure.
-            'Content-Type': headers.contentType,
+        options.headers = new Headers(options.headers);
+        options.headers.set('Content-Type', headers.contentType);
+        if (headers.contentDisposition) {
+            options.headers.set('Content-Disposition', headers.contentDisposition);
+        }
+
+        const disableHeaders: DisableHeaders = [
+            'Authorization', // Disable by default to avoid accidental token exposure.
+
             /* Override custom ShapeDiver headers to avoid CORS issues. */
-            'X-ShapeDiver-Origin': undefined,
-            'X-ShapeDiver-SessionEngineId': undefined,
-            'X-ShapeDiver-BuildVersion': undefined,
-            'X-ShapeDiver-BuildDate': undefined,
-            'X-ShapeDiver-UserAgent': undefined,
-        };
-        if (headers.contentDisposition)
-            reqHeaders['Content-Disposition'] = headers.contentDisposition;
+            'X-ShapeDiver-Origin',
+            'X-ShapeDiver-SessionEngineId',
+            'X-ShapeDiver-BuildVersion',
+            'X-ShapeDiver-BuildDate',
+            'X-ShapeDiver-UserAgent',
+        ];
 
-        const reqOptions: RawAxiosRequestConfig = { ...options };
-        reqOptions.headers = { ...reqHeaders, ...options?.headers };
-
-        const request = this.buildRequest('PUT', url, data, reqOptions)();
-        return request();
+        return this.fetchRequest("PUT", url, data, options, disableHeaders);
     }
 
     /**
      * Downloads data from the specified URL.
      *
-     * You can set the response type using the `responseType` property in the `options` object.
-     * @param {string} url The URL to download from.
-     * @param {*} [options] Optional HTTP request overrides.
-     * @throws {ResponseError} if the response type cannot be handled, such as when JSON parsing
+     * @param url The URL to download from.
+     * @param [options] Optional HTTP request overrides.
+     * @throws ResponseError if the response type cannot be handled, such as when JSON parsing
      * fails.
      */
-    public download(
-        url: string,
-        options: { responseType: 'arraybuffer' } & RawAxiosRequestConfig
-    ): AxiosPromise<ArrayBuffer>;
-    public download(
-        url: string,
-        options: { responseType: 'json' } & RawAxiosRequestConfig
-    ): AxiosPromise<Record<string, any>>;
-    public download(
-        url: string,
-        options: { responseType: 'text' } & RawAxiosRequestConfig
-    ): AxiosPromise<string>;
-    public download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any>;
-    public async download(url: string, options?: RawAxiosRequestConfig): AxiosPromise<any> {
-        const localRequestOptions = await this.buildRequestOptions(url, options ?? {});
-        this.disableAuthHeaderForShapeDiverUris(url, localRequestOptions);
+    public async download(url: string, options: RequestInit = {}): Promise<Response> {
+        const disableHeaders: DisableHeaders = [];
+        this.disableAuthHeaderForShapeDiverUris(url, options, disableHeaders);
 
-        const request = this.buildRequest('GET', url, undefined, localRequestOptions)();
-        const res = request();
-
-        // Convert Buffer to ArrayBuffer in Node.js when responseType is 'arraybuffer'
-        if (options?.responseType === 'arraybuffer') {
-            return res.then((response) => {
-                const data = response.data;
-
-                // In Node.js, Axios returns a Buffer for arraybuffer responseType
-                // Convert it to ArrayBuffer for consistency with browser behavior
-                if (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) {
-                    // Convert Buffer to ArrayBuffer by copying to a new Uint8Array
-                    const uint8Array = new Uint8Array(data);
-                    response.data = uint8Array.buffer;
-                }
-
-                return response;
-            });
-        }
-
-        // Validate JSON responses when responseType is 'json'
-        if (options?.responseType === 'json') {
-            return res.then((response) => {
-                const data = response.data;
-
-                // Throw a single error if the response is not valid JSON (object or array)
-                if (
-                    data === null ||
-                    data === undefined ||
-                    typeof data === 'string' ||
-                    data instanceof ArrayBuffer ||
-                    (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) ||
-                    (typeof Blob !== 'undefined' && data instanceof Blob)
-                ) {
-                    throw new ResponseError(
-                        response.status,
-                        'Invalid JSON response: Could not parse response as JSON',
-                        'Expected valid JSON but received incompatible response'
-                    );
-                }
-
-                return response;
-            });
-        }
-
-        return res;
+        return await this.fetchRequest("GET", url, undefined, options, disableHeaders);
     }
 
     /**
@@ -198,22 +140,14 @@ export class UtilsApi extends BaseAPI {
      * the asset is determined by the URL and returned with the promise.
      *
      * The response type can be controlled by setting the `responseType` in the `options` object.
-     * @param {string} url The URL of the asset to download.
-     * @param {*} [options] Override http request option.
-     * @throws {IllegalArgumentError} in case the URL is not a valid ShapeDiver asset URL.
+     * @param url The URL of the asset to download.
+     * @param [options] Override http request option.
+     * @throws IllegalArgumentError in case the URL is not a valid ShapeDiver asset URL.
      */
     public downloadAsset(
         url: string,
-        options: { responseType: 'arraybuffer' } & RawAxiosRequestConfig
-    ): [AxiosPromise<ArrayBuffer>, 'export' | 'output' | 'texture'];
-    public downloadAsset(
-        url: string,
-        options?: RawAxiosRequestConfig
-    ): [AxiosPromise<any>, 'export' | 'output' | 'texture'];
-    public downloadAsset(
-        url: string,
-        options?: RawAxiosRequestConfig
-    ): [AxiosPromise<any>, 'export' | 'output' | 'texture'] {
+        options?: RequestInit
+    ): [Promise<Response>, 'export' | 'output' | 'texture'] {
         let type: 'output' | 'export' | 'texture';
 
         // Check if the given URL is a valid API or CDN asset URL
@@ -226,7 +160,7 @@ export class UtilsApi extends BaseAPI {
             );
         }
 
-        return [this.download(url, options) as any, type];
+        return [this.download(url, options), type];
     }
 
     /**
@@ -234,83 +168,71 @@ export class UtilsApi extends BaseAPI {
      * URLs to the `AssetsApi.downloadImage` endpoint to avoid CORS issues.
      *
      * The response type can be controlled by setting the `responseType` in the `options` object.
-     * @param {string} sessionId The session ID.
-     * @param {string} url The URL of the image to download.
-     * @param {*} [options] Override http request option.
+     * @param sessionId The session ID.
+     * @param url The URL of the image to download.
+     * @param [options] Override http request option.
      */
-    public downloadImage(
+    public async downloadImage(
         sessionId: string,
         url: string,
-        options: { responseType: 'arraybuffer' } & RawAxiosRequestConfig
-    ): AxiosPromise<ArrayBuffer>;
-    public downloadImage(
-        sessionId: string,
-        url: string,
-        options?: RawAxiosRequestConfig
-    ): AxiosPromise<any>;
-    public downloadImage(
-        sessionId: string,
-        url: string,
-        options?: RawAxiosRequestConfig
-    ): AxiosPromise<any> {
+        options: RequestInit = {}
+    ): Promise<Blob> {
         if (
             apiAssetTextureUri.test(url) ||
             cdnAssetTextureUri.test(url) ||
             directDownloadUri.test(url)
         ) {
             // Call ShapeDiver texture-asset URLs directly
-            return this.download(url, options) as any;
+            return this.download(url, options).then((response) => response.blob());
         } else {
             /* All other source URLs are called via the download-image endpoint */
-
-            const localOptions: RawAxiosRequestConfig = options ?? {};
-            this.disableAuthHeaderForShapeDiverUris(url, localOptions);
 
             // Use a universal base64 encoder for browser and Node.js environments
             const encodedUrl =
                 typeof window !== 'undefined' && window.btoa
                     ? window.btoa(
-                          encodeURIComponent(url).replace(/%([0-9A-F]{2})/g, (_, p1) =>
-                              String.fromCharCode(parseInt(p1, 16))
-                          )
-                      )
+                        encodeURIComponent(url).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+                            String.fromCharCode(parseInt(p1, 16))
+                        )
+                    )
                     : Buffer.from(url, 'utf-8').toString('base64');
 
-            return new AssetsApi(this.configuration).downloadImage(
+            // Remove the authrization header from all configurations.
+            const config = new Configuration(this.configuration);
+            if (config.headers && config.headers['Authorization'])
+                delete config.headers!['Authrization'];
+
+            return new AssetsApi(config).downloadImage(
                 sessionId,
                 encodedUrl,
-                localOptions
+                options
             );
         }
     }
 
     /**
      * Submit a customization request and wait for the result to be finished.
-     * @param {string} sessionId The session ID.
-     * @param {ReqCustomization} body The body of the customization request.
-     * @param {number} [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
-     * @param {boolean} [ignoreUnknownParams=false] Allow relaxed validation of parameter
-     * identifiers. When set to `true`, unrecognized parameters will be ignored rather than causing
-     * an error.  Defaults to `false`.
-     * @param {*} [options] Override http request option.
-     * @throws {TimeoutError} in case a maximum duration has been specified and is exceeded.
+     * @param sessionId The session ID.
+     * @param body The body of the customization request.
+     * @param [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
+     * @param [ignoreUnknownParams=false] Allow relaxed validation of parameter identifiers. When set to `true`, unrecognized parameters will be ignored rather than causing an error. Defaults to `false`.
+     * @param [options] Override http request option.
+     * @throws TimeoutError in case a maximum duration has been specified and is exceeded.
      */
     public async submitAndWaitForOutput(
         sessionId: string,
         body: ReqCustomization,
         maxWaitMsec = -1,
         ignoreUnknownParams?: boolean,
-        options?: RawAxiosRequestConfig
+        options?: RequestInit
     ): Promise<ResComputeOutputs> {
         const startMsec = Date.now();
-        const dto = (
-            await new OutputApi(this.configuration).computeOutputs(
-                sessionId,
-                body,
-                ignoreUnknownParams,
-                options
-            )
-        ).data;
+        const dto = await new OutputApi(this.configuration).computeOutputs(
+            sessionId,
+            body,
+            ignoreUnknownParams,
+            options
+        );
         const waitMsec = Date.now() - startMsec;
 
         // Reduce the total max waiting time by the amount the customization-request took
@@ -321,31 +243,27 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Submit an export request and wait for the result to be finished.
-     * @param {string} sessionId The session ID.
-     * @param {ReqExport} body The body of the export request.
-     * @param {number} [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
-     * @param {boolean} [ignoreUnknownParams=false] Allow relaxed validation of parameter
-     * identifiers. When set to `true`, unrecognized parameters will be ignored rather than causing
-     * an error.  Defaults to `false`.
-     * @param {*} [options] Override http request option.
-     * @throws {TimeoutError} in case a maximum duration has been specified and is exceeded.
+     * @param sessionId The session ID.
+     * @param body The body of the export request.
+     * @param [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
+     * @param [ignoreUnknownParams=false] Allow relaxed validation of parameter identifiers. When set to `true`, unrecognized parameters will be ignored rather than causing an error. Defaults to `false`.
+     * @param [options] Override http request option.
+     * @throws TimeoutError in case a maximum duration has been specified and is exceeded.
      */
     public async submitAndWaitForExport(
         sessionId: string,
         body: ReqExport,
         maxWaitMsec = -1,
         ignoreUnknownParams?: boolean,
-        options?: RawAxiosRequestConfig
+        options?: RequestInit
     ): Promise<ResComputeExports> {
         const startMsec = Date.now();
-        const dto = (
-            await new ExportApi(this.configuration).computeExports(
-                sessionId,
-                body,
-                ignoreUnknownParams,
-                options
-            )
-        ).data;
+        const dto = await new ExportApi(this.configuration).computeExports(
+            sessionId,
+            body,
+            ignoreUnknownParams,
+            options
+        );
         const waitMsec = Date.now() - startMsec;
 
         // Reduce the total max waiting time by the amount the compute-request took
@@ -356,17 +274,17 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Given a DTO resulting from a customization request, wait for the results to be finished.
-     * @param {string} sessionId The session ID.
-     * @param {ResComputeOutputs} dto The DTO resulting from a customization request.
-     * @param {number} [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
-     * @param {*} [options] Override http request option.
-     * @throws {TimeoutError} in case a maximum duration has been specified and is exceeded.
+     * @param sessionId The session ID.
+     * @param dto The DTO resulting from a customization request.
+     * @param [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
+     * @param [options] Override http request option.
+     * @throws TimeoutError in case a maximum duration has been specified and is exceeded.
      */
     private async waitForOutputResult(
         sessionId: string,
         dto: ResComputeOutputs,
         maxWaitMsec: number,
-        options?: RawAxiosRequestConfig
+        options?: RequestInit
     ): Promise<ResComputeOutputs> {
         if (!dto.outputs) return dto;
 
@@ -394,13 +312,11 @@ export class UtilsApi extends BaseAPI {
             await sleep(delay);
 
             // Send cache request
-            dto = (
-                await new OutputApi(this.configuration).getCachedOutputs(
-                    sessionId,
-                    outputVersions,
-                    options
-                )
-            ).data;
+            dto = await new OutputApi(this.configuration).getCachedOutputs(
+                sessionId,
+                outputVersions,
+                options
+            )
             delay = this.getMaxOutputDelay(dto);
         }
 
@@ -409,19 +325,19 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Given a DTO resulting from an export request, wait for the result to be finished.
-     * @param {string} sessionId The session ID.
-     * @param {ReqExport} body The body of the export request.
-     * @param {ResComputeExports} dto The DTO resulting from an export request.
-     * @param {number} [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
-     * @param {*} [options] Override http request option.
-     * @throws {TimeoutError} in case a maximum duration has been specified and is exceeded.
+     * @param sessionId The session ID.
+     * @param body The body of the export request.
+     * @param dto The DTO resulting from an export request.
+     * @param [maxWaitMsec=-1] Maximum duration to wait for result (in milliseconds), pass value < 0 to disable limit.
+     * @param [options] Override http request option.
+     * @throws TimeoutError in case a maximum duration has been specified and is exceeded.
      */
     private async waitForExportResult(
         sessionId: string,
         body: ReqExport,
         dto: ResComputeExports,
         maxWaitMsec: number,
-        options?: RawAxiosRequestConfig
+        options?: RequestInit
     ): Promise<ResComputeExports> {
         let delay = this.getMaxExportDelay(body, dto);
         const startMsec = Date.now();
@@ -441,9 +357,7 @@ export class UtilsApi extends BaseAPI {
             await sleep(delay);
 
             // Send cache request
-            dto = (
-                await new ExportApi(this.configuration).getCachedExports(sessionId, body, options)
-            ).data;
+            dto = await new ExportApi(this.configuration).getCachedExports(sessionId, body, options);
             delay = this.getMaxExportDelay(body, dto);
         }
 
@@ -452,7 +366,7 @@ export class UtilsApi extends BaseAPI {
 
     /**
      * Get the maximum delay that was reported for output versions.
-     * @param {ResComputeOutputs | ResGetCachedOutputs} dto The DTO resulting from a customization request.
+     * @param dto The DTO resulting from a customization request.
      * @returns maximum delay, -1 in case no delay was reported
      */
     private getMaxOutputDelay(dto: ResComputeOutputs | ResGetCachedOutputs): number {
@@ -465,7 +379,7 @@ export class UtilsApi extends BaseAPI {
     /**
      * Get the maximum delay that was reported for the exports. If outputs have been reported as
      * well, their delay time is included too.
-     * @param {ResComputeExports | ResGetCachedExports} dto The DTO resulting from an export request.
+     * @param dto The DTO resulting from an export request.
      * @returns delay, -1 in case no delay was reported
      */
     private getMaxExportDelay(
@@ -487,77 +401,121 @@ export class UtilsApi extends BaseAPI {
     }
 
     /**
-     * Builds an Axios request from the given configuration, the API's base configuration, and the
-     * optional http request option.
-     * @param {string} method The HTTP method to use.
-     * @param {string} url The URL to send the request to.
-     * @param {*} data The data to send with the request.
-     * @param {*} [options={}] Optional http request options.
-     */
-    private buildRequest(
+    * Replacement for `runtime.BaseAPI.request`.
+    * Needed to call `createFetchParameters`.
+    */
+    private async fetchRequest(
         method: string,
         url: string,
-        data: any,
-        options: RawAxiosRequestConfig = {}
-    ) {
-        return (basePath: string = '') => {
-            const baseOptions = this.configuration?.baseOptions ?? {};
-            const baseHeaders = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+        data: unknown,
+        options: RequestInit = {},
+        disableHeaders: DisableHeaders = []
+    ): Promise<Response> {
+        const { url: requestUrl, init } = await this.createFetchParameters(
+            method,
+            url,
+            data,
+            options,
+            disableHeaders
+        );
 
-            const reqOptions = { method, ...baseOptions, ...options };
-            reqOptions.headers = { ...baseHeaders, ...options.headers };
-            if (!reqOptions.data && data) {
-                // Create a new configuration object if necessary to enable mime type detection
-                // in the serialization process.
-                const configuration = this.configuration ?? new Configuration();
-                reqOptions.data = this.serializeDataSafely(data, reqOptions, configuration);
-            }
+        const response = await this.fetchApi(requestUrl, init);
+        if (response.ok) return response;
 
-            // Remove the base path configuration if the URL is a full URL.
-            const configuration =
-                this.configuration && url.startsWith('http')
-                    ? new Configuration({ ...this.configuration, basePath: undefined })
-                    : this.configuration;
-
-            const axiosArgs: RequestArgs = { url, options: reqOptions };
-            return createRequestFunction(axiosArgs, this.axios, basePath, configuration).bind(
-                this.axios
-            );
-        };
+        throw new ClientResponseError(response, 'Response returned an error code');
     }
 
     /**
-     * Builds the Axios request options by merging the API's base configuration with the given
-     * options, and conditionally setting or overrides the Authorization header.
-     *
-     * The authorization header is set, when the URL is targeting the same server as the one
-     * specified in the API's base path configuration, or if it is a ShapeDiver no-CDN server. In
-     * this case, the Bearer token from the API configuration will be used.
-     * @param url The URL to send the request to.
-     * @param options The Axios request options.
-     * @returns The merged Axios request options.
-     */
-    private async buildRequestOptions(
+    * Replacement for `runtime.BaseAPI.createFetchParams`.
+    * Needed to allow dynamic basePath handling and proper header manipulation.
+    */
+    private async createFetchParameters(
+        method: string,
         url: string,
-        options: RawAxiosRequestConfig
-    ): Promise<RawAxiosRequestConfig> {
-        let baseOptions;
-        if (this.configuration) baseOptions = this.configuration.baseOptions;
+        data: unknown,
+        options: RequestInit,
+        disableHeaders: DisableHeaders
+    ): Promise<{ url: string; init: RequestInit }> {
+        const configuration = this.configuration ?? new Configuration();
 
-        const localRequestOptions = { ...baseOptions, ...options },
-            localHeaderParameter = {} as any;
+        // Add authorization if applicable.
+        const authHeaders: Record<string, string> = {};
+        if (
+            this.isTargetingInternalOrNoCdnServer(url) &&
+            this.configuration &&
+            this.configuration.accessToken
+        ) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("JwtAuth", []);
 
-        if (this.isTargetingInternalOrNoCdnServer(url))
-            await setBearerAuthToObject(localHeaderParameter, this.configuration);
+            if (tokenString) authHeaders["Authorization"] = `Bearer ${tokenString}`;
+        }
 
-        let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-        localRequestOptions.headers = {
-            ...localHeaderParameter,
-            ...headersFromBaseOptions,
-            ...options.headers,
+        const headers = new Headers(configuration.headers);
+        for (const source of [
+            authHeaders,
+            options.headers,
+        ]) {
+            if (!source) continue;
+            new Headers(source).forEach((value, name) => headers.set(name, value));
+        }
+
+        // Remove all disabled headers.
+        disableHeaders.forEach(header => headers.delete(header));
+
+        const init: RequestInit = {
+            ...options,
+            method,
+            headers,
+            body: this.serializeDataForFetch(data, headers),
         };
 
-        return localRequestOptions;
+        return {
+            url: this.createFetchUrl(url),
+            init
+        };
+    }
+
+    /** Prepends the base-path to `url` when the URL is relative. */
+    private createFetchUrl(url: string): string {
+        if (url.startsWith("http")) return url;
+
+        const basePath = this.configuration.basePath.replace(/\/+$/, "");
+        const path = url.replace(/^\/+/, "");
+
+        return `${basePath}/${path}`;
+    }
+
+    /** Passes `BodyInit` types through, stringifies JSON bodies and throws for invalid types. */
+    private serializeDataForFetch(data: unknown, headers: Headers): BodyInit | undefined {
+        if (data === undefined || data === null) return undefined;
+
+        if (
+            typeof data === 'string' ||
+            data instanceof ArrayBuffer ||
+            ArrayBuffer.isView(data) ||
+            (typeof Blob !== 'undefined' && data instanceof Blob) ||
+            (typeof FormData !== 'undefined' && data instanceof FormData) ||
+            (typeof URLSearchParams !== 'undefined' && data instanceof URLSearchParams) ||
+            (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream)
+        ) {
+            return data as BodyInit;
+        }
+
+        if (!this.isJsonMime(headers.get('content-type') ?? '')) {
+            throw new TypeError(
+                'Request body must be a Fetch BodyInit value or use a JSON Content-Type.'
+            );
+        }
+
+        const body = JSON.stringify(data);
+
+        // JSON.stringify(undefined), functions, and symbols returns undefined.
+        if (body === undefined) {
+            throw new TypeError('Request body cannot be serialized as JSON.');
+        }
+
+        return body;
     }
 
     /**
@@ -578,57 +536,27 @@ export class UtilsApi extends BaseAPI {
         }
     }
 
-    /**
-     * A wrapper around the auto-generated `serializeDataIfNeeded` that safely serializes data for
-     * Axios. The idea of the base function is to stringify objects for application-json requests.
-     * However, this does not work on all data types. Thus, this wrapper passes through all data
-     * types that can be handled natively by Axios, and only calls the base function for the rest.
-     * @param value The data to serialize.
-     * @param requestOptions The request options.
-     * @param configuration The API configuration.
-     * @returns The serialized data.
-     */
-    private serializeDataSafely(
-        value: any,
-        requestOptions: any,
-        configuration?: Configuration
-    ): any {
-        // Helper: detect Node.js stream
-        function isStream(val: any): boolean {
-            return val !== null && typeof val === 'object' && typeof val.pipe === 'function';
-        }
-
-        // Pass through raw binary types that Axios can handle
-        if (
-            value instanceof ArrayBuffer ||
-            ArrayBuffer.isView(value) || // TypedArray (Uint8Array, Int16Array, etc.) and DataView
-            isStream(value) ||
-            (typeof Buffer !== 'undefined' && Buffer.isBuffer(value)) ||
-            (typeof Blob !== 'undefined' && value instanceof Blob) ||
-            (typeof File !== 'undefined' && value instanceof File) ||
-            (typeof FormData !== 'undefined' && value instanceof FormData) ||
-            (typeof URLSearchParams !== 'undefined' && value instanceof URLSearchParams)
-        ) {
-            return value;
-        }
-
-        // Fallback to the generated serializer
-        return serializeDataIfNeeded(value, requestOptions, configuration);
-    }
-
     /** Disable the Authorization header for ShapeDiver URIs if not explicitly set. */
-    private disableAuthHeaderForShapeDiverUris(url: string, options: RawAxiosRequestConfig): void {
+    private disableAuthHeaderForShapeDiverUris(
+        url: string,
+        options: RequestInit,
+        disableHeaders: DisableHeaders,
+    ): void {
+        const headers = new Headers(options.headers);
+
         // When an authorization header is set, it will override anything that is set later
-        if (options.headers?.Authorization) return;
+        if (headers.has('Authorization')) return;
+
+        const fetchUrl = this.createFetchUrl(url);
 
         let targetUrl: URL;
         try {
-            targetUrl = new URL(url);
+            targetUrl = new URL(fetchUrl);
         } catch {
             return;
         }
 
-        if (directDownloadUri.test(targetUrl.origin) || cdnAssetUri.test(url))
-            options.headers = { Authorization: undefined, ...options.headers };
+        if (directDownloadUri.test(targetUrl.origin) || cdnAssetUri.test(targetUrl.pathname))
+            disableHeaders.push('Authorization');
     }
 }

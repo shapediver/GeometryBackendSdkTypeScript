@@ -24,8 +24,8 @@ test -n "$version" || {
 # Update sdk version number.
 config="${root}/packages/sdk.geometry-api-sdk-v2/src/configuration.ts"
 case $(uname -s) in
-Linux) sed -i "s/sdkVersion = '.*'/sdkVersion = '${version}'/" "${config}" ;;
-Darwin) sed -i '' "s/sdkVersion = '.*'/sdkVersion = '${version}'/" "${config}" ;;
+Linux) sed -i "s/SDK_VERSION = '.*'/SDK_VERSION = '${version}'/" "${config}" ;;
+Darwin) sed -i '' "s/SDK_VERSION = '.*'/SDK_VERSION = '${version}'/" "${config}" ;;
 *) exit 1 ;;
 esac
 git add "${config}"

@@ -6,18 +6,18 @@ test('upload gltf', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).data.sessionId;
+    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
 
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Upload a new glTF.
-    const resUpload = (await new GltfApi(config).uploadGltf(sessionId, data as File)).data;
+    const resUpload = (await new GltfApi(config).uploadGltf(sessionId, data as File));
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the uploaded glTF.
-    const resGltf = (
-        await new UtilsApi().download(resUpload.gltf.href, { responseType: 'arraybuffer' })
-    ).data as unknown as Buffer;
+    const resGltf = await (
+        await new UtilsApi().download(resUpload.gltf.href)
+    ).arrayBuffer();
     expect(resGltf.byteLength).toBe(data.size);
 
     // Close the session.
@@ -29,20 +29,19 @@ test('upload gltf and convert to usdz', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const session = (await new SessionApi(config).createSessionByTicket(ticket)).data.sessionId;
+    const session = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
 
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Upload a new glTF and convert to USDZ.
-    const resUpload = (
+    const resUpload =
         await new GltfApi(config).uploadGltf(session, data as File, QueryGltfConversion.USDZ)
-    ).data;
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the created USDZ.
-    const resUsdz = (
-        await new UtilsApi().download(resUpload.gltf.href, { responseType: 'arraybuffer' })
-    ).data as unknown as Buffer;
+    const resUsdz = await (
+        await new UtilsApi().download(resUpload.gltf.href)
+    ).arrayBuffer();
     expect(resUsdz.byteLength !== data.size).toBeTruthy();
 
     // Close the session.
