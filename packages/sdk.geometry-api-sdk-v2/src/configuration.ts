@@ -17,6 +17,19 @@ export interface ConfigurationParameters
     maxRetries?: number;
 }
 
+export class Configuration extends ClientConfig {
+    readonly maxRetries: number;
+
+    constructor(param: ConfigurationParameters = {}) {
+        super({
+            ...param,
+            headers: createHeaders(param.headers),
+        });
+
+        this.maxRetries = param.maxRetries ?? 5;
+    }
+}
+
 function createHeaders(
     headers?: ClientConfigParams['headers'],
 ): Record<string, string> {
@@ -24,7 +37,7 @@ function createHeaders(
     const normalizedHeaders = new Headers(headers);
     const userAgent = `sd-sdk/typescript/${SDK_VERSION}`;
 
-    if (typeof process === 'object' && !normalizedHeaders.has('User-Agent')) {
+    if (detectRuntime() === "node" && !normalizedHeaders.has('User-Agent')) {
         // Overwrite User-Agent on Node.js applications.
         normalizedHeaders.set('User-Agent', userAgent);
     } else if (!normalizedHeaders.has('X-ShapeDiver-UserAgent')) {
@@ -39,15 +52,34 @@ function createHeaders(
     return result;
 }
 
-export class Configuration extends ClientConfig {
-    readonly maxRetries: number;
+function detectRuntime(): "node" | "browser" | "unknown" {
+    const global = globalThis as typeof globalThis & {
+        process?: {
+            versions?: {
+                node?: unknown;
+            };
+        };
+        window?: unknown;
+        document?: unknown;
+        self?: unknown;
+        navigator?: unknown;
+    };
 
-    constructor(param: ConfigurationParameters = {}) {
-        super({
-            ...param,
-            headers: createHeaders(param.headers),
-        });
-
-        this.maxRetries = param.maxRetries ?? 5;
+    if (typeof global.process?.versions?.node === "string") {
+        return "node";
     }
+
+    const isBrowserMainThread =
+        global.window === globalThis &&
+        typeof global.document !== "undefined";
+
+    const isBrowserWorker =
+        global.self === globalThis &&
+        typeof global.navigator !== "undefined";
+
+    if (isBrowserMainThread || isBrowserWorker) {
+        return "browser";
+    }
+
+    return "unknown";
 }
