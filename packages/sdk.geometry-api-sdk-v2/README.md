@@ -6,7 +6,9 @@
 
 # GeometryBackendSdkTypeScript
 
-> :warning: **You might be looking for the [v1 docs](https://github.com/shapediver/GeometryBackendSdkTypeScript/tree/legacy/v1) - [Migration Guide](<https://help.shapediver.com/doc/geometry-backend-sdk-typescript-migration-guide#GeometryBackendSDKTypeScript-MigrationGuide-MigratingfromVersion1.x.xto2.x.x(03/11/2024)>).**
+> :warning: **You might be looking for:**
+> - [v1 docs](https://github.com/shapediver/GeometryBackendSdkTypeScript/blob/legacy/v1/packages/sdk.geometry-api-sdk-v2/README.md) - [Migration Guide to v2](https://help.shapediver.com/doc/geometry-backend-sdk-typescript-migration-guide#Migrating-from-Version-1.x.x-to-2.x.x-(03/11/2024)).
+> - [v3 docs](https://github.com/shapediver/GeometryBackendSdkTypeScript/blob/legacy/v3/packages/sdk.geometry-api-sdk-v2/README.md) - [Migration Guide to v4](https://help.shapediver.com/doc/geometry-backend-sdk-typescript-migration-guide#Migrating-from-Version-3.x.x-to-4.x.x-(28/07/2026)).
 
 [ShapeDiver](https://www.shapediver.com/) is a cloud platform for building online applications
 based on parametric 3D files made with [Rhinoceros 3D](https://www.rhino3d.com/) and
