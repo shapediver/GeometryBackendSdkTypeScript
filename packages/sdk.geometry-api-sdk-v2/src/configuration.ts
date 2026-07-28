@@ -49,7 +49,7 @@ export class Configuration extends ClientConfig {
 
         const userAgent = `sd-sdk/typescript/${this.sdkVersion}`;
 
-        if (typeof process === 'object' && !this.baseOptions.headers['User-Agent']) {
+        if (detectRuntime() === "node" && !this.baseOptions.headers['User-Agent']) {
             // Overwrite User-Agent on Node.js applications.
             this.baseOptions.headers['User-Agent'] = userAgent;
         } else if (!this.baseOptions.headers['X-ShapeDiver-UserAgent']) {
@@ -57,4 +57,36 @@ export class Configuration extends ClientConfig {
             this.baseOptions.headers['X-ShapeDiver-UserAgent'] = userAgent;
         }
     }
+}
+
+function detectRuntime(): "node" | "browser" | "unknown" {
+    const global = globalThis as typeof globalThis & {
+        process?: {
+            versions?: {
+                node?: unknown;
+            };
+        };
+        window?: unknown;
+        document?: unknown;
+        self?: unknown;
+        navigator?: unknown;
+    };
+
+    if (typeof global.process?.versions?.node === "string") {
+        return "node";
+    }
+
+    const isBrowserMainThread =
+        global.window === globalThis &&
+        typeof global.document !== "undefined";
+
+    const isBrowserWorker =
+        global.self === globalThis &&
+        typeof global.navigator !== "undefined";
+
+    if (isBrowserMainThread || isBrowserWorker) {
+        return "browser";
+    }
+
+    return "unknown";
 }
