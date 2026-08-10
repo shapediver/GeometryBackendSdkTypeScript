@@ -170,20 +170,35 @@ export class UtilsApi extends BaseAPI {
      * The response type can be controlled by setting the `responseType` in the `options` object.
      * @param sessionId The session ID.
      * @param url The URL of the image to download.
-     * @param [options] Override http request option.
+     * @param [options] Override http request option and set response-type.
      */
+    public downloadImage(
+        sessionId: string,
+        url: string,
+        options?: RequestInit
+    ): Promise<Blob>;
+    public downloadImage(
+        sessionId: string,
+        url: string,
+        options: RequestInit & { responseType: "arraybuffer" }
+    ): Promise<ArrayBuffer>;
     public async downloadImage(
         sessionId: string,
         url: string,
-        options: RequestInit = {}
-    ): Promise<Blob> {
+        options: RequestInit & { responseType?: 'arraybuffer' } = {}
+    ): Promise<Blob | ArrayBuffer> {
+        const responseType = options.responseType;
         if (
             apiAssetTextureUri.test(url) ||
             cdnAssetTextureUri.test(url) ||
             directDownloadUri.test(url)
         ) {
             // Call ShapeDiver texture-asset URLs directly
-            return this.download(url, options).then((response) => response.blob());
+            const response = await this.download(url, options);
+
+            return responseType === 'arraybuffer'
+                ? response.arrayBuffer()
+                : response.blob();
         } else {
             /* All other source URLs are called via the download-image endpoint */
 
@@ -202,11 +217,15 @@ export class UtilsApi extends BaseAPI {
             if (config.headers && config.headers['Authorization'])
                 delete config.headers!['Authrization'];
 
-            return new AssetsApi(config).downloadImage(
+            const image = await new AssetsApi(config).downloadImage(
                 sessionId,
                 encodedUrl,
                 options
             );
+
+            return responseType === 'arraybuffer'
+                ? await image.arrayBuffer()
+                : image;
         }
     }
 
