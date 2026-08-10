@@ -181,12 +181,12 @@ export class UtilsApi extends BaseAPI {
         sessionId: string,
         url: string,
         options: RequestInit & { responseType: "arraybuffer" }
-    ): Promise<ArrayBuffer>;
+    ): Promise<{ data: ArrayBuffer; contentType: string }>;
     public async downloadImage(
         sessionId: string,
         url: string,
         options: RequestInit & { responseType?: 'arraybuffer' } = {}
-    ): Promise<Blob | ArrayBuffer> {
+    ): Promise<Blob | { data: ArrayBuffer; contentType: string }> {
         const responseType = options.responseType;
         if (
             apiAssetTextureUri.test(url) ||
@@ -197,7 +197,10 @@ export class UtilsApi extends BaseAPI {
             const response = await this.download(url, options);
 
             return responseType === 'arraybuffer'
-                ? response.arrayBuffer()
+                ? {
+                    data: await response.arrayBuffer(),
+                    contentType: response.headers.get('Content-Type') ?? '',
+                }
                 : response.blob();
         } else {
             /* All other source URLs are called via the download-image endpoint */
@@ -217,15 +220,17 @@ export class UtilsApi extends BaseAPI {
             if (config.headers && config.headers['Authorization'])
                 delete config.headers!['Authrization'];
 
-            const image = await new AssetsApi(config).downloadImage(
-                sessionId,
-                encodedUrl,
+            const response = await new AssetsApi(config).downloadImageRaw(
+                { sessionId, url: encodedUrl },
                 options
             );
 
             return responseType === 'arraybuffer'
-                ? await image.arrayBuffer()
-                : image;
+                ? {
+                    data: await response.raw.arrayBuffer(),
+                    contentType: response.raw.headers.get('Content-Type') ?? '',
+                }
+                : await response.value();
         }
     }
 
