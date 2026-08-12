@@ -3,7 +3,7 @@ import {
     ConfigurationParameters as ClientConfigParams,
 } from './client/runtime';
 
-const SDK_VERSION = '4.2.1'; // WARNING: This value is updated automatically!
+const SDK_VERSION = '4.2.2'; // WARNING: This value is updated automatically!
 
 export interface ConfigurationParameters
     extends Pick<ClientConfigParams, 'accessToken' | 'basePath' | 'fetchApi' | 'headers' | 'middleware' | 'queryParamsStringify'> {
