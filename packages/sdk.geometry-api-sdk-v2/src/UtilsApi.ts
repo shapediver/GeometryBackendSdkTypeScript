@@ -187,14 +187,17 @@ export class UtilsApi extends BaseAPI {
         url: string,
         options: RequestInit & { responseType?: 'arraybuffer' } = {}
     ): Promise<Blob | { data: ArrayBuffer; contentType: string }> {
-        const responseType = options.responseType;
+        // responseType is an SDK-only option, not part of the Fetch API.
+        const { responseType, ...fetchOptions } = options;
+
         if (
             apiAssetTextureUri.test(url) ||
             cdnAssetTextureUri.test(url) ||
             directDownloadUri.test(url)
         ) {
+            console.log('[downloadApi] ShapeDiver URL');
             // Call ShapeDiver texture-asset URLs directly
-            const response = await this.download(url, options);
+            const response = await this.download(url, fetchOptions);
 
             return responseType === 'arraybuffer'
                 ? {
@@ -215,14 +218,19 @@ export class UtilsApi extends BaseAPI {
                     )
                     : Buffer.from(url, 'utf-8').toString('base64');
 
-            // Remove the authrization header from all configurations.
+            // The server-side proxy authenticates with the session token. Do not forward
+            // browser-only request headers that Node's Fetch implementation forbids.
             const config = new Configuration(this.configuration);
-            if (config.headers && config.headers['Authorization'])
-                delete config.headers!['Authrization'];
+            if (config.headers) {
+                delete config.headers['authorization'];
+                delete config.headers['origin'];
+                delete config.headers['x-shapediver-origin'];
+            }
 
+            console.log('[downloadApi] Other URL:', encodedUrl, fetchOptions);
             const response = await new AssetsApi(config).downloadImageRaw(
                 { sessionId, url: encodedUrl },
-                options
+                fetchOptions
             );
 
             return responseType === 'arraybuffer'

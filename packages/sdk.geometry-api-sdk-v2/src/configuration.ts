@@ -20,14 +20,33 @@ export interface ConfigurationParameters
 export class Configuration extends ClientConfig {
     readonly maxRetries: number;
 
-    constructor(param: ConfigurationParameters = {}) {
+    constructor(param: ConfigurationParameters | ClientConfig = {}) {
+        const parameters = configurationParameters(param);
+
         super({
-            ...param,
-            headers: createHeaders(param.headers),
+            ...parameters,
+            headers: createHeaders(parameters.headers),
         });
 
-        this.maxRetries = param.maxRetries ?? 5;
+        this.maxRetries = parameters.maxRetries ?? 5;
     }
+}
+
+/** Converts an existing SDK configuration into constructor parameters. */
+function configurationParameters(
+    param: ConfigurationParameters | ClientConfig,
+): ConfigurationParameters {
+    if (!(param instanceof ClientConfig)) return param;
+
+    return {
+        accessToken: param.accessToken,
+        basePath: param.basePath,
+        fetchApi: param.fetchApi,
+        headers: param.headers,
+        middleware: param.middleware,
+        queryParamsStringify: param.queryParamsStringify,
+        maxRetries: param instanceof Configuration ? param.maxRetries : undefined,
+    };
 }
 
 function createHeaders(
