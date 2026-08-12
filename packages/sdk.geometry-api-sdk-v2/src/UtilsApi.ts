@@ -195,7 +195,6 @@ export class UtilsApi extends BaseAPI {
             cdnAssetTextureUri.test(url) ||
             directDownloadUri.test(url)
         ) {
-            console.log('[downloadApi] ShapeDiver URL');
             // Call ShapeDiver texture-asset URLs directly
             const response = await this.download(url, fetchOptions);
 
@@ -227,7 +226,6 @@ export class UtilsApi extends BaseAPI {
                 delete config.headers['x-shapediver-origin'];
             }
 
-            console.log('[downloadApi] Other URL:', encodedUrl, fetchOptions);
             const response = await new AssetsApi(config).downloadImageRaw(
                 { sessionId, url: encodedUrl },
                 fetchOptions
