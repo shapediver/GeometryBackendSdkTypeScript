@@ -25,4 +25,3 @@ __pycache__/
 !.vscode/tasks.json
 
 **/.DS_Store
-graphify-out/

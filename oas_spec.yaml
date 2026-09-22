@@ -7,7 +7,7 @@ info:
     * host Grasshopper models in a secure, reliable, scalable, and performant way,
     * run computations of Grasshopper models,
     * and cache and output the results of computations and exports.
-  version: 2.5.0
+  version: 2.6.0
 
 externalDocs:
   description: ShapeDiver Help Center
@@ -1030,6 +1030,7 @@ components:
         - $ref: "#/components/schemas/ResPartMessage"
         - $ref: "#/components/schemas/ResPartModel"
         - $ref: "#/components/schemas/ResPartModelComputation"
+        - $ref: "#/components/schemas/ResPartModelSessions"
         - $ref: "#/components/schemas/ResPartOutputs"
         - $ref: "#/components/schemas/ResPartPagination"
         - $ref: "#/components/schemas/ResPartParameters"
@@ -1305,6 +1306,15 @@ components:
         - $ref: "#/components/schemas/ResPartVersion"
       required:
         - computations
+        - pagination
+        - version
+    ResGetModelSessionsAnalytics:
+      allOf:
+        - $ref: "#/components/schemas/ResPartModelSessions"
+        - $ref: "#/components/schemas/ResPartPagination"
+        - $ref: "#/components/schemas/ResPartVersion"
+      required:
+        - sessions
         - pagination
         - version
     ResGetModelState:
@@ -1822,6 +1832,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ResModelComputation"
+    ResPartModelSessions:
+      type: object
+      properties:
+        sessions:
+          description: Analytics for model sessions.
+          type: array
+          items:
+            $ref: "#/components/schemas/ResModelSession"
     ResPartModelState:
       type: object
       properties:
@@ -2477,6 +2495,10 @@ components:
         filename:
           description: The name of the file, when specified during the upload.
           type: string
+        lastModified:
+          description: Timestamp of the last modification of the file.
+          allOf:
+            - $ref: "#/components/schemas/DateTimeIso"
       required:
         - id
         - parameterId
@@ -2495,6 +2517,10 @@ components:
           description: The size of the sdTF in bytes.
           type: integer
           minimum: 0
+        lastModified:
+          description: Timestamp of the last modification of the sdTF.
+          allOf:
+            - $ref: "#/components/schemas/DateTimeIso"
       required:
         - id
         - namespace
@@ -3080,6 +3106,23 @@ components:
         credits:
           description: The number of credits that are charged for this computation.
           type: number
+        sessionId:
+          description: |-
+            ID of the session that triggered this computation.
+
+            The value may be redacted, or omitted when the computation is not associated with a
+            session.
+          type: string
+        chargeUserId:
+          description: >-
+            Identifier of the user billed for this computation. This may differ from the user who
+            requested it.
+          type: string
+        chargeOrgId:
+          description: >-
+            Identifier of the organization billed for this computation. This may differ from the
+            organization of the user who requested it.
+          type: string
       required:
         - id
         - timestamp
@@ -3094,6 +3137,79 @@ components:
         - timestamp_req
         - timestamp_req_iso
         - timestamp_resp
+    ResModelSession:
+      type: object
+      properties:
+        id:
+          type: string
+          description: >-
+            ID of the session. The value may be redacted.
+        status:
+          $ref: "#/components/schemas/SessionAnalyticsStatus"
+        openedAt:
+          $ref: "#/components/schemas/DateTimeMs"
+        closedAt:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/DateTimeMs"
+        statistics:
+          $ref: "#/components/schemas/ResModelSessionStatistics"
+        chargeUserId:
+          type: string
+        chargeOrgId:
+          type: string
+        request:
+          $ref: "#/components/schemas/ResModelSessionRequest"
+      required:
+        - id
+        - status
+        - openedAt
+        - closedAt
+    ResModelSessionStatistics:
+      type: object
+      properties:
+        billableCount:
+          type: integer
+          description: >-
+            Number of billing windows started during the session (timeslot pricing).
+        duration:
+          type: integer
+          description: Total duration of the session in milliseconds.
+        exportsCount:
+          type: integer
+          description: Number of successful export requests that did not also request outputs.
+        interactionsCount:
+          type: integer
+          description: Number of successful customization requests.
+        combinedCount:
+          type: integer
+          description: Number of successful export requests that also requested outputs.
+      required:
+        - billableCount
+        - duration
+        - exportsCount
+        - interactionsCount
+        - combinedCount
+    ResModelSessionRequest:
+      type: object
+      properties:
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: A subset of the request headers the client sent when opening the session.
+        ip:
+          type: string
+          description: Anonymized client IP address.
+      required:
+        - headers
+        - ip
+    SessionAnalyticsStatus:
+      type: string
+      enum:
+        - open
+        - pending
+        - finalized
     ResModelState:
       description: Definition of a Model-State.
       allOf:
@@ -5781,6 +5897,84 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResGetModelComputations"
+        default:
+          description: Unexpected error. See `message` for more details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResError"
+      security:
+        - JwtAuth: []
+  "/api/v2/model/{modelId}/sessions":
+    get:
+      operationId: GetModelSessionsAnalytics
+      tags:
+        - model
+      summary: Get model session analytics in a time range.
+      description: |-
+        Returns session analytics whose **open** timestamp falls in the requested time range.
+        `statistics` is omitted until the session has been finalized.
+
+        Permissions:
+        * `analytics.model.get.*` - __required__.
+      parameters:
+        - name: modelId
+          in: path
+          description: Model ID.
+          required: true
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: |-
+            Order in which to query session analytics items.
+
+            _Default:_ `desc`
+          required: false
+          schema:
+            $ref: "#/components/schemas/QueryOrder"
+        - name: timestamp_from
+          in: query
+          description: |-
+            Open timestamp to query from.
+
+            _Default:_ `0`
+          required: false
+          schema:
+            $ref: "#/components/schemas/DateTimeMs"
+        - name: timestamp_to
+          in: query
+          description: |-
+            Open timestamp to query to.
+
+            _Default:_ `infinity`
+          required: false
+          schema:
+            $ref: "#/components/schemas/DateTimeMs"
+        - name: limit
+          in: query
+          description: |-
+            How many items to return at most.
+
+            _Default:_ `100`
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Continuation token for pagination.
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResGetModelSessionsAnalytics"
         default:
           description: Unexpected error. See `message` for more details.
           content:
