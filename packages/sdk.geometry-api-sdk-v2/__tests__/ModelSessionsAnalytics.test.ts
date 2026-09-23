@@ -42,12 +42,14 @@ type SessionPhase = {
     }
 );
 
+// Query bounds are DateTimeMs: 17 digits. Ticket expiry uses config.now(), which is 14.
 function dateTimeMs(diffSeconds?: number): string {
     const currentTime = new Date();
     if (diffSeconds) currentTime.setTime(currentTime.getTime() + diffSeconds * 1000);
     return currentTime.toISOString().replace(/\D/g, '').slice(0, 17);
 }
 
+// The revealed session id, or the only '<redacted>' row when the id is hidden. Any other count throws.
 function soleSession(sessions: ResModelSession[], knownSessionId: string): ResModelSession {
     const revealed = sessions.filter((row) => row.id === knownSessionId);
     if (revealed.length === 1) {
@@ -65,6 +67,7 @@ function soleSession(sessions: ResModelSession[], knownSessionId: string): ResMo
     );
 }
 
+// Map the row to open, pending, or finalized. A broken phase throws. The test calls this after polling, so that throw fails once.
 function readSessionPhase(row: ResModelSession, knownSessionId: string): SessionPhase {
     if (!DATE_TIME_MS.test(row.openedAt)) {
         throw new Error(`invalid openedAt: ${row.openedAt}`);
@@ -161,12 +164,14 @@ function readSessionPhase(row: ResModelSession, knownSessionId: string): Session
     }
 }
 
+// Charge ids may be absent. A present id must be non-empty and must not be the 'no-charge' sentinel.
 function expectChargeId(id: string | undefined): void {
     if (id === undefined) return;
     expect(id).not.toBe(NO_CHARGE);
     expect(id.length).toBeGreaterThan(0);
 }
 
+// request may be absent. When present, every header name is on the allow-list and the IP ends in '.X' or ':X'.
 function expectAnalyticsRequest(request: ResModelSessionRequest | undefined): void {
     if (!request) return;
     for (const name of Object.keys(request.headers)) {
@@ -175,6 +180,7 @@ function expectAnalyticsRequest(request: ResModelSessionRequest | undefined): vo
     expect(request.ip.endsWith('.X') || request.ip.endsWith(':X')).toBe(true);
 }
 
+// Retry up to 8 times, 1s apart, while load or accept throws. accept checks that the row is listed. Phase checks stay outside.
 async function untilRow<T>(load: () => Promise<T>, accept: (value: T) => void): Promise<T> {
     for (let attempt = 0; attempt < 8; attempt++) {
         try {
@@ -189,6 +195,7 @@ async function untilRow<T>(load: () => Promise<T>, accept: (value: T) => void): 
     throw new Error('analytics row did not appear');
 }
 
+// Close at most once. The flag flips only after closeSession resolves, so a failed close is tried again from finally.
 async function closeOnce(
     config: Configuration,
     sessionId: string,
@@ -200,10 +207,12 @@ async function closeOnce(
 }
 
 test('model session analytics', async () => {
+    // Analytics reads use the model JWT. Opening and closing the session use the ticket, with no access token.
     const modelConfig = new Configuration({ basePath, accessToken: jwtModel });
     const config = new Configuration({ basePath });
     const modelApi = new ModelApi(modelConfig);
 
+    // The list filters on open time. Sample the start before the session exists, and the end after it does.
     const from = dateTimeMs(-60);
     const ticket = await createTicket();
     const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
@@ -211,13 +220,14 @@ test('model session analytics', async () => {
     const closed = { closed: false };
 
     try {
+        // Poll until this session is listed. A listed row that is not open fails the checks below. It is not retried.
         const openPage = await untilRow(
             () => modelApi.getModelSessionsAnalytics(modelId, QueryOrder.DESC, from, to, 20),
             (page) => soleSession(page.sessions, sessionId)
         );
         expect(openPage.version).toEqual(expect.any(String));
-        expect(openPage!.pagination.limit).toBe(20);
-        expect(Array.isArray(openPage!.sessions)).toBe(true);
+        expect(openPage.pagination.limit).toBe(20);
+        expect(Array.isArray(openPage.sessions)).toBe(true);
 
         const openPhase = readSessionPhase(soleSession(openPage.sessions, sessionId), sessionId);
         expect(openPhase.phase).toBe('open');
@@ -230,8 +240,10 @@ test('model session analytics', async () => {
         expectChargeId(openPhase.chargeOrgId);
         expectAnalyticsRequest(openPhase.request);
 
+        // Close the session.
         await closeOnce(config, sessionId, closed);
 
+        // Poll until the same session is listed again.
         const pendingPage = await untilRow(
             () => modelApi.getModelSessionsAnalytics(modelId, QueryOrder.DESC, from, to, 20),
             (page) => soleSession(page.sessions, sessionId)
@@ -245,6 +257,7 @@ test('model session analytics', async () => {
         expectChargeId(pendingPhase.chargeOrgId);
         expectAnalyticsRequest(pendingPhase.request);
     } finally {
+        // Close the session if an assertion failed before the close above.
         await closeOnce(config, sessionId, closed);
     }
 });
