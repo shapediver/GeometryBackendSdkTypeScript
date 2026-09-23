@@ -200,10 +200,12 @@ async function closeOnce(
 }
 
 test('model session analytics', async () => {
+    // Analytics reads use the model JWT. Opening and closing the session use the ticket, with no access token.
     const modelConfig = new Configuration({ basePath, accessToken: jwtModel });
     const config = new Configuration({ basePath });
     const modelApi = new ModelApi(modelConfig);
 
+    // The list filters on open time. Sample the start before the session exists, and the end after it does.
     const from = dateTimeMs(-60);
     const ticket = await createTicket();
     const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
@@ -211,13 +213,14 @@ test('model session analytics', async () => {
     const closed = { closed: false };
 
     try {
+        // Poll until this session is listed. A listed row that is not open fails the checks below. It is not retried.
         const openPage = await untilRow(
             () => modelApi.getModelSessionsAnalytics(modelId, QueryOrder.DESC, from, to, 20),
             (page) => soleSession(page.sessions, sessionId)
         );
         expect(openPage.version).toEqual(expect.any(String));
-        expect(openPage!.pagination.limit).toBe(20);
-        expect(Array.isArray(openPage!.sessions)).toBe(true);
+        expect(openPage.pagination.limit).toBe(20);
+        expect(Array.isArray(openPage.sessions)).toBe(true);
 
         const openPhase = readSessionPhase(soleSession(openPage.sessions, sessionId), sessionId);
         expect(openPhase.phase).toBe('open');
@@ -230,8 +233,10 @@ test('model session analytics', async () => {
         expectChargeId(openPhase.chargeOrgId);
         expectAnalyticsRequest(openPhase.request);
 
+        // Close the session.
         await closeOnce(config, sessionId, closed);
 
+        // Poll until the same session is listed again.
         const pendingPage = await untilRow(
             () => modelApi.getModelSessionsAnalytics(modelId, QueryOrder.DESC, from, to, 20),
             (page) => soleSession(page.sessions, sessionId)
@@ -245,6 +250,7 @@ test('model session analytics', async () => {
         expectChargeId(pendingPhase.chargeOrgId);
         expectAnalyticsRequest(pendingPhase.request);
     } finally {
+        // Close the session if an assertion failed before the close above.
         await closeOnce(config, sessionId, closed);
     }
 });
