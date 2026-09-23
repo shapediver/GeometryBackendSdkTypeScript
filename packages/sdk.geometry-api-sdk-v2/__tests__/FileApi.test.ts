@@ -75,6 +75,10 @@ test('file parameter', async () => {
     const resList = (await new FileApi(modelConfig).listFiles(sessionId, fileParams[0].id));
     expect(resList.list.file.length).toBeGreaterThan(0);
 
+    const listedFile = resList.list.file.find((item) => item.id === file.id);
+    expect(listedFile?.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(Number.isNaN(Date.parse(listedFile!.lastModified!))).toBe(false);
+
     // Delete the uploaded file.
     await new FileApi(modelConfig).deleteFile(sessionId, fileParams[0].id, file.id);
 
