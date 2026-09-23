@@ -1,0 +1,382 @@
+import {
+    Configuration,
+    ModelApi,
+    QueryComputationStatisticsStatus,
+    QueryOrder,
+    ReqCustomization,
+    ResModelComputation,
+    ResModelSession,
+    ResModelSessionRequest,
+    ResModelSessionStatistics,
+    SessionAnalyticsStatus,
+    SessionApi,
+    UtilsApi,
+} from '../src';
+import { basePath, createTicket, jwtModel, modelId } from './config';
+
+const DATE_TIME_MS = /^\d{17}$/;
+const NO_CHARGE = 'no-charge';
+const ALLOWED_ANALYTICS_HEADERS = [
+    'origin',
+    'referer',
+    'user-agent',
+    'x-shapediver-builddate',
+    'x-shapediver-buildversion',
+    'x-shapediver-origin',
+    'x-shapediver-useragent',
+] as const;
+
+type SessionIdView =
+    | { exposure: 'redacted' }
+    | { exposure: 'revealed'; id: string };
+
+type SessionPhase = {
+    openedAt: string;
+    chargeUserId?: string;
+    chargeOrgId?: string;
+    request?: ResModelSessionRequest;
+} & (
+    | { phase: 'open'; id: SessionIdView; closedAt: null; statistics: undefined }
+    | { phase: 'pending'; id: { exposure: 'revealed'; id: string }; closedAt: string | null; statistics: undefined }
+    | {
+        phase: 'finalized';
+        id: { exposure: 'revealed'; id: string };
+        closedAt: string;
+        statistics: ResModelSessionStatistics;
+    }
+);
+
+type ComputationSessionId =
+    | { exposure: 'omitted' }
+    | SessionIdView;
+
+type ComputationAttribution = {
+    sessionId: ComputationSessionId;
+    chargeUserId?: string;
+    chargeOrgId?: string;
+};
+
+function dateTimeMs(diffSeconds?: number): string {
+    const currentTime = new Date();
+    if (diffSeconds) currentTime.setTime(currentTime.getTime() + diffSeconds * 1000);
+    return currentTime.toISOString().replace(/\D/g, '').slice(0, 17);
+}
+
+function soleSession(sessions: ResModelSession[], knownSessionId: string): ResModelSession {
+    const revealed = sessions.filter((row) => row.id === knownSessionId);
+    if (revealed.length === 1) {
+        return revealed[0];
+    }
+    if (revealed.length > 1) {
+        throw new Error(`multiple analytics rows for session ${knownSessionId}`);
+    }
+    const redacted = sessions.filter((row) => row.id === '<redacted>');
+    if (redacted.length === 1) {
+        return redacted[0];
+    }
+    throw new Error(
+        `expected one analytics row for session ${knownSessionId}, found ${revealed.length} revealed and ${redacted.length} redacted`
+    );
+}
+
+function readSessionPhase(row: ResModelSession, knownSessionId: string): SessionPhase {
+    if (!DATE_TIME_MS.test(row.openedAt)) {
+        throw new Error(`invalid openedAt: ${row.openedAt}`);
+    }
+
+    let idView: SessionIdView;
+    if (row.id === '<redacted>') {
+        idView = { exposure: 'redacted' };
+    } else if (row.id === knownSessionId) {
+        idView = { exposure: 'revealed', id: row.id };
+    } else {
+        throw new Error(`foreign session id: ${row.id}`);
+    }
+
+    const base = {
+        openedAt: row.openedAt,
+        ...(row.chargeUserId !== undefined ? { chargeUserId: row.chargeUserId } : {}),
+        ...(row.chargeOrgId !== undefined ? { chargeOrgId: row.chargeOrgId } : {}),
+        ...(row.request !== undefined ? { request: row.request } : {}),
+    };
+
+    switch (row.status) {
+        case SessionAnalyticsStatus.OPEN: {
+            if (row.closedAt !== null) {
+                throw new Error('open session must have closedAt null');
+            }
+            if (row.statistics !== undefined) {
+                throw new Error('open session must not have statistics');
+            }
+            return {
+                ...base,
+                phase: 'open',
+                id: idView,
+                closedAt: null,
+                statistics: undefined,
+            };
+        }
+        case SessionAnalyticsStatus.PENDING: {
+            if (row.statistics !== undefined) {
+                throw new Error('pending session must not have statistics');
+            }
+            if (idView.exposure !== 'revealed' || idView.id !== knownSessionId) {
+                throw new Error('pending session must reveal id');
+            }
+            if (row.closedAt !== null && !DATE_TIME_MS.test(row.closedAt)) {
+                throw new Error(`invalid pending closedAt: ${row.closedAt}`);
+            }
+            return {
+                ...base,
+                phase: 'pending',
+                id: { exposure: 'revealed', id: knownSessionId },
+                closedAt: row.closedAt,
+                statistics: undefined,
+            };
+        }
+        case SessionAnalyticsStatus.FINALIZED: {
+            if (idView.exposure !== 'revealed' || idView.id !== knownSessionId) {
+                throw new Error('finalized session must reveal id');
+            }
+            if (row.closedAt === null || !DATE_TIME_MS.test(row.closedAt)) {
+                throw new Error(`invalid finalized closedAt: ${row.closedAt}`);
+            }
+            if (row.statistics === undefined) {
+                throw new Error('finalized session must have statistics');
+            }
+            const {
+                billableCount,
+                duration,
+                exportsCount,
+                interactionsCount,
+                combinedCount,
+            } = row.statistics;
+            if (
+                typeof billableCount !== 'number'
+                || typeof duration !== 'number'
+                || typeof exportsCount !== 'number'
+                || typeof interactionsCount !== 'number'
+                || typeof combinedCount !== 'number'
+            ) {
+                throw new Error('finalized session statistics incomplete');
+            }
+            return {
+                ...base,
+                phase: 'finalized',
+                id: { exposure: 'revealed', id: knownSessionId },
+                closedAt: row.closedAt,
+                statistics: row.statistics,
+            };
+        }
+        default: {
+            const _exhaustive: never = row.status;
+            throw new Error(`unknown session status: ${_exhaustive}`);
+        }
+    }
+}
+
+function soleAttributedComputation(
+    rows: ResModelComputation[],
+    knownSessionId: string,
+): ResModelComputation {
+    const revealed = rows.filter((row) => row.sessionId === knownSessionId);
+    if (revealed.length === 1) {
+        return revealed[0];
+    }
+    if (revealed.length > 1) {
+        throw new Error(`multiple computation rows for session ${knownSessionId}`);
+    }
+    const redacted = rows.filter((row) => row.sessionId === '<redacted>');
+    if (redacted.length === 1) {
+        return redacted[0];
+    }
+    throw new Error(
+        `expected one computation row for session ${knownSessionId}, found ${revealed.length} revealed and ${redacted.length} redacted`
+    );
+}
+
+function readComputationAttribution(
+    row: ResModelComputation,
+    knownSessionId: string,
+): ComputationAttribution {
+    let sessionId: ComputationSessionId;
+    if (row.sessionId === undefined) {
+        sessionId = { exposure: 'omitted' };
+    } else if (row.sessionId === '<redacted>') {
+        sessionId = { exposure: 'redacted' };
+    } else if (row.sessionId === knownSessionId) {
+        sessionId = { exposure: 'revealed', id: row.sessionId };
+    } else {
+        throw new Error(`foreign computation sessionId: ${row.sessionId}`);
+    }
+
+    const attribution: ComputationAttribution = { sessionId };
+    if (row.chargeUserId !== undefined) {
+        if (row.chargeUserId === NO_CHARGE) {
+            throw new Error('no-charge chargeUserId');
+        }
+        attribution.chargeUserId = row.chargeUserId;
+    }
+    if (row.chargeOrgId !== undefined) {
+        if (row.chargeOrgId === NO_CHARGE) {
+            throw new Error('no-charge chargeOrgId');
+        }
+        attribution.chargeOrgId = row.chargeOrgId;
+    }
+    return attribution;
+}
+
+function expectChargeId(id: string | undefined): void {
+    if (id === undefined) return;
+    expect(id).not.toBe(NO_CHARGE);
+    expect(id.length).toBeGreaterThan(0);
+}
+
+function expectAnalyticsRequest(request: ResModelSessionRequest | undefined): void {
+    if (!request) return;
+    for (const name of Object.keys(request.headers)) {
+        expect(ALLOWED_ANALYTICS_HEADERS).toContain(name);
+    }
+    expect(request.ip.endsWith('.X') || request.ip.endsWith(':X')).toBe(true);
+}
+
+async function untilRow<T>(load: () => Promise<T>, accept: (value: T) => void): Promise<T> {
+    for (let attempt = 0; attempt < 8; attempt++) {
+        try {
+            const value = await load();
+            accept(value);
+            return value;
+        } catch (err) {
+            if (attempt === 7) throw err;
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+    }
+    throw new Error('analytics row did not appear');
+}
+
+async function closeOnce(
+    config: Configuration,
+    sessionId: string,
+    state: { closed: boolean }
+): Promise<void> {
+    if (state.closed) return;
+    await new SessionApi(config).closeSession(sessionId);
+    state.closed = true;
+}
+
+test('model session analytics', async () => {
+    const modelConfig = new Configuration({ basePath, accessToken: jwtModel });
+    const config = new Configuration({ basePath });
+    const modelApi = new ModelApi(modelConfig);
+
+    const from = dateTimeMs(-60);
+    const ticket = await createTicket();
+    const sessionId = (await new SessionApi(config).createSessionByTicket(ticket)).sessionId;
+    const to = dateTimeMs(60);
+    const closed = { closed: false };
+
+    try {
+        const openPage = await untilRow(
+            () => modelApi.getModelSessionsAnalytics(modelId, QueryOrder.DESC, from, to, 20),
+            (page) => soleSession(page.sessions, sessionId)
+        );
+        expect(openPage.version).toEqual(expect.any(String));
+        expect(openPage!.pagination.limit).toBe(20);
+        expect(Array.isArray(openPage!.sessions)).toBe(true);
+
+        const openPhase = readSessionPhase(soleSession(openPage.sessions, sessionId), sessionId);
+        expect(openPhase.phase).toBe('open');
+        expect(openPhase.closedAt).toBeNull();
+        expect(openPhase.statistics).toBeUndefined();
+        expect(openPhase.openedAt).toMatch(DATE_TIME_MS);
+        expect(['redacted', 'revealed']).toContain(openPhase.id.exposure);
+        if (openPhase.id.exposure === 'revealed') expect(openPhase.id.id).toBe(sessionId);
+        expectChargeId(openPhase.chargeUserId);
+        expectChargeId(openPhase.chargeOrgId);
+        expectAnalyticsRequest(openPhase.request);
+
+        await closeOnce(config, sessionId, closed);
+
+        const pendingPage = await untilRow(
+            () => modelApi.getModelSessionsAnalytics(modelId, QueryOrder.DESC, from, to, 20),
+            (page) => soleSession(page.sessions, sessionId)
+        );
+        const pendingPhase = readSessionPhase(soleSession(pendingPage.sessions, sessionId), sessionId);
+        expect(pendingPhase.phase).toBe('pending');
+        expect(pendingPhase.statistics).toBeUndefined();
+        expect(pendingPhase.id).toEqual({ exposure: 'revealed', id: sessionId });
+        if (pendingPhase.closedAt !== null) expect(pendingPhase.closedAt).toMatch(DATE_TIME_MS);
+        expectChargeId(pendingPhase.chargeUserId);
+        expectChargeId(pendingPhase.chargeOrgId);
+        expectAnalyticsRequest(pendingPhase.request);
+    } finally {
+        await closeOnce(config, sessionId, closed);
+    }
+});
+
+test('computation session attribution', async () => {
+    const modelConfig = new Configuration({ basePath, accessToken: jwtModel });
+    const config = new Configuration({ basePath });
+    const modelApi = new ModelApi(modelConfig);
+
+    const ticket = await createTicket();
+    const resSession = await new SessionApi(config).createSessionByTicket(ticket);
+    const sessionId = resSession.sessionId;
+    const closed = { closed: false };
+
+    try {
+        const output = Object.values(resSession.outputs!)[0];
+        const reqComp: ReqCustomization = {};
+        for (const paramId of output.dependency) {
+            const defval = resSession.parameters![paramId].defval;
+            if (defval) reqComp[paramId] = defval;
+        }
+
+        const from = dateTimeMs(-60);
+        await new UtilsApi(config).submitAndWaitForOutput(sessionId, reqComp, -1);
+        const to = dateTimeMs(60);
+        const livePage = await untilRow(
+            () => modelApi.getModelComputations(
+                modelId,
+                QueryOrder.DESC,
+                from,
+                to,
+                QueryComputationStatisticsStatus.SUCCESS,
+                undefined,
+                20
+            ),
+            (page) => soleAttributedComputation(page.computations, sessionId)
+        );
+        const liveRow = soleAttributedComputation(livePage.computations, sessionId);
+        const liveAttr = readComputationAttribution(liveRow, sessionId);
+        expect(liveAttr.sessionId.exposure).not.toBe('omitted');
+        expect(['redacted', 'revealed']).toContain(liveAttr.sessionId.exposure);
+        if (liveAttr.sessionId.exposure === 'revealed') {
+            expect(liveAttr.sessionId.id).toBe(sessionId);
+        }
+        expectChargeId(liveAttr.chargeUserId);
+        expectChargeId(liveAttr.chargeOrgId);
+
+        await closeOnce(config, sessionId, closed);
+
+        const closedPage = await untilRow(
+            () => modelApi.getModelComputations(
+                modelId,
+                QueryOrder.DESC,
+                from,
+                to,
+                QueryComputationStatisticsStatus.SUCCESS,
+                undefined,
+                20
+            ),
+            (page) => soleAttributedComputation(page.computations, sessionId)
+        );
+        const closedRow = soleAttributedComputation(closedPage.computations, sessionId);
+        const closedAttr = readComputationAttribution(closedRow, sessionId);
+        expect(closedAttr.sessionId).toEqual({ exposure: 'revealed', id: sessionId });
+        expectChargeId(closedAttr.chargeUserId);
+        expectChargeId(closedAttr.chargeOrgId);
+    } finally {
+        await closeOnce(config, sessionId, closed);
+    }
+});
