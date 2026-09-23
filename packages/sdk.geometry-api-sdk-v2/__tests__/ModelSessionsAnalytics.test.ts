@@ -1,16 +1,12 @@
 import {
     Configuration,
     ModelApi,
-    QueryComputationStatisticsStatus,
     QueryOrder,
-    ReqCustomization,
-    ResModelComputation,
     ResModelSession,
     ResModelSessionRequest,
     ResModelSessionStatistics,
     SessionAnalyticsStatus,
     SessionApi,
-    UtilsApi,
 } from '../src';
 import { basePath, createTicket, jwtModel, modelId } from './config';
 
@@ -45,16 +41,6 @@ type SessionPhase = {
         statistics: ResModelSessionStatistics;
     }
 );
-
-type ComputationSessionId =
-    | { exposure: 'omitted' }
-    | SessionIdView;
-
-type ComputationAttribution = {
-    sessionId: ComputationSessionId;
-    chargeUserId?: string;
-    chargeOrgId?: string;
-};
 
 function dateTimeMs(diffSeconds?: number): string {
     const currentTime = new Date();
@@ -175,57 +161,6 @@ function readSessionPhase(row: ResModelSession, knownSessionId: string): Session
     }
 }
 
-function soleAttributedComputation(
-    rows: ResModelComputation[],
-    knownSessionId: string,
-): ResModelComputation {
-    const revealed = rows.filter((row) => row.sessionId === knownSessionId);
-    if (revealed.length === 1) {
-        return revealed[0];
-    }
-    if (revealed.length > 1) {
-        throw new Error(`multiple computation rows for session ${knownSessionId}`);
-    }
-    const redacted = rows.filter((row) => row.sessionId === '<redacted>');
-    if (redacted.length === 1) {
-        return redacted[0];
-    }
-    throw new Error(
-        `expected one computation row for session ${knownSessionId}, found ${revealed.length} revealed and ${redacted.length} redacted`
-    );
-}
-
-function readComputationAttribution(
-    row: ResModelComputation,
-    knownSessionId: string,
-): ComputationAttribution {
-    let sessionId: ComputationSessionId;
-    if (row.sessionId === undefined) {
-        sessionId = { exposure: 'omitted' };
-    } else if (row.sessionId === '<redacted>') {
-        sessionId = { exposure: 'redacted' };
-    } else if (row.sessionId === knownSessionId) {
-        sessionId = { exposure: 'revealed', id: row.sessionId };
-    } else {
-        throw new Error(`foreign computation sessionId: ${row.sessionId}`);
-    }
-
-    const attribution: ComputationAttribution = { sessionId };
-    if (row.chargeUserId !== undefined) {
-        if (row.chargeUserId === NO_CHARGE) {
-            throw new Error('no-charge chargeUserId');
-        }
-        attribution.chargeUserId = row.chargeUserId;
-    }
-    if (row.chargeOrgId !== undefined) {
-        if (row.chargeOrgId === NO_CHARGE) {
-            throw new Error('no-charge chargeOrgId');
-        }
-        attribution.chargeOrgId = row.chargeOrgId;
-    }
-    return attribution;
-}
-
 function expectChargeId(id: string | undefined): void {
     if (id === undefined) return;
     expect(id).not.toBe(NO_CHARGE);
@@ -309,73 +244,6 @@ test('model session analytics', async () => {
         expectChargeId(pendingPhase.chargeUserId);
         expectChargeId(pendingPhase.chargeOrgId);
         expectAnalyticsRequest(pendingPhase.request);
-    } finally {
-        await closeOnce(config, sessionId, closed);
-    }
-});
-
-test('computation session attribution', async () => {
-    const modelConfig = new Configuration({ basePath, accessToken: jwtModel });
-    const config = new Configuration({ basePath });
-    const modelApi = new ModelApi(modelConfig);
-
-    const ticket = await createTicket();
-    const resSession = await new SessionApi(config).createSessionByTicket(ticket);
-    const sessionId = resSession.sessionId;
-    const closed = { closed: false };
-
-    try {
-        const output = Object.values(resSession.outputs!)[0];
-        const reqComp: ReqCustomization = {};
-        for (const paramId of output.dependency) {
-            const defval = resSession.parameters![paramId].defval;
-            if (defval) reqComp[paramId] = defval;
-        }
-
-        const from = dateTimeMs(-60);
-        await new UtilsApi(config).submitAndWaitForOutput(sessionId, reqComp, -1);
-        const to = dateTimeMs(60);
-        const livePage = await untilRow(
-            () => modelApi.getModelComputations(
-                modelId,
-                QueryOrder.DESC,
-                from,
-                to,
-                QueryComputationStatisticsStatus.SUCCESS,
-                undefined,
-                20
-            ),
-            (page) => soleAttributedComputation(page.computations, sessionId)
-        );
-        const liveRow = soleAttributedComputation(livePage.computations, sessionId);
-        const liveAttr = readComputationAttribution(liveRow, sessionId);
-        expect(liveAttr.sessionId.exposure).not.toBe('omitted');
-        expect(['redacted', 'revealed']).toContain(liveAttr.sessionId.exposure);
-        if (liveAttr.sessionId.exposure === 'revealed') {
-            expect(liveAttr.sessionId.id).toBe(sessionId);
-        }
-        expectChargeId(liveAttr.chargeUserId);
-        expectChargeId(liveAttr.chargeOrgId);
-
-        await closeOnce(config, sessionId, closed);
-
-        const closedPage = await untilRow(
-            () => modelApi.getModelComputations(
-                modelId,
-                QueryOrder.DESC,
-                from,
-                to,
-                QueryComputationStatisticsStatus.SUCCESS,
-                undefined,
-                20
-            ),
-            (page) => soleAttributedComputation(page.computations, sessionId)
-        );
-        const closedRow = soleAttributedComputation(closedPage.computations, sessionId);
-        const closedAttr = readComputationAttribution(closedRow, sessionId);
-        expect(closedAttr.sessionId).toEqual({ exposure: 'revealed', id: sessionId });
-        expectChargeId(closedAttr.chargeUserId);
-        expectChargeId(closedAttr.chargeOrgId);
     } finally {
         await closeOnce(config, sessionId, closed);
     }

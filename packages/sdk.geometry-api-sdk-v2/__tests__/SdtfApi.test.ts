@@ -45,7 +45,7 @@ test('sdtf', async () => {
     const resListNew = (await new SdtfApi(modelConfig).listSdtfs(sessionId, namespace));
     expect(resListNew.list.sdtf.length).toBeGreaterThan(0);
 
-    const listedSdtf = resListNew.list.sdtf.find((item) => item.id === sdtf.id);
+    const listedSdtf = resListNew.list.sdtf.find((item) => item.id === sdtf.id.split('/').pop());
     expect(listedSdtf?.lastModified).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
     expect(Number.isNaN(Date.parse(listedSdtf!.lastModified!))).toBe(false);
 
