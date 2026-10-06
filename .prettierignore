@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-dev
+dist-prod
+.nx
+.venv
+coverage
+pnpm-lock.yaml
+.husky
+out
+oas_spec.yaml
+packages/sdk.geometry-api-sdk-v2/src/client

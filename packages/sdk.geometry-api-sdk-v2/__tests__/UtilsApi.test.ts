@@ -51,12 +51,9 @@ describe('Fetch response types in Node.js', () => {
     });
 
     test('should return parsed JSON for JSON responses', async () => {
-        await expectBody(
-            JSON.stringify({ hello: 'world' }),
-            (r) => r.json(),
-            expectJsonObject,
-            { 'Content-Type': 'application/json' }
-        );
+        await expectBody(JSON.stringify({ hello: 'world' }), (r) => r.json(), expectJsonObject, {
+            'Content-Type': 'application/json',
+        });
     });
 
     test('should return text for text responses', async () => {
@@ -64,12 +61,9 @@ describe('Fetch response types in Node.js', () => {
     });
 
     test('should return a Blob for binary responses', async () => {
-        await expectBody(
-            new Uint8Array([1, 2, 3]),
-            (r) => r.blob(),
-            expectBlob,
-            { 'Content-Type': 'image/png' }
-        );
+        await expectBody(new Uint8Array([1, 2, 3]), (r) => r.blob(), expectBlob, {
+            'Content-Type': 'image/png',
+        });
     });
 
     test('should reject when parsing invalid JSON', async () => {
@@ -80,7 +74,9 @@ describe('Fetch response types in Node.js', () => {
     });
 
     test('should expose the Fetch response for default handling', async () => {
-        const fetch = jest.fn().mockResolvedValue(new Response('{"hello":"world"}', { status: 200 }));
+        const fetch = jest
+            .fn()
+            .mockResolvedValue(new Response('{"hello":"world"}', { status: 200 }));
         const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
 
         const response = await utilsApi.download(url);
@@ -202,11 +198,10 @@ describe('Fetch request construction', () => {
         const utilsApi = new UtilsApi(new ClientConfig({ fetchApi: fetch }));
         const contentDisposition = 'attachment; filename="asset.txt"';
 
-        await utilsApi.uploadAsset(
-            'https://upload.example.com/asset',
-            'payload',
-            { contentType: 'text/plain', contentDisposition }
-        );
+        await utilsApi.uploadAsset('https://upload.example.com/asset', 'payload', {
+            contentType: 'text/plain',
+            contentDisposition,
+        });
 
         const headers = new Headers(fetch.mock.calls[0][1].headers);
         expect(headers.get('Content-Disposition')).toBe(contentDisposition);
@@ -283,9 +278,7 @@ describe('waitForOutputResult', function () {
 
         // Mock
         const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
-        getCachedOutputs.mockReturnValue(
-            Promise.resolve(resCache)
-        );
+        getCachedOutputs.mockReturnValue(Promise.resolve(resCache));
 
         // @ts-expect-error
         const res = await utilsApi.waitForOutputResult(
@@ -348,9 +341,7 @@ describe('waitForOutputResult', function () {
 
         // Mock
         const getCachedOutputs = jest.spyOn(OutputApi.prototype, 'getCachedOutputs');
-        getCachedOutputs.mockReturnValue(
-            Promise.resolve(resCache)
-        );
+        getCachedOutputs.mockReturnValue(Promise.resolve(resCache));
 
         await expect(
             // @ts-expect-error
@@ -431,9 +422,7 @@ describe('waitForExportResult', function () {
 
         // Mock
         const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
-        getCachedExports.mockReturnValue(
-            Promise.resolve(resCache)
-        );
+        getCachedExports.mockReturnValue(Promise.resolve(resCache));
 
         // @ts-expect-error
         const res = await utilsApi.waitForExportResult(
@@ -478,9 +467,7 @@ describe('waitForExportResult', function () {
 
         // Mock
         const getCachedExports = jest.spyOn(ExportApi.prototype, 'getCachedExports');
-        getCachedExports.mockReturnValue(
-            Promise.resolve(resCache)
-        );
+        getCachedExports.mockReturnValue(Promise.resolve(resCache));
 
         await expect(
             // @ts-expect-error
@@ -827,7 +814,10 @@ describe('disableAuthHeaderForShapeDiverUris', () => {
         expect(disabledHeaders(url)).toContain('Authorization');
     });
 
-    test.each(['not-a-valid:::url', 'https://example.com/some/path'])('keeps Authorization for %s', (url) => {
-        expect(disabledHeaders(url)).not.toContain('Authorization');
-    });
+    test.each(['not-a-valid:::url', 'https://example.com/some/path'])(
+        'keeps Authorization for %s',
+        (url) => {
+            expect(disabledHeaders(url)).not.toContain('Authorization');
+        }
+    );
 });

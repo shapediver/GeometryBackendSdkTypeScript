@@ -23,7 +23,7 @@
     },
     "scripts": {
         "test": "bash ../../scripts/test.sh",
-        "check": "tsc --noEmit",
+        "check": "tsc -p tsconfig.check.json --noEmit",
         "build": "bash ../../scripts/build.sh",
         "build-dep": "bash ../../scripts/build-dep.sh",
         "pre-publish": "bash ../../scripts/pre-publish.sh",
@@ -57,7 +57,6 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "@types/uuid": "10.0.0",
         "jest": "29.7.0",
         "lerna": "9.0.7",
         "typescript": "5.9.3",

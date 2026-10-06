@@ -30,9 +30,9 @@ describe('fetch retry and authorization', () => {
     });
 
     test.each([429, 502])('retryable status should retry until failure (%s)', async (status) => {
-        const fetch = jest.fn().mockResolvedValue(
-            new Response('{}', { status, headers: { 'Retry-After': '0' } })
-        );
+        const fetch = jest
+            .fn()
+            .mockResolvedValue(new Response('{}', { status, headers: { 'Retry-After': '0' } }));
         const api = apiUsingFetch(fetch, 2);
 
         await expect(api.createSessionByTicket('ticket')).rejects.toThrow();
@@ -40,7 +40,8 @@ describe('fetch retry and authorization', () => {
     });
 
     test('retryable status should retry once when the next request succeeds', async () => {
-        const fetch = jest.fn()
+        const fetch = jest
+            .fn()
             .mockResolvedValueOnce(new Response('{}', { status: 502 }))
             .mockResolvedValueOnce(new Response('{}', { status: 200 }));
         const api = apiUsingFetch(fetch, 2);
@@ -55,13 +56,14 @@ describe('fetch retry and authorization', () => {
     ])('uses the fallback delay for %s Retry-After values', async (_, retryAfter) => {
         const headers = retryAfter ? { 'Retry-After': retryAfter } : undefined;
         const fetch = jest.fn().mockResolvedValue(new Response('{}', { status: 429, headers }));
-        const setTimeout = jest
-            .spyOn(global, 'setTimeout')
-            .mockImplementation(((callback: (...args: any[]) => void, delay?: number) => {
-                expect(delay).toBe(60_000);
-                callback();
-                return 0 as unknown as NodeJS.Timeout;
-            }) as typeof global.setTimeout);
+        const setTimeout = jest.spyOn(global, 'setTimeout').mockImplementation(((
+            callback: (...args: any[]) => void,
+            delay?: number
+        ) => {
+            expect(delay).toBe(60_000);
+            callback();
+            return 0 as unknown as NodeJS.Timeout;
+        }) as typeof global.setTimeout);
         const api = apiUsingFetch(fetch, 1);
 
         await expect(api.createSessionByTicket('ticket')).rejects.toThrow();
@@ -85,6 +87,8 @@ describe('fetch retry and authorization', () => {
         const api = new SessionApi(config);
 
         await api.createSessionByTicket('ticket');
-        expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe(`Bearer ${jwt}`);
+        expect(new Headers(fetch.mock.calls[0][1].headers).get('Authorization')).toBe(
+            `Bearer ${jwt}`
+        );
     });
 });

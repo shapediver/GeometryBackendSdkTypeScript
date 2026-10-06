@@ -2,7 +2,7 @@ import { Configuration, ConfigurationParameters } from '../src';
 import { Configuration as ClientConfig } from '../src/client/runtime';
 
 describe('Configuration constructor', () => {
-    const accessToken = async () => 'token';
+    const accessToken = () => Promise.resolve('token');
     const fetchApi = jest.fn();
     const middleware = [{ pre: jest.fn() }];
     const queryParamsStringify = jest.fn(() => 'query=value');

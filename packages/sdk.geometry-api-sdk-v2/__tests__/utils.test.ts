@@ -18,10 +18,12 @@ import {
 
 describe('file helpers', () => {
     test('extracts filename and size from headers', () => {
-        expect(extractFileInfo({
-            'Content-Length': '165030',
-            'Content-Disposition': 'attachment; filename="foobar.txt"',
-        })).toEqual({ filename: 'foobar.txt', size: 165030 });
+        expect(
+            extractFileInfo({
+                'Content-Length': '165030',
+                'Content-Disposition': 'attachment; filename="foobar.txt"',
+            })
+        ).toEqual({ filename: 'foobar.txt', size: 165030 });
     });
 
     test('handles missing headers', () => {
@@ -35,14 +37,20 @@ describe('file helpers', () => {
 });
 
 describe('processError', () => {
-    const body = JSON.stringify({ error: 'SdTextureUrlError', desc: 'Some error', message: 'Could not fetch texture' });
+    const body = JSON.stringify({
+        error: 'SdTextureUrlError',
+        desc: 'Some error',
+        message: 'Could not fetch texture',
+    });
 
     test.each([
         ['string', body],
         ['ArrayBuffer', new TextEncoder().encode(body).buffer],
         ['Blob', new Blob([body])],
     ])('converts a Fetch response with %s error data', async (_, data) => {
-        const result = await processError(new Response(data as BodyInit, { status: 400, statusText: 'Bad Request' }));
+        const result = await processError(
+            new Response(data as BodyInit, { status: 400, statusText: 'Bad Request' })
+        );
         expect(result).toBeInstanceOf(ResponseError);
         expect((result as ResponseError).status).toBe(400);
         expect((result as ResponseError).message).toBe('Could not fetch texture');
@@ -50,7 +58,9 @@ describe('processError', () => {
     });
 
     test('falls back to a generic response error for invalid data', async () => {
-        const result = await processError(new Response('not json', { status: 400, statusText: 'Bad Request' }));
+        const result = await processError(
+            new Response('not json', { status: 400, statusText: 'Bad Request' })
+        );
         expect(result).toBeInstanceOf(ResponseError);
         expect((result as ResponseError).message).toBe('Bad Request');
     });
@@ -71,7 +81,7 @@ describe('processError', () => {
         const response = {
             status: 502,
             statusText: 'Bad Gateway',
-            clone: () => ({ text: async () => 'not valid JSON' }),
+            clone: () => ({ text: () => Promise.resolve('not valid JSON') }),
         } as unknown as Response;
         const result = await processError(
             new ClientResponseError(response, 'Response returned an error code')

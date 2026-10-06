@@ -15,11 +15,11 @@ tokens**, which are handled by the [ShapeDiver Platform](https://www.shapediver.
 obtain **tickets** and **JWT tokens** by:
 
 - using your account on the [ShapeDiver Platform](https://www.shapediver.com/app/) (tickets only),
-    or
+  or
 
 - you can obtain them programmatically using the
-    [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) (both tickets and JWT
-    tokens).
+  [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) (both tickets and JWT
+  tokens).
 
 An SDK for the [ShapeDiver Platform API](https://app.shapediver.com/api/documentation) will be
 released soon.
@@ -28,10 +28,10 @@ When obtaining a ticket for your model from the ShapeDiver Platform, please be a
 need a
 
 - _ticket for direct embedding_ in case you are accessing the Geometry Backend API from a web
-    browser, or a
+  browser, or a
 
 - _ticket for backend access_ in case you are accessing the Geometry Backend API from an arbitrary
-    client application that is not a web browser.
+  client application that is not a web browser.
 
 > :warning: It is important to note that some endpoint calls require a **backend JWT** to work.
 > However, JWTs with backend access are never provided to users and, therefore, cannot be utilized.

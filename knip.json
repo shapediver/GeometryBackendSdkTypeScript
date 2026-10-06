@@ -1,0 +1,18 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "ignore": ["packages/sdk.geometry-api-sdk-v2/src/client/**"],
+    "ignoreDependencies": [
+        "json",
+        "lerna",
+        "npm-check-updates",
+        "ts-loader",
+        "webpack",
+        "webpack-cli",
+        "webpack-dev-server"
+    ],
+    "workspaces": {
+        ".": {
+            "entry": ["webpack.*.js"]
+        }
+    }
+}

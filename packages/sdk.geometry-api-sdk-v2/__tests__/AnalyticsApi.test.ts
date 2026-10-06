@@ -9,8 +9,7 @@ test('credit metrics', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const sessionId = (await new SessionApi(modelConfig).createSessionByTicket(ticket))
-        .sessionId;
+    const sessionId = (await new SessionApi(modelConfig).createSessionByTicket(ticket)).sessionId;
 
     // Fetch credit metrics within a specific time range.
     const reqCredits: ReqCreditMetrics = {
@@ -22,7 +21,7 @@ test('credit metrics', async () => {
             },
         ],
     };
-    const resCredits = (await new AnalyticsApi(modelConfig).getCreditMetrics(reqCredits));
+    const resCredits = await new AnalyticsApi(modelConfig).getCreditMetrics(reqCredits);
     expect(resCredits.analytics.creditMetrics.length).toBeGreaterThan(0);
 
     // Close the session.
@@ -35,7 +34,7 @@ test('user credit metrics', async () => {
         accessToken: jwtBackend,
     });
 
-    const resCredits = (await new AnalyticsApi(backendConfig).getUserCreditMetrics('202407'));
+    const resCredits = await new AnalyticsApi(backendConfig).getUserCreditMetrics('202407');
     expect(resCredits.analytics.creditMetrics.length).toBeGreaterThan(0);
 });
 
@@ -45,8 +44,9 @@ test('organization credit metrics', async () => {
         accessToken: jwtBackend,
     });
 
-    const resCredits =
-        await new AnalyticsApi(backendConfig).getOrganizationCreditMetrics('202407')
+    const resCredits = await new AnalyticsApi(backendConfig).getOrganizationCreditMetrics(
+        '202407'
+    );
     expect(resCredits.analytics.creditMetrics.length).toBeGreaterThan(0);
 });
 
@@ -57,8 +57,10 @@ test('model user credit metrics', async () => {
     });
 
     const userId = '92a8410b-6496-4b86-8c3f-1014d59f7fa3';
-    const resCredits =
-        await new AnalyticsApi(backendConfig).getModelUserCreditMetrics('202407', userId)
+    const resCredits = await new AnalyticsApi(backendConfig).getModelUserCreditMetrics(
+        '202407',
+        userId
+    );
     expect(resCredits.analytics.creditMetrics.length).toBeGreaterThan(0);
 });
 
@@ -69,7 +71,9 @@ test('model organization credit metrics', async () => {
     });
 
     const orgId = 'a785380e-183d-11ef-926a-f3f7d2b9f407';
-    const resCredits =
-        await new AnalyticsApi(backendConfig).getModelOrganizationCreditMetrics('202407', orgId)
+    const resCredits = await new AnalyticsApi(backendConfig).getModelOrganizationCreditMetrics(
+        '202407',
+        orgId
+    );
     expect(resCredits.analytics.creditMetrics.length).toBeGreaterThan(0);
 });

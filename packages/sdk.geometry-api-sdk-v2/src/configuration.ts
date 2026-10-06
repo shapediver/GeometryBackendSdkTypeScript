@@ -5,8 +5,10 @@ import {
 
 const SDK_VERSION = '4.3.0'; // WARNING: This value is updated automatically!
 
-export interface ConfigurationParameters
-    extends Pick<ClientConfigParams, 'accessToken' | 'basePath' | 'fetchApi' | 'headers' | 'middleware' | 'queryParamsStringify'> {
+export interface ConfigurationParameters extends Pick<
+    ClientConfigParams,
+    'accessToken' | 'basePath' | 'fetchApi' | 'headers' | 'middleware' | 'queryParamsStringify'
+> {
     /**
      * Specifies the maximum number of automatic HTTP retries for failed requests.
      *
@@ -34,7 +36,7 @@ export class Configuration extends ClientConfig {
 
 /** Converts an existing SDK configuration into constructor parameters. */
 function configurationParameters(
-    param: ConfigurationParameters | ClientConfig,
+    param: ConfigurationParameters | ClientConfig
 ): ConfigurationParameters {
     if (!(param instanceof ClientConfig)) return param;
 
@@ -49,14 +51,12 @@ function configurationParameters(
     };
 }
 
-function createHeaders(
-    headers?: ClientConfigParams['headers'],
-): Record<string, string> {
+function createHeaders(headers?: ClientConfigParams['headers']): Record<string, string> {
     const result: Record<string, string> = {};
     const normalizedHeaders = new Headers(headers);
     const userAgent = `sd-sdk/typescript/${SDK_VERSION}`;
 
-    if (detectRuntime() === "node" && !normalizedHeaders.has('User-Agent')) {
+    if (detectRuntime() === 'node' && !normalizedHeaders.has('User-Agent')) {
         // Overwrite User-Agent on Node.js applications.
         normalizedHeaders.set('User-Agent', userAgent);
     } else if (!normalizedHeaders.has('X-ShapeDiver-UserAgent')) {
@@ -71,7 +71,7 @@ function createHeaders(
     return result;
 }
 
-function detectRuntime(): "node" | "browser" | "unknown" {
+function detectRuntime(): 'node' | 'browser' | 'unknown' {
     const global = globalThis as typeof globalThis & {
         process?: {
             versions?: {
@@ -84,21 +84,18 @@ function detectRuntime(): "node" | "browser" | "unknown" {
         navigator?: unknown;
     };
 
-    if (typeof global.process?.versions?.node === "string") {
-        return "node";
+    if (typeof global.process?.versions?.node === 'string') {
+        return 'node';
     }
 
     const isBrowserMainThread =
-        global.window === globalThis &&
-        typeof global.document !== "undefined";
+        global.window === globalThis && typeof global.document !== 'undefined';
 
-    const isBrowserWorker =
-        global.self === globalThis &&
-        typeof global.navigator !== "undefined";
+    const isBrowserWorker = global.self === globalThis && typeof global.navigator !== 'undefined';
 
     if (isBrowserMainThread || isBrowserWorker) {
-        return "browser";
+        return 'browser';
     }
 
-    return "unknown";
+    return 'unknown';
 }

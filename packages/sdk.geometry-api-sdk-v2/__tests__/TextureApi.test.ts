@@ -9,11 +9,10 @@ test('textures', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const sessionId = (await new SessionApi(modelConfig).createSessionByTicket(ticket))
-        .sessionId;
+    const sessionId = (await new SessionApi(modelConfig).createSessionByTicket(ticket)).sessionId;
 
     // List all model textures.
-    const resList = (await new TextureApi(modelConfig).listTextures(sessionId));
+    const resList = await new TextureApi(modelConfig).listTextures(sessionId);
     expect(resList.list.texture).toBeDefined();
 
     // Close the session.
