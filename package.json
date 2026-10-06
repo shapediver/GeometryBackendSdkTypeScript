@@ -20,9 +20,9 @@
         "format:check": "prettier --check .",
         "knip": "knip --treat-config-hints-as-errors",
         "check:static": "npm run typecheck && npm run lint && npm run format:check && npm run knip",
-        "test": "npm run check-npm-version && lerna run test",
-        "build": "npm run check-npm-version && lerna run build",
-        "build-dep": "lerna run build-dep",
+        "test": "npm run check-npm-version && NX_NATIVE_COMMAND_RUNNER=false lerna run test",
+        "build": "npm run check-npm-version && NX_NATIVE_COMMAND_RUNNER=false lerna run build",
+        "build-dep": "NX_NATIVE_COMMAND_RUNNER=false lerna run build-dep",
         "downstream": "bash ./scripts/downstream.sh"
     },
     "devDependencies": {
