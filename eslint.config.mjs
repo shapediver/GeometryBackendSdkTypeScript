@@ -1,6 +1,7 @@
 // @ts-check
 
 import eslint from '@eslint/js';
+import prettier from 'eslint-config-prettier/flat';
 import jestPlugin from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 
@@ -84,5 +85,6 @@ export default tseslint.config(
             reportUnusedDisableDirectives: 'error',
             reportUnusedInlineConfigs: 'error',
         },
-    }
+    },
+    prettier
 );

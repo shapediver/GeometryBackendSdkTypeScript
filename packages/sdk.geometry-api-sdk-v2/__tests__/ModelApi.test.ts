@@ -42,20 +42,17 @@ test('model', async () => {
     expect(resGet.model.id).toBe(modelId);
 
     // Download the model's Grasshopper file.
-    const resGh = await (
-        await new ModelApi(modelConfig).downloadModelFile(modelId)
-    ).arrayBuffer();
+    const resGh = await (await new ModelApi(modelConfig).downloadModelFile(modelId)).arrayBuffer();
     expect(resGh.byteLength).toBeGreaterThan(0);
 
     // Get the model's computation statistics by status.
-    const resComp =
-        await new ModelApi(modelConfig).getModelComputations(
-            modelId,
-            undefined,
-            '20240614155603054',
-            '20240627072220908',
-            QueryComputationStatisticsStatus.SUCCESS
-        )
+    const resComp = await new ModelApi(modelConfig).getModelComputations(
+        modelId,
+        undefined,
+        '20240614155603054',
+        '20240627072220908',
+        QueryComputationStatisticsStatus.SUCCESS
+    );
     expect(resComp.computations.length).toBeGreaterThanOrEqual(0);
 
     // Update a model.
@@ -148,8 +145,7 @@ test('model blocking', async () => {
     await new ModelApi(backendConfig).updateModel(modelId, reqModel);
 
     // Session init should work again.
-    const sessionId = (await new SessionApi(modelConfig).createSessionByModel(modelId))
-        .sessionId;
+    const sessionId = (await new SessionApi(modelConfig).createSessionByModel(modelId)).sessionId;
     await new SessionApi(modelConfig).closeSession(sessionId);
 });
 

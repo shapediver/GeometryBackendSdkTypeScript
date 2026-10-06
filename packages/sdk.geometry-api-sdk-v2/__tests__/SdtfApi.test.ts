@@ -16,14 +16,13 @@ test('sdtf', async () => {
     const data = readFile('__tests__/data/test.sdtf', 'model/vnd.sdtf');
 
     // Request a sdTF upload for a specific namespace.
-    const resUpload =
-        await new SdtfApi(config).uploadSdtf(sessionId, [
-            {
-                content_length: data.size,
-                content_type: ReqSdtfType.MODEL_SDTF,
-                namespace: namespace,
-            },
-        ])
+    const resUpload = await new SdtfApi(config).uploadSdtf(sessionId, [
+        {
+            content_length: data.size,
+            content_type: ReqSdtfType.MODEL_SDTF,
+            namespace: namespace,
+        },
+    ]);
     const sdtf = resUpload.asset.sdtf[0];
     expect(sdtf).toBeDefined();
 
@@ -42,7 +41,7 @@ test('sdtf', async () => {
     expect(resData.byteLength).toBeGreaterThan(0);
 
     // List all sdTFs of a specific namespace.
-    const resListNew = (await new SdtfApi(modelConfig).listSdtfs(sessionId, namespace));
+    const resListNew = await new SdtfApi(modelConfig).listSdtfs(sessionId, namespace);
     expect(resListNew.list.sdtf.length).toBeGreaterThan(0);
 
     const listedSdtf = resListNew.list.sdtf.find((item) => item.id === sdtf.id.split('/').pop());

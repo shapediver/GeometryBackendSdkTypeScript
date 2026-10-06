@@ -11,13 +11,11 @@ test('upload gltf', async () => {
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Upload a new glTF.
-    const resUpload = (await new GltfApi(config).uploadGltf(sessionId, data));
+    const resUpload = await new GltfApi(config).uploadGltf(sessionId, data);
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the uploaded glTF.
-    const resGltf = await (
-        await new UtilsApi().download(resUpload.gltf.href)
-    ).arrayBuffer();
+    const resGltf = await (await new UtilsApi().download(resUpload.gltf.href)).arrayBuffer();
     expect(resGltf.byteLength).toBe(data.size);
 
     // Close the session.
@@ -34,14 +32,15 @@ test('upload gltf and convert to usdz', async () => {
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Upload a new glTF and convert to USDZ.
-    const resUpload =
-        await new GltfApi(config).uploadGltf(session, data, QueryGltfConversion.USDZ)
+    const resUpload = await new GltfApi(config).uploadGltf(
+        session,
+        data,
+        QueryGltfConversion.USDZ
+    );
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the created USDZ.
-    const resUsdz = await (
-        await new UtilsApi().download(resUpload.gltf.href)
-    ).arrayBuffer();
+    const resUsdz = await (await new UtilsApi().download(resUpload.gltf.href)).arrayBuffer();
     expect(resUsdz.byteLength !== data.size).toBeTruthy();
 
     // Close the session.

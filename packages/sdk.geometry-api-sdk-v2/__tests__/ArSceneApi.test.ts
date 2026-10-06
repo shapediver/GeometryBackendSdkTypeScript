@@ -20,8 +20,11 @@ test('metadata and downloads', async () => {
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Create AR scene from glTF file.
-    const resUpload =
-        await new GltfApi(config).uploadGltf(sessionId, data, QueryGltfConversion.SCENE)
+    const resUpload = await new GltfApi(config).uploadGltf(
+        sessionId,
+        data,
+        QueryGltfConversion.SCENE
+    );
     expect(resUpload.gltf.sceneId).toBeDefined();
 
     const sceneId = resUpload.gltf.sceneId!;
@@ -57,14 +60,17 @@ test('model state from ar-scene', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket));
+    const resSession = await new SessionApi(config).createSessionByTicket(ticket);
     const sessionId = resSession.sessionId;
 
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Create AR scene from glTF file.
-    const resUpload =
-        await new GltfApi(config).uploadGltf(sessionId, data, QueryGltfConversion.SCENE)
+    const resUpload = await new GltfApi(config).uploadGltf(
+        sessionId,
+        data,
+        QueryGltfConversion.SCENE
+    );
     expect(resUpload.gltf.sceneId).toBeDefined();
 
     // Create minimal Model-State from AR scene.
@@ -72,8 +78,10 @@ test('model state from ar-scene', async () => {
         parameters: {},
         arSceneId: resUpload.gltf.sceneId,
     };
-    const resModelState =
-        await new ModelStateApi(config).createModelState(sessionId, reqModelState)
+    const resModelState = await new ModelStateApi(config).createModelState(
+        sessionId,
+        reqModelState
+    );
     const modelStateId = resModelState.modelState.id;
 
     // Get metadata of the Model-State's AR scene.

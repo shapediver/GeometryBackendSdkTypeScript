@@ -14,7 +14,8 @@ test('create', async () => {
         users: [uuidv4()],
         organizations: [uuidv4()],
     };
-    const resAuthGroup =
-        await new AuthGroupApi(backendConfig).createAuthorizationGroup(reqAuthGroup)
+    const resAuthGroup = await new AuthGroupApi(backendConfig).createAuthorizationGroup(
+        reqAuthGroup
+    );
     expect(resAuthGroup.auth_group).toBeDefined();
 });

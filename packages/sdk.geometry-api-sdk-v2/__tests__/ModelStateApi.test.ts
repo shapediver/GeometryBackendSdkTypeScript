@@ -37,8 +37,10 @@ test('basic model state', async () => {
         parameters: { [customParamId]: customParamValue },
         data: customData,
     };
-    const resModelState =
-        await new ModelStateApi(config).createModelState(sessionId, reqModelState)
+    const resModelState = await new ModelStateApi(config).createModelState(
+        sessionId,
+        reqModelState
+    );
     const modelStateId = resModelState.modelState.id;
 
     // Check if the Model-State was created successfully.
@@ -68,8 +70,9 @@ test('basic model state', async () => {
     ).toBeFalsy();
 
     // Fetch all Model-States of a model.
-    const resList =
-        await new ModelStateApi(backendConfig).listModelStates(resModelState.modelState.modelId)
+    const resList = await new ModelStateApi(backendConfig).listModelStates(
+        resModelState.modelState.modelId
+    );
     expect(resList.list.modelState.length).toBeGreaterThan(0);
 
     // Delete the Model-State.
@@ -100,8 +103,10 @@ test('model state with image', async () => {
         parameters: {},
         image: { filename, format, size: data.size },
     };
-    const resModelState =
-        await new ModelStateApi(config).createModelState(sessionId, reqModelState)
+    const resModelState = await new ModelStateApi(config).createModelState(
+        sessionId,
+        reqModelState
+    );
     expect(resModelState.asset).toBeDefined();
     expect(resModelState.asset!.modelState).toBeDefined();
     const modelStateId = resModelState.modelState.id;
@@ -116,9 +121,7 @@ test('model state with image', async () => {
     expect(resUpload.status).toBe(200);
 
     // Check if the Model-State has an image.
-    await new ModelStateApi(config).getModelStateImageMetadata(
-        modelStateId
-    );
+    await new ModelStateApi(config).getModelStateImageMetadata(modelStateId);
 
     // Or use the helper function to check if the Model-State has an image.
     expect(

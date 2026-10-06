@@ -17,7 +17,7 @@ test('file parameter', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(modelConfig).createSessionByTicket(ticket));
+    const resSession = await new SessionApi(modelConfig).createSessionByTicket(ticket);
     const sessionId = resSession.sessionId;
     expect(resSession.parameters).toBeDefined();
 
@@ -32,14 +32,13 @@ test('file parameter', async () => {
     const data = readFile('__tests__/data/logo.jpg', format);
 
     // Request a file upload for a specific file-parameter.
-    const resUploadReq =
-        await new FileApi(config).uploadFile(sessionId, {
-            [fileParams[0].id]: {
-                filename,
-                format,
-                size: data.size,
-            },
-        })
+    const resUploadReq = await new FileApi(config).uploadFile(sessionId, {
+        [fileParams[0].id]: {
+            filename,
+            format,
+            size: data.size,
+        },
+    });
     const file = resUploadReq.asset.file[fileParams[0].id];
     expect(file).toBeDefined();
 
@@ -72,7 +71,7 @@ test('file parameter', async () => {
     expect(fileInfo.size).toBe(data.size);
 
     // List all files of a specific file-parameter.
-    const resList = (await new FileApi(modelConfig).listFiles(sessionId, fileParams[0].id));
+    const resList = await new FileApi(modelConfig).listFiles(sessionId, fileParams[0].id);
     expect(resList.list.file.length).toBeGreaterThan(0);
 
     const listedFile = resList.list.file.find((item) => item.id === file.id);

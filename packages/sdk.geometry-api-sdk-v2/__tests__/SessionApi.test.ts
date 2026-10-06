@@ -23,7 +23,7 @@ test('init session via ticket', async () => {
         until: now(120),
         use_id2: false,
     };
-    const resTicket = (await new SessionApi(backendConfig).createTicket(modelId, reqTicket));
+    const resTicket = await new SessionApi(backendConfig).createTicket(modelId, reqTicket);
     expect(resTicket.ticket).toBeDefined();
 
     // Initialize a new session using the ticket.
@@ -32,7 +32,7 @@ test('init session via ticket', async () => {
     expect(sessionId).toBeDefined();
 
     // Get the session defaults.
-    const resDefaults = (await new SessionApi(config).getSessionDefaults(sessionId));
+    const resDefaults = await new SessionApi(config).getSessionDefaults(sessionId);
     expect(resDefaults.sessionId).toBe(sessionId);
 
     // Close the session.
@@ -52,7 +52,7 @@ test('init session via model', async () => {
     expect(sessionId).toBeDefined();
 
     // Get the session defaults.
-    const resDefaults = (await new SessionApi(config).getSessionDefaults(sessionId));
+    const resDefaults = await new SessionApi(config).getSessionDefaults(sessionId);
     expect(resDefaults.sessionId).toBe(sessionId);
 
     // Close the session.
@@ -68,24 +68,26 @@ test('init session with model state', async () => {
 
     // Initialize a new session.
     const ticket = await createTicket();
-    const resSession = (await new SessionApi(config).createSessionByTicket(ticket));
+    const resSession = await new SessionApi(config).createSessionByTicket(ticket);
     expect(resSession.modelState).toBeUndefined();
     const sessionId = resSession.sessionId;
 
     // Create minimal Model-State.
     const reqModelState: ReqModelState = { parameters: {} };
-    const resModelState =
-        await new ModelStateApi(config).createModelState(sessionId, reqModelState)
+    const resModelState = await new ModelStateApi(config).createModelState(
+        sessionId,
+        reqModelState
+    );
     const modelStateId = resModelState.modelState.id;
     const modelId = resModelState.modelState.modelId;
 
     // Test: Create session via ticket and Model-State.
-    let res = (await new SessionApi(config).createSessionByTicket(ticket, modelStateId, true));
+    let res = await new SessionApi(config).createSessionByTicket(ticket, modelStateId, true);
     expect(res.modelState).toBeDefined();
     await new SessionApi(config).closeSession(res.sessionId);
 
     // Test: Create session via model and Model-State.
-    res = (await new SessionApi(backendConfig).createSessionByModel(modelId, modelStateId, false));
+    res = await new SessionApi(backendConfig).createSessionByModel(modelId, modelStateId, false);
     expect(res.modelState).toBeDefined();
     await new SessionApi(config).closeSession(res.sessionId);
 
@@ -110,11 +112,12 @@ test('decrypt ticket', async () => {
         until: now(120),
         use_id2: false,
     };
-    const resTicket = (await new SessionApi(backendConfig).createTicket(modelId, reqTicket));
+    const resTicket = await new SessionApi(backendConfig).createTicket(modelId, reqTicket);
     expect(resTicket.ticket).toBeDefined();
 
     // Decrypt the ticket.
-    const decryptedTicket = (await new SessionApi(backendConfig).decryptTicket(resTicket.ticket)).decryptedTicket;
+    const decryptedTicket = (await new SessionApi(backendConfig).decryptTicket(resTicket.ticket))
+        .decryptedTicket;
     expect(decryptedTicket.pub).toBe(reqTicket.pub);
     expect(decryptedTicket.author).toBe(reqTicket.author);
     expect(decryptedTicket.type).toBe(reqTicket.type);

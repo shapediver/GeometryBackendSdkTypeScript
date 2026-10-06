@@ -1,4 +1,8 @@
-import { BaseAPI as ClientBaseAPI, Configuration as ClientConfig, FetchAPI } from './client/runtime';
+import {
+    BaseAPI as ClientBaseAPI,
+    Configuration as ClientConfig,
+    FetchAPI,
+} from './client/runtime';
 import { Configuration } from './configuration';
 
 /**
@@ -14,9 +18,7 @@ export class BaseAPI extends ClientBaseAPI {
         super(config);
 
         const maxRetries =
-            config instanceof Configuration
-                ? config.maxRetries
-                : new Configuration().maxRetries;
+            config instanceof Configuration ? config.maxRetries : new Configuration().maxRetries;
 
         // Wrap the generated pipeline rather than the raw Fetch implementation so that
         // configured middleware still runs for every attempt.
@@ -31,29 +33,20 @@ export class BaseAPI extends ClientBaseAPI {
  * perform its normal success/error conversion. Fetch transport failures are not
  * retried here.
  */
-function createRetryingFetch(
-    fetchApi: FetchAPI,
-    maxRetries = 5,
-): FetchAPI {
+function createRetryingFetch(fetchApi: FetchAPI, maxRetries = 5): FetchAPI {
     return async (url, init) => {
         let retries = 0;
 
         while (true) {
             const response = await fetchApi(url, init);
 
-            if (
-                (response.status !== 429 && response.status !== 502) ||
-                retries >= maxRetries
-            ) {
+            if ((response.status !== 429 && response.status !== 502) || retries >= maxRetries) {
                 return response;
             }
 
             retries++;
 
-            const delay =
-                response.status === 429
-                    ? getRetryAfterDelay(response)
-                    : 1000;
+            const delay = response.status === 429 ? getRetryAfterDelay(response) : 1000;
 
             await new Promise((resolve) => setTimeout(resolve, delay));
         }

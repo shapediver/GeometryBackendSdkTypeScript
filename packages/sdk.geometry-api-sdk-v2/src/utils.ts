@@ -1,7 +1,4 @@
-import {
-    FetchError,
-    ResponseError as ClientResponseError,
-} from './client/runtime';
+import { FetchError, ResponseError as ClientResponseError } from './client/runtime';
 import { RequestError, ResponseError } from './error';
 
 /** ShapeDiver error object structure. */
@@ -33,9 +30,7 @@ function headerValue(
  * @param headers The HTTP headers of a file-metadata response.
  * @return An object with 'size' and 'filename' properties.
  */
-export function extractFileInfo(
-    headers: Record<string, string | null | undefined> | undefined
-): {
+export function extractFileInfo(headers: Record<string, string | null | undefined> | undefined): {
     size: number | undefined;
     filename: string | undefined;
 } {
@@ -111,7 +106,8 @@ export async function exists(apiCall: () => Promise<unknown>): Promise<boolean> 
     return apiCall()
         .then(() => true)
         .catch((error: unknown) => {
-            if (error instanceof ClientResponseError && error.response.status === 404) return false;
+            if (error instanceof ClientResponseError && error.response.status === 404)
+                return false;
             throw error;
         });
 }
@@ -192,10 +188,7 @@ export async function processError(
     }
 
     if (typeof Response !== 'undefined' && error instanceof Response) {
-        return processResponseError(
-            error,
-            error.statusText || 'Response returned an error code'
-        );
+        return processResponseError(error, error.statusText || 'Response returned an error code');
     }
 
     if (error instanceof FetchError) {
@@ -215,15 +208,6 @@ async function processResponseError(
     const errorObj = await tryExtractErrorObject(await response.clone().text());
 
     return errorObj
-        ? new ResponseError(
-              response.status,
-              errorObj.message,
-              errorObj.desc,
-              errorObj.error
-          )
-        : new ResponseError(
-              response.status,
-              fallbackMessage,
-              'No error description provided'
-          );
+        ? new ResponseError(response.status, errorObj.message, errorObj.desc, errorObj.error)
+        : new ResponseError(response.status, fallbackMessage, 'No error description provided');
 }

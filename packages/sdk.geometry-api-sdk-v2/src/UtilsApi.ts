@@ -81,7 +81,7 @@ export class UtilsApi extends BaseAPI {
             'X-ShapeDiver-UserAgent',
         ];
 
-        return this.fetchRequest("PUT", url, data, options, disableHeaders);
+        return this.fetchRequest('PUT', url, data, options, disableHeaders);
     }
 
     /**
@@ -117,7 +117,7 @@ export class UtilsApi extends BaseAPI {
             'X-ShapeDiver-UserAgent',
         ];
 
-        return this.fetchRequest("PUT", url, data, options, disableHeaders);
+        return this.fetchRequest('PUT', url, data, options, disableHeaders);
     }
 
     /**
@@ -132,7 +132,7 @@ export class UtilsApi extends BaseAPI {
         const disableHeaders: DisableHeaders = [];
         this.disableAuthHeaderForShapeDiverUris(url, options, disableHeaders);
 
-        return await this.fetchRequest("GET", url, undefined, options, disableHeaders);
+        return await this.fetchRequest('GET', url, undefined, options, disableHeaders);
     }
 
     /**
@@ -172,15 +172,11 @@ export class UtilsApi extends BaseAPI {
      * @param url The URL of the image to download.
      * @param [options] Override http request option and set response-type.
      */
+    public downloadImage(sessionId: string, url: string, options?: RequestInit): Promise<Blob>;
     public downloadImage(
         sessionId: string,
         url: string,
-        options?: RequestInit
-    ): Promise<Blob>;
-    public downloadImage(
-        sessionId: string,
-        url: string,
-        options: RequestInit & { responseType: "arraybuffer" }
+        options: RequestInit & { responseType: 'arraybuffer' }
     ): Promise<{ data: ArrayBuffer; contentType: string }>;
     public async downloadImage(
         sessionId: string,
@@ -200,9 +196,9 @@ export class UtilsApi extends BaseAPI {
 
             return responseType === 'arraybuffer'
                 ? {
-                    data: await response.arrayBuffer(),
-                    contentType: response.headers.get('Content-Type') ?? '',
-                }
+                      data: await response.arrayBuffer(),
+                      contentType: response.headers.get('Content-Type') ?? '',
+                  }
                 : response.blob();
         } else {
             /* All other source URLs are called via the download-image endpoint */
@@ -211,12 +207,12 @@ export class UtilsApi extends BaseAPI {
             const encodedUrl =
                 typeof window !== 'undefined' && window.btoa
                     ? window.btoa(
-                        encodeURIComponent(url).replace(
-                            /%([0-9A-F]{2})/g,
-                            (_match: string, hex: string) =>
-                                String.fromCharCode(parseInt(hex, 16))
-                        )
-                    )
+                          encodeURIComponent(url).replace(
+                              /%([0-9A-F]{2})/g,
+                              (_match: string, hex: string) =>
+                                  String.fromCharCode(parseInt(hex, 16))
+                          )
+                      )
                     : Buffer.from(url, 'utf-8').toString('base64');
 
             // The server-side proxy authenticates with the session token. Do not forward
@@ -235,9 +231,9 @@ export class UtilsApi extends BaseAPI {
 
             return responseType === 'arraybuffer'
                 ? {
-                    data: await response.raw.arrayBuffer(),
-                    contentType: response.raw.headers.get('Content-Type') ?? '',
-                }
+                      data: await response.raw.arrayBuffer(),
+                      contentType: response.raw.headers.get('Content-Type') ?? '',
+                  }
                 : await response.value();
         }
     }
@@ -348,7 +344,7 @@ export class UtilsApi extends BaseAPI {
                 sessionId,
                 outputVersions,
                 options
-            )
+            );
             delay = this.getMaxOutputDelay(dto);
         }
 
@@ -389,7 +385,11 @@ export class UtilsApi extends BaseAPI {
             await sleep(delay);
 
             // Send cache request
-            dto = await new ExportApi(this.configuration).getCachedExports(sessionId, body, options);
+            dto = await new ExportApi(this.configuration).getCachedExports(
+                sessionId,
+                body,
+                options
+            );
             delay = this.getMaxExportDelay(body, dto);
         }
 
@@ -433,9 +433,9 @@ export class UtilsApi extends BaseAPI {
     }
 
     /**
-    * Replacement for `runtime.BaseAPI.request`.
-    * Needed to call `createFetchParameters`.
-    */
+     * Replacement for `runtime.BaseAPI.request`.
+     * Needed to call `createFetchParameters`.
+     */
     private async fetchRequest(
         method: string,
         url: string,
@@ -458,9 +458,9 @@ export class UtilsApi extends BaseAPI {
     }
 
     /**
-    * Replacement for `runtime.BaseAPI.createFetchParams`.
-    * Needed to allow dynamic basePath handling and proper header manipulation.
-    */
+     * Replacement for `runtime.BaseAPI.createFetchParams`.
+     * Needed to allow dynamic basePath handling and proper header manipulation.
+     */
     private async createFetchParameters(
         method: string,
         url: string,
@@ -478,22 +478,19 @@ export class UtilsApi extends BaseAPI {
             this.configuration.accessToken
         ) {
             const token = this.configuration.accessToken;
-            const tokenString = await token("JwtAuth", []);
+            const tokenString = await token('JwtAuth', []);
 
-            if (tokenString) authHeaders["Authorization"] = `Bearer ${tokenString}`;
+            if (tokenString) authHeaders['Authorization'] = `Bearer ${tokenString}`;
         }
 
         const headers = new Headers(configuration.headers);
-        for (const source of [
-            authHeaders,
-            options.headers,
-        ]) {
+        for (const source of [authHeaders, options.headers]) {
             if (!source) continue;
             new Headers(source).forEach((value, name) => headers.set(name, value));
         }
 
         // Remove all disabled headers.
-        disableHeaders.forEach(header => headers.delete(header));
+        disableHeaders.forEach((header) => headers.delete(header));
 
         const init: RequestInit = {
             ...options,
@@ -504,16 +501,16 @@ export class UtilsApi extends BaseAPI {
 
         return {
             url: this.createFetchUrl(url),
-            init
+            init,
         };
     }
 
     /** Prepends the base-path to `url` when the URL is relative. */
     private createFetchUrl(url: string): string {
-        if (url.startsWith("http")) return url;
+        if (url.startsWith('http')) return url;
 
-        const basePath = this.configuration.basePath.replace(/\/+$/, "");
-        const path = url.replace(/^\/+/, "");
+        const basePath = this.configuration.basePath.replace(/\/+$/, '');
+        const path = url.replace(/^\/+/, '');
 
         return `${basePath}/${path}`;
     }
@@ -572,7 +569,7 @@ export class UtilsApi extends BaseAPI {
     private disableAuthHeaderForShapeDiverUris(
         url: string,
         options: RequestInit,
-        disableHeaders: DisableHeaders,
+        disableHeaders: DisableHeaders
     ): void {
         const headers = new Headers(options.headers);
 
