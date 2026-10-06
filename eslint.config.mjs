@@ -27,6 +27,7 @@ export default tseslint.config(
             '**/dist-dev/**',
             '**/dist-prod/**',
             '**/node_modules/**',
+            '**/.venv/**',
             'scripts/**',
         ],
     },
