@@ -3,3 +3,5 @@ packages:
     - 'libs/*'
 allowBuilds:
     nx: true
+overrides:
+    package-manager-detector: 1.8.0

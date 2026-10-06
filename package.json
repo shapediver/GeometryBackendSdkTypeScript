@@ -17,6 +17,7 @@
         "lint": "eslint . --max-warnings 0",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
+        "knip": "knip --treat-config-hints-as-errors",
         "test": "npm run check-npm-version && lerna run test",
         "build": "npm run check-npm-version && lerna run build",
         "build-dep": "lerna run build-dep",
@@ -24,7 +25,6 @@
     },
     "devDependencies": {
         "@eslint/js": "9.39.5",
-        "@types/eslint__js": "8.42.3",
         "@types/jest": "29.5.14",
         "@types/node": "20.19.43",
         "eslint": "9.39.5",
@@ -32,6 +32,7 @@
         "eslint-plugin-jest": "28.14.0",
         "jest": "29.7.0",
         "json": "11.0.0",
+        "knip": "6.38.0",
         "lerna": "9.0.7",
         "npm-check-updates": "22.2.9",
         "prettier": "3.9.9",
