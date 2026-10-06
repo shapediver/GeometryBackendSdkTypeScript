@@ -11,7 +11,7 @@ test('upload gltf', async () => {
     const data = readFile('__tests__/data/Box.glb', 'model/gltf-binary');
 
     // Upload a new glTF.
-    const resUpload = (await new GltfApi(config).uploadGltf(sessionId, data as File));
+    const resUpload = (await new GltfApi(config).uploadGltf(sessionId, data));
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the uploaded glTF.
@@ -35,7 +35,7 @@ test('upload gltf and convert to usdz', async () => {
 
     // Upload a new glTF and convert to USDZ.
     const resUpload =
-        await new GltfApi(config).uploadGltf(session, data as File, QueryGltfConversion.USDZ)
+        await new GltfApi(config).uploadGltf(session, data, QueryGltfConversion.USDZ)
     expect(resUpload.gltf.href).toBeDefined();
 
     // Download the created USDZ.

@@ -5,15 +5,27 @@ import {
 import { RequestError, ResponseError } from './error';
 
 /** ShapeDiver error object structure. */
-type SdErrorObject = {
+interface SdErrorObject {
     error: string;
     desc: string;
     message: string;
-};
+}
 
 /** Delays the response for the given number of milliseconds */
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function headerValue(
+    headers: Record<string, string | null | undefined>,
+    ...names: string[]
+): string | undefined {
+    for (const name of names) {
+        const value = headers[name];
+        if (typeof value === 'string' && value.length > 0) return value;
+    }
+
+    return undefined;
 }
 
 /**
@@ -21,18 +33,18 @@ export function sleep(ms: number): Promise<void> {
  * @param headers The HTTP headers of a file-metadata response.
  * @return An object with 'size' and 'filename' properties.
  */
-export function extractFileInfo(headers: Record<string, any> | undefined): {
+export function extractFileInfo(
+    headers: Record<string, string | null | undefined> | undefined
+): {
     size: number | undefined;
     filename: string | undefined;
 } {
     if (!headers) return { size: undefined, filename: undefined };
 
-    // Extract size from Content-Length header
-    const contentLength = headers['Content-Length'] || headers['content-length'];
-    const size = contentLength ? parseInt(contentLength) : undefined;
+    const contentLength = headerValue(headers, 'Content-Length', 'content-length');
+    const size = contentLength ? parseInt(contentLength, 10) : undefined;
 
-    // Extract filename from Content-Disposition header
-    const contentDisposition = headers['Content-Disposition'] || headers['content-disposition'];
+    const contentDisposition = headerValue(headers, 'Content-Disposition', 'content-disposition');
     const filename = contentDisposition
         ? filenameFromContentDisposition(contentDisposition)
         : undefined;
@@ -47,7 +59,9 @@ export function extractFileInfo(headers: Record<string, any> | undefined): {
  */
 export function contentDispositionFromFilename(filename: string): string {
     // Normalize the filename to ASCII
-    const asciiName = filename.normalize('NFKD').replace(/[^\x00-\x7F]/g, ''); // Transliterates to ASCII
+    const asciiName = [...filename.normalize('NFKD')]
+        .filter((char) => char.charCodeAt(0) <= 0x7f)
+        .join('');
     let header = `attachment; filename="${asciiName}"`;
 
     if (asciiName !== filename) {
@@ -96,8 +110,8 @@ export function filenameFromContentDisposition(contentDisposition: string): stri
 export async function exists(apiCall: () => Promise<unknown>): Promise<boolean> {
     return apiCall()
         .then(() => true)
-        .catch((error) => {
-            if (error.response?.status === 404) return false;
+        .catch((error: unknown) => {
+            if (error instanceof ClientResponseError && error.response.status === 404) return false;
             throw error;
         });
 }
@@ -117,7 +131,7 @@ function isErrorObject(value: unknown): value is SdErrorObject {
 /** Helper function that wraps JSON.parse and returns undefined on failure. */
 async function tryParseJson(
     input: string | (() => string) | (() => Promise<string>)
-): Promise<unknown | undefined> {
+): Promise<unknown> {
     try {
         const text = typeof input === 'function' ? await input() : input;
         return JSON.parse(text);
@@ -188,7 +202,9 @@ export async function processError(
         return new RequestError(error.cause.message);
     }
 
-    return error instanceof Error ? error : new Error(String(error));
+    if (error instanceof Error) return error;
+
+    return new Error('Unknown error');
 }
 
 /** Converts a non-success Fetch response into the SDK's public response error. */

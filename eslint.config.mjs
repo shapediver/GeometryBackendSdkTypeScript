@@ -4,82 +4,63 @@ import eslint from '@eslint/js';
 import jestPlugin from 'eslint-plugin-jest';
 import tseslint from 'typescript-eslint';
 
-/** Custom rules go here */
-const customRules = {
-    '@typescript-eslint/ban-ts-comment': 'warn',
-    '@typescript-eslint/consistent-indexed-object-style': 'off',
-    '@typescript-eslint/no-empty-function': 'off',
-    '@typescript-eslint/no-empty-object-type': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-redundant-type-constituents': 'off',
-    '@typescript-eslint/no-require-imports': 'off',
-    '@typescript-eslint/no-unsafe-argument': 'warn',
-    '@typescript-eslint/no-unsafe-assignment': 'off',
-    '@typescript-eslint/no-unsafe-call': 'warn',
-    '@typescript-eslint/no-unsafe-enum-comparison': 'off',
-    '@typescript-eslint/no-unsafe-return': 'warn',
-    '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-            args: 'all',
-            argsIgnorePattern: '^_',
-            caughtErrors: 'all',
-            caughtErrorsIgnorePattern: '^_',
-            destructuredArrayIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
-            ignoreRestSiblings: true,
-        },
-    ],
-    '@typescript-eslint/restrict-template-expressions': 'warn',
-};
-
-function buildLanguageOptions(tsconfig) {
-    return {
-        parserOptions: {
-            project: tsconfig,
-            tsconfigRootDir: import.meta.dirname,
-        },
-    };
-}
+const unusedVars = [
+    'error',
+    {
+        args: 'all',
+        argsIgnorePattern: '^_',
+        caughtErrors: 'all',
+        caughtErrorsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+    },
+];
 
 export default tseslint.config(
     {
-        // Global ignores
         ignores: [
             'packages/sdk.geometry-api-sdk-v2/src/client/**',
             '**/build/**',
             '**/dist/**',
+            '**/dist-dev/**',
+            '**/dist-prod/**',
             '**/node_modules/**',
             'scripts/**',
         ],
     },
     eslint.configs.recommended,
-    ...tseslint.configs.recommendedTypeChecked,
-    ...tseslint.configs.stylistic,
     {
-        files: ['libs/**/*.ts'],
-        languageOptions: buildLanguageOptions('./tsconfig.package.json'),
-        rules: customRules,
+        files: ['packages/sdk.geometry-api-sdk-v2/**/*.ts'],
+        extends: [...tseslint.configs.recommendedTypeChecked, ...tseslint.configs.stylistic],
+        languageOptions: {
+            parserOptions: {
+                project: './packages/sdk.geometry-api-sdk-v2/tsconfig.check.json',
+                tsconfigRootDir: import.meta.dirname,
+            },
+        },
+        rules: {
+            '@typescript-eslint/no-unused-vars': unusedVars,
+        },
     },
     {
-        files: ['services/**/*.ts'],
-        languageOptions: buildLanguageOptions('./tsconfig.service.json'),
-        rules: customRules,
-    },
-    {
-        // disable type-aware linting on JS files
-        files: ['**/*.js'],
+        files: ['**/*.{js,mjs,cjs}'],
         ...tseslint.configs.disableTypeChecked,
     },
     {
-        // enable jest rules on test files
+        files: ['webpack.*.js'],
+        languageOptions: {
+            sourceType: 'commonjs',
+            globals: {
+                module: 'readonly',
+                require: 'readonly',
+            },
+        },
+    },
+    {
         files: ['**/*.test.ts'],
-        languageOptions: buildLanguageOptions('./tsconfig.json'),
-        ...jestPlugin.configs['flat/recommended'],
+        extends: [jestPlugin.configs['flat/recommended']],
         rules: {
-            ...jestPlugin.configs['flat/recommended'].rules,
-
-            /** Jest specific settings */
             'jest/expect-expect': 'off',
             'jest/no-conditional-expect': 'off',
             'jest/no-disabled-tests': 'warn',
@@ -87,12 +68,21 @@ export default tseslint.config(
             'jest/no-identical-title': 'error',
             'jest/prefer-to-have-length': 'warn',
             'jest/valid-expect': 'error',
-
-            '@typescript-eslint/no-floating-promises': 'error',
             '@typescript-eslint/ban-ts-comment': 'off',
-            '@typescript-eslint/no-empty-function': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
+            '@typescript-eslint/no-floating-promises': 'error',
+            '@typescript-eslint/no-unsafe-argument': 'off',
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+            '@typescript-eslint/no-unsafe-call': 'off',
             '@typescript-eslint/no-unsafe-member-access': 'off',
+            '@typescript-eslint/no-unsafe-return': 'off',
             '@typescript-eslint/unbound-method': 'off',
+        },
+    },
+    {
+        linterOptions: {
+            reportUnusedDisableDirectives: 'error',
+            reportUnusedInlineConfigs: 'error',
         },
     }
 );

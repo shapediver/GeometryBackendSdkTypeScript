@@ -21,7 +21,7 @@ test('metadata and downloads', async () => {
 
     // Create AR scene from glTF file.
     const resUpload =
-        await new GltfApi(config).uploadGltf(sessionId, data as File, QueryGltfConversion.SCENE)
+        await new GltfApi(config).uploadGltf(sessionId, data, QueryGltfConversion.SCENE)
     expect(resUpload.gltf.sceneId).toBeDefined();
 
     const sceneId = resUpload.gltf.sceneId!;
@@ -64,7 +64,7 @@ test('model state from ar-scene', async () => {
 
     // Create AR scene from glTF file.
     const resUpload =
-        await new GltfApi(config).uploadGltf(sessionId, data as File, QueryGltfConversion.SCENE)
+        await new GltfApi(config).uploadGltf(sessionId, data, QueryGltfConversion.SCENE)
     expect(resUpload.gltf.sceneId).toBeDefined();
 
     // Create minimal Model-State from AR scene.

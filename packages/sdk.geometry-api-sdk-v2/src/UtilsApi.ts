@@ -59,7 +59,7 @@ export class UtilsApi extends BaseAPI {
      */
     public upload(
         url: string,
-        data: any,
+        data: BodyInit,
         contentType: string,
         filename?: string,
         options: RequestInit = {}
@@ -95,7 +95,7 @@ export class UtilsApi extends BaseAPI {
      */
     public uploadAsset(
         url: string,
-        data: any,
+        data: BodyInit,
         headers: ResAssetUploadHeaders,
         options: RequestInit = {}
     ): Promise<Response> {
@@ -211,8 +211,10 @@ export class UtilsApi extends BaseAPI {
             const encodedUrl =
                 typeof window !== 'undefined' && window.btoa
                     ? window.btoa(
-                        encodeURIComponent(url).replace(/%([0-9A-F]{2})/g, (_, p1) =>
-                            String.fromCharCode(parseInt(p1, 16))
+                        encodeURIComponent(url).replace(
+                            /%([0-9A-F]{2})/g,
+                            (_match: string, hex: string) =>
+                                String.fromCharCode(parseInt(hex, 16))
                         )
                     )
                     : Buffer.from(url, 'utf-8').toString('base64');

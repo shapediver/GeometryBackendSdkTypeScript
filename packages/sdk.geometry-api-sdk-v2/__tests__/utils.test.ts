@@ -71,7 +71,7 @@ describe('processError', () => {
         const response = {
             status: 502,
             statusText: 'Bad Gateway',
-            clone: () => ({ text: async () => 'not valid JSON' }),
+            clone: () => ({ text: () => Promise.resolve('not valid JSON') }),
         } as unknown as Response;
         const result = await processError(
             new ClientResponseError(response, 'Response returned an error code')
