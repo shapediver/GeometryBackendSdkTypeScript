@@ -23,7 +23,7 @@
     },
     "scripts": {
         "test": "bash ../../scripts/test.sh",
-        "check": "tsc --noEmit",
+        "check": "tsc -p tsconfig.check.json --noEmit",
         "build": "bash ../../scripts/build.sh",
         "build-dep": "bash ../../scripts/build-dep.sh",
         "pre-publish": "bash ../../scripts/pre-publish.sh",

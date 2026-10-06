@@ -10,11 +10,18 @@
         "removeComments": true,
         "strict": true,
         "strictNullChecks": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedSideEffectImports": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "useUnknownInCatchVariables": true,
+        "skipLibCheck": true,
         "moduleResolution": "node",
         "types": ["jest", "node"],
         "esModuleInterop": true,
         "sourceRoot": "",
-        "forceConsistentCasingInFileNames": true,
-        "useUnknownInCatchVariables": false
+        "forceConsistentCasingInFileNames": true
     }
 }
