@@ -1,0 +1,18 @@
+---
+description: Never hand-edit the generated Geometry Backend client or oas_spec.yaml. Do not publish spec versions.
+alwaysApply: true
+---
+
+# Generated Geometry Backend client
+
+`packages/sdk.geometry-api-sdk-v2/src/client/**` and `oas_spec.yaml` are outputs of `just generate <version>`. Do not create, edit, delete, format, revert, or patch them by hand, script, or formatter.
+
+Run `just generate <version>` only when the user explicitly asks to generate a version that is already published. A request to fix or extend the client is not that ask. The version is the suffix of an existing `gb_v2@` tag in shapediver/OpenApiSpecifications. Tag `gb_v2@1.0.0` means version `1.0.0`. The recipe downloads that tag's `geometry_backend_v2.yaml`, replaces `src/client`, applies the `justfile` patches, and commits the whole worktree with `git add -A`. Do not run it while other work is in the tree.
+
+Never pass `local`. Do not run `just test-generator`. Both read a sibling checkout instead of a published tag.
+
+Do not re-apply or undo the `justfile` patches (`extends BaseAPI`, `protected fetchApi`).
+
+If the client is wrong, stop. Do not edit OpenApiSpecifications, publish a tag, or generate. Tell the user the endpoint or schema, what is wrong, and the spec change that would fix it.
+
+Code outside `src/client`, such as `src/base.ts`, stays editable.
